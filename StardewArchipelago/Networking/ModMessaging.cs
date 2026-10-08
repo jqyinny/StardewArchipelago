@@ -5,7 +5,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 
-namespace StardewArchipelago.Multiplayer
+namespace StardewArchipelago.Networking
 {
     // Phase 2 "Core Plumbing" skeleton for host -> farmhand sync. Only the host holds the
     // Archipelago connection (see ModEntry.OnSaveLoaded's Context.IsMainPlayer gate); this

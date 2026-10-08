@@ -1,4 +1,4 @@
-namespace StardewArchipelago.Multiplayer
+namespace StardewArchipelago.Networking
 {
     public class HostConnectedMessage
     {

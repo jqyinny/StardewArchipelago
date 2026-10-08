@@ -37,7 +37,7 @@ using StardewArchipelago.Locations.InGameLocations;
 using StardewArchipelago.Locations.Jojapocalypse;
 using StardewArchipelago.Locations.Patcher;
 using StardewArchipelago.Logging;
-using StardewArchipelago.Multiplayer;
+using StardewArchipelago.Networking;
 using StardewArchipelago.Registry;
 using StardewArchipelago.Serialization;
 using StardewArchipelago.Stardew;
