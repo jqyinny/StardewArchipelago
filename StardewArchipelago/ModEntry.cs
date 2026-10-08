@@ -37,6 +37,7 @@ using StardewArchipelago.Locations.InGameLocations;
 using StardewArchipelago.Locations.Jojapocalypse;
 using StardewArchipelago.Locations.Patcher;
 using StardewArchipelago.Logging;
+using StardewArchipelago.Multiplayer;
 using StardewArchipelago.Registry;
 using StardewArchipelago.Serialization;
 using StardewArchipelago.Stardew;
@@ -66,6 +67,7 @@ namespace StardewArchipelago
         private IRegistry _registry;
         private TesterFeatures _testerFeatures;
         private StardewArchipelagoClient _archipelago;
+        private ModMessaging _modMessaging;
         private AdvancedOptionsManager _advancedOptionsManager;
         private Mailman _mail;
         private ChatForwarder _chatForwarder;
@@ -126,6 +128,7 @@ namespace StardewArchipelago
             _testerFeatures = new TesterFeatures(_logger, _helper);
 
             _archipelago = new StardewArchipelagoClient(_logger, _helper, ModManifest, _harmony, OnItemReceived, new SmapiJsonLoader(_helper), _testerFeatures);
+            _modMessaging = new ModMessaging(_logger, _helper, ModManifest.UniqueID);
 
             _helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             _helper.Events.GameLoop.SaveCreating += OnSaveCreating;
@@ -262,6 +265,17 @@ namespace StardewArchipelago
         {
             try
             {
+                // Phase 2 "Core Plumbing": only the host holds the Archipelago connection and save
+                // data, so only the host should connect and run the AP-driven patchers below. A
+                // farmhand instead waits for the host to fan effects out over ModMessaging (see
+                // ModMessaging.cs); that fan-out isn't implemented yet, so farmhands get nothing
+                // beyond the round-trip "host connected" chat message for now.
+                if (!Context.IsMainPlayer)
+                {
+                    _logger.LogWarning("Running as a farmhand; Archipelago is only connected by the host. Multiplayer item/location sync is not implemented yet.");
+                    return;
+                }
+
                 ReadPersistentArchipelagoData();
 
                 if (!AttemptConnectionToArchipelago().Success)
@@ -344,6 +358,7 @@ namespace StardewArchipelago
             Game1.chatBox?.addMessage($"Connected to Archipelago as {_archipelago.SlotData.SlotName}. Type !!help for client commands", Color.Green);
             ArchipelagoJunimoNoteMenu.CompleteBundleIfExists(MemeBundleNames.CONNECTION);
             Game1.AddNPCs();
+            _modMessaging.BroadcastHostConnected(_archipelago.SlotData.SlotName);
         }
 
         private ConnectionResult AttemptConnectionToArchipelago()
