@@ -20,12 +20,19 @@ namespace StardewArchipelago.Networking
         private readonly IModHelper _helper;
         private readonly string _modId;
 
+        // SendMessage has no replay/queueing: a peer who joins after this was first broadcast would
+        // otherwise never see it. Remembering the slot name lets OnPeerConnected resend it to just
+        // that peer, so joining late (the only way local co-op actually works - the host is always
+        // already connected before a farmhand can join) still gets the round trip through.
+        private string _lastKnownSlotName;
+
         public ModMessaging(ILogger logger, IModHelper helper, string modId)
         {
             _logger = logger;
             _helper = helper;
             _modId = modId;
             _helper.Events.Multiplayer.ModMessageReceived += OnModMessageReceived;
+            _helper.Events.Multiplayer.PeerConnected += OnPeerConnected;
         }
 
         public void BroadcastHostConnected(string slotName)
@@ -36,7 +43,18 @@ namespace StardewArchipelago.Networking
                 return;
             }
 
+            _lastKnownSlotName = slotName;
             _helper.Multiplayer.SendMessage(new HostConnectedMessage(slotName), MESSAGE_TYPE_HOST_CONNECTED, modIDs: new[] { _modId });
+        }
+
+        private void OnPeerConnected(object sender, PeerConnectedEventArgs e)
+        {
+            if (!Context.IsMainPlayer || _lastKnownSlotName == null)
+            {
+                return;
+            }
+
+            _helper.Multiplayer.SendMessage(new HostConnectedMessage(_lastKnownSlotName), MESSAGE_TYPE_HOST_CONNECTED, modIDs: new[] { _modId }, playerIDs: new[] { e.Peer.PlayerID });
         }
 
         private void OnModMessageReceived(object sender, ModMessageReceivedEventArgs e)

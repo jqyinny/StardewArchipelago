@@ -588,7 +588,13 @@ namespace StardewArchipelago
             _itemManager.TrapManager.TrapExecutor.FrameUpdate(e);
 
             MovementInjections.UpdateMove(e);
-            MultiplayerVisionInjections.OnUpdateTicked(e);
+            if (Context.IsMainPlayer)
+            {
+                // MultiplayerVision broadcasts over the AP connection, which only the host has (see the
+                // Context.IsMainPlayer gate in OnSaveLoaded) - per design decision, it stays host-only
+                // rather than being extended to farmhands.
+                MultiplayerVisionInjections.OnUpdateTicked(e);
+            }
             _jojapocalypseManager?.OnUpdateTicked(e);
             FoolVisionManager.Instance.Update(e);
         }
