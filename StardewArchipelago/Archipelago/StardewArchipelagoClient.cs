@@ -49,6 +49,11 @@ namespace StardewArchipelago.Archipelago
         public SlotData.SlotData SlotData => (SlotData.SlotData)_slotData;
         public IGiftingService GiftingService { get; private set; }
 
+        // The raw fields SlotData.SlotData was built from. Kept around so the host can hand them to
+        // a farmhand (see ModMessaging), which reconstructs its own local SlotData.SlotData through
+        // the exact same constructor below - no separate serialization format to keep in sync.
+        public Dictionary<string, object> SlotDataFields { get; private set; }
+
         private List<string> _messagesToIgnore;
         private int _numberFailedReconnections = 0;
 
@@ -81,6 +86,7 @@ namespace StardewArchipelago.Archipelago
 
         protected override void InitializeSlotData(string slotName, Dictionary<string, object> slotDataFields)
         {
+            SlotDataFields = slotDataFields;
             _slotData = new SlotData.SlotData(slotName, slotDataFields, Logger, _manifest, _testerFeatures);
         }
 

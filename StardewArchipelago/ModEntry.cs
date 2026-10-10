@@ -128,7 +128,7 @@ namespace StardewArchipelago
             _testerFeatures = new TesterFeatures(_logger, _helper);
 
             _archipelago = new StardewArchipelagoClient(_logger, _helper, ModManifest, _harmony, OnItemReceived, new SmapiJsonLoader(_helper), _testerFeatures);
-            _modMessaging = new ModMessaging(_logger, _helper, ModManifest.UniqueID);
+            _modMessaging = new ModMessaging(_logger, _helper, ModManifest, _testerFeatures, ModManifest.UniqueID);
 
             _helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             _helper.Events.GameLoop.SaveCreating += OnSaveCreating;
@@ -358,7 +358,7 @@ namespace StardewArchipelago
             Game1.chatBox?.addMessage($"Connected to Archipelago as {_archipelago.SlotData.SlotName}. Type !!help for client commands", Color.Green);
             ArchipelagoJunimoNoteMenu.CompleteBundleIfExists(MemeBundleNames.CONNECTION);
             Game1.AddNPCs();
-            _modMessaging.BroadcastHostConnected(_archipelago.SlotData.SlotName);
+            _modMessaging.BroadcastHostConnected(_archipelago.SlotData.SlotName, _archipelago.SlotDataFields);
         }
 
         private ConnectionResult AttemptConnectionToArchipelago()
