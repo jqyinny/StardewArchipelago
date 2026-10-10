@@ -103,6 +103,10 @@ namespace StardewArchipelago.Networking
                 return;
             }
 
+            // TEMP DIAGNOSTIC (see NOTES.md "farmhand fan-out" investigation) - remove once the
+            // split-screen delivery-timing question is resolved.
+            _logger.LogInfo($"[DIAG] BroadcastItemReceived: item={receivedItem?.ItemName} time={DateTime.Now:HH:mm:ss.fff} thread={System.Threading.Thread.CurrentThread.ManagedThreadId} IsMainPlayer={Context.IsMainPlayer} Game1.player={Game1.player?.Name} screenId={Context.ScreenId}");
+
             _helper.Multiplayer.SendMessage(new ItemReceivedMessage(receivedItem), MESSAGE_TYPE_ITEM_RECEIVED, modIDs: new[] { _modId });
         }
 
@@ -174,6 +178,10 @@ namespace StardewArchipelago.Networking
 
         private void HandleItemReceived(ItemReceivedMessage message)
         {
+            // TEMP DIAGNOSTIC (see NOTES.md "farmhand fan-out" investigation) - remove once the
+            // split-screen delivery-timing question is resolved.
+            _logger.LogInfo($"[DIAG] HandleItemReceived: item={message.ReceivedItem?.ItemName} time={DateTime.Now:HH:mm:ss.fff} thread={System.Threading.Thread.CurrentThread.ManagedThreadId} IsMainPlayer={Context.IsMainPlayer} Game1.player={Game1.player?.Name} screenId={Context.ScreenId}");
+
             FarmhandItemReceived?.Invoke(message.ReceivedItem);
         }
     }

@@ -397,6 +397,10 @@ namespace StardewArchipelago
 
         private void OnFarmhandItemReceived(ReceivedItem receivedItem)
         {
+            // TEMP DIAGNOSTIC (see NOTES.md "farmhand fan-out" investigation) - remove once the
+            // split-screen delivery-timing question is resolved.
+            _logger.LogInfo($"[DIAG] OnFarmhandItemReceived: item={receivedItem?.ItemName} time={DateTime.Now:HH:mm:ss.fff} thread={System.Threading.Thread.CurrentThread.ManagedThreadId} IsMainPlayer={Context.IsMainPlayer} Game1.player={Game1.player?.Name} screenId={Context.ScreenId} parserBuilt={_farmhandItemParser != null} willSkip={Context.IsMainPlayer || _farmhandItemParser == null}");
+
             if (Context.IsMainPlayer || _farmhandItemParser == null)
             {
                 return;
