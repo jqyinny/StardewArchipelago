@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using KaitoKid.ArchipelagoUtilities.Net;
+using KaitoKid.ArchipelagoUtilities.Net.Client;
 using KaitoKid.Utilities.Interfaces;
 using Microsoft.Xna.Framework;
 using StardewArchipelago.Archipelago;
@@ -20,6 +21,7 @@ namespace StardewArchipelago.Networking
         private const string MESSAGE_TYPE_HOST_CONNECTED = "HostConnected";
         private const string MESSAGE_TYPE_SLOT_DATA_SNAPSHOT = "SlotDataSnapshot";
         private const string MESSAGE_TYPE_LOCATION_CHECKED = "LocationChecked";
+        private const string MESSAGE_TYPE_ITEM_RECEIVED = "ItemReceived";
 
         private readonly ILogger _logger;
         private readonly IModHelper _helper;
@@ -44,6 +46,12 @@ namespace StardewArchipelago.Networking
         // host's snapshot (see HandleSlotDataSnapshot) - the earliest point it's safe to build
         // SlotData-dependent objects (e.g. CraftingInjections' CompoundNameMapper) for the farmhand.
         public event Action FarmhandSlotDataReceived;
+
+        // Fires on a farmhand when the host has processed an AP-received item. Per design decision
+        // (NOTES.md "item distribution"): every received item is applied to every connected player,
+        // not just the host - this is the farmhand's half of that, applying the exact same item the
+        // host already decided on, to its own local Game1.player.
+        public event Action<ReceivedItem> FarmhandItemReceived;
 
         public ModMessaging(ILogger logger, IModHelper helper, IManifest manifest, TesterFeatures testerFeatures, StardewArchipelagoClient archipelago, string modId)
         {
@@ -87,6 +95,17 @@ namespace StardewArchipelago.Networking
             _helper.Multiplayer.SendMessage(new LocationCheckedMessage(locationName), MESSAGE_TYPE_LOCATION_CHECKED, modIDs: new[] { _modId });
         }
 
+        public void BroadcastItemReceived(ReceivedItem receivedItem)
+        {
+            if (!Context.IsMainPlayer)
+            {
+                _logger.LogWarning("BroadcastItemReceived was called by a farmhand; only the host should send this message.");
+                return;
+            }
+
+            _helper.Multiplayer.SendMessage(new ItemReceivedMessage(receivedItem), MESSAGE_TYPE_ITEM_RECEIVED, modIDs: new[] { _modId });
+        }
+
         private void OnPeerConnected(object sender, PeerConnectedEventArgs e)
         {
             if (!Context.IsMainPlayer || _lastKnownSlotName == null)
@@ -118,6 +137,9 @@ namespace StardewArchipelago.Networking
                     case MESSAGE_TYPE_LOCATION_CHECKED:
                         HandleLocationChecked(e.ReadAs<LocationCheckedMessage>());
                         break;
+                    case MESSAGE_TYPE_ITEM_RECEIVED:
+                        HandleItemReceived(e.ReadAs<ItemReceivedMessage>());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -148,6 +170,11 @@ namespace StardewArchipelago.Networking
             }
 
             _hostLocationChecker.AddCheckedLocation(message.LocationName);
+        }
+
+        private void HandleItemReceived(ItemReceivedMessage message)
+        {
+            FarmhandItemReceived?.Invoke(message.ReceivedItem);
         }
     }
 }

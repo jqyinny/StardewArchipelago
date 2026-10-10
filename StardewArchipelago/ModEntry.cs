@@ -68,6 +68,8 @@ namespace StardewArchipelago
         private TesterFeatures _testerFeatures;
         private StardewArchipelagoClient _archipelago;
         private ModMessaging _modMessaging;
+        private ItemParser _farmhandItemParser;
+        private Mailman _farmhandMail;
         private AdvancedOptionsManager _advancedOptionsManager;
         private Mailman _mail;
         private ChatForwarder _chatForwarder;
@@ -130,6 +132,7 @@ namespace StardewArchipelago
             _archipelago = new StardewArchipelagoClient(_logger, _helper, ModManifest, _harmony, OnItemReceived, new SmapiJsonLoader(_helper), _testerFeatures);
             _modMessaging = new ModMessaging(_logger, _helper, ModManifest, _testerFeatures, _archipelago, ModManifest.UniqueID);
             _modMessaging.FarmhandSlotDataReceived += OnFarmhandSlotDataReceived;
+            _modMessaging.FarmhandItemReceived += OnFarmhandItemReceived;
 
             _helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             _helper.Events.GameLoop.SaveCreating += OnSaveCreating;
@@ -337,7 +340,7 @@ namespace StardewArchipelago
             _chatForwarder = new ChatForwarder(_logger, Monitor, _helper, _harmony, _archipelago, _giftHandler, _goalManager, trapExecutor, _tileSanityManager, bank);
             _questCleaner = new QuestCleaner(_locationChecker);
 
-            _itemManager = new APItemManager(_logger, _helper, _harmony, _archipelago, _locationChecker, _stardewItemManager, _mail, trapExecutor, giftTrapManager, State.ItemsReceived);
+            _itemManager = new APItemManager(_logger, _helper, _harmony, _archipelago, _locationChecker, _stardewItemManager, _mail, trapExecutor, giftTrapManager, State.ItemsReceived, _modMessaging);
             _weaponsManager = new WeaponsManager(_archipelago, _stardewItemManager, _archipelago.SlotData.Mods);
 
             _registry.Initialize(_archipelago, _stardewItemManager, _locationChecker, _giftHandler, _weaponsManager, State, _itemManager.TrapManager);
@@ -368,8 +371,10 @@ namespace StardewArchipelago
 
         // Pilot for farmhand-reported location checks (Craftsanity only - see NOTES.md "Design concerns
         // - farmhand location checks" for the bigger open questions before this gets extended to the
-        // other ~115 check-detecting patches). Fires once the farmhand's own StardewArchipelagoClient
-        // has been seeded with the host's SlotData, which CraftingInjections needs for name-mapping.
+        // other ~115 check-detecting patches), plus the farmhand's half of "every received item applies
+        // to every player" (NOTES.md "item distribution"). Fires once the farmhand's own
+        // StardewArchipelagoClient has been seeded with the host's SlotData, the earliest point these
+        // SlotData-dependent objects (CompoundNameMapper, etc.) can be built for a farmhand.
         private void OnFarmhandSlotDataReceived()
         {
             if (Context.IsMainPlayer)
@@ -380,6 +385,30 @@ namespace StardewArchipelago
             var farmhandItemManager = new StardewItemManager(_logger);
             var farmhandLocationChecker = new CoopLocationChecker(_logger, _archipelago, new List<string>(), _modMessaging);
             CraftingInjections.Initialize(_logger, _helper, _archipelago, farmhandItemManager, farmhandLocationChecker);
+
+            // Mirrors InitializeAfterConnection's host-side construction of the same pipeline, just with
+            // farmhand-local instances - the host already decided what the item is (APItemManager.ProcessItem
+            // broadcasts before applying it locally), this just replays that exact decision here.
+            var farmhandTrapExecutor = new TrapExecutor(_logger, _helper, _archipelago, _giftHandler, State);
+            var farmhandGiftTrapManager = new GiftTrapManager(_logger, farmhandTrapExecutor);
+            _farmhandMail = new Mailman(_logger, _archipelago, State);
+            _farmhandItemParser = new ItemParser(_logger, _helper, _harmony, _archipelago, farmhandLocationChecker, farmhandItemManager, farmhandTrapExecutor, farmhandGiftTrapManager);
+        }
+
+        private void OnFarmhandItemReceived(ReceivedItem receivedItem)
+        {
+            if (Context.IsMainPlayer || _farmhandItemParser == null)
+            {
+                return;
+            }
+
+            if (_farmhandItemParser.TrySendItemImmediately(receivedItem))
+            {
+                return;
+            }
+
+            var attachment = _farmhandItemParser.ProcessItemAsLetter(receivedItem);
+            attachment.SendToPlayer(_farmhandMail);
         }
 
         private ConnectionResult AttemptConnectionToArchipelago()
@@ -582,7 +611,18 @@ namespace StardewArchipelago
 
         private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
-            _archipelago.APUpdate();
+            // Split-screen quirk: _archipelago is one shared object for the whole process (ModEntry is a
+            // per-process singleton, not per-screen), so _archipelago.IsConnected reads true from EITHER
+            // screen's context once the host connects - it's not a reliable "am I the host" signal there.
+            // Context.IsMainPlayer is the one SMAPI actually guarantees is correct per screen. Without this,
+            // APUpdate() (and everything the IsConnected check below gates) would run once per screen per
+            // tick, and whichever screen's tick happens to be executing when network data arrives is the
+            // one that incorrectly receives it (this is what caused mail to land on the wrong player's
+            // mailbox during testing).
+            if (Context.IsMainPlayer)
+            {
+                _archipelago.APUpdate();
+            }
 
             // _helper.GameContent.InvalidateCache("Data/Shops");
 
@@ -596,7 +636,7 @@ namespace StardewArchipelago
 
             ArchipelagoJunimoNoteMenu.OnUpdateTickedStatic(e);
             State?.Wallet?.CookieClicker?.DoFrame();
-            if (!_archipelago.IsConnected || _itemManager == null)
+            if (!Context.IsMainPlayer || !_archipelago.IsConnected || _itemManager == null)
             {
                 return;
             }
