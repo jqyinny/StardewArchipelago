@@ -128,7 +128,8 @@ namespace StardewArchipelago
             _testerFeatures = new TesterFeatures(_logger, _helper);
 
             _archipelago = new StardewArchipelagoClient(_logger, _helper, ModManifest, _harmony, OnItemReceived, new SmapiJsonLoader(_helper), _testerFeatures);
-            _modMessaging = new ModMessaging(_logger, _helper, ModManifest, _testerFeatures, ModManifest.UniqueID);
+            _modMessaging = new ModMessaging(_logger, _helper, ModManifest, _testerFeatures, _archipelago, ModManifest.UniqueID);
+            _modMessaging.FarmhandSlotDataReceived += OnFarmhandSlotDataReceived;
 
             _helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             _helper.Events.GameLoop.SaveCreating += OnSaveCreating;
@@ -306,8 +307,12 @@ namespace StardewArchipelago
             }
             else
             {
-                _locationChecker = new StardewLocationChecker(_logger, _archipelago, State.LocationsChecked);
+                // CoopLocationChecker instead of plain StardewLocationChecker: identical behavior on the
+                // host, but it's also the type a farmhand's own copy uses to forward checks here instead
+                // of talking to the AP server directly (see CoopLocationChecker, ModMessaging).
+                _locationChecker = new CoopLocationChecker(_logger, _archipelago, State.LocationsChecked, _modMessaging);
             }
+            _modMessaging.SetHostLocationChecker(_locationChecker);
             _saveCleaner = new SaveCleaner(_logger, _locationChecker);
             _jojaLocationChecker = new JojaLocationChecker(_archipelago, _locationChecker, State.JojaLocationsChecked);
             _itemPatcher = new ItemPatcher(_logger, _helper, _harmony, _archipelago);
@@ -359,6 +364,22 @@ namespace StardewArchipelago
             ArchipelagoJunimoNoteMenu.CompleteBundleIfExists(MemeBundleNames.CONNECTION);
             Game1.AddNPCs();
             _modMessaging.BroadcastHostConnected(_archipelago.SlotData.SlotName, _archipelago.SlotDataFields);
+        }
+
+        // Pilot for farmhand-reported location checks (Craftsanity only - see NOTES.md "Design concerns
+        // - farmhand location checks" for the bigger open questions before this gets extended to the
+        // other ~115 check-detecting patches). Fires once the farmhand's own StardewArchipelagoClient
+        // has been seeded with the host's SlotData, which CraftingInjections needs for name-mapping.
+        private void OnFarmhandSlotDataReceived()
+        {
+            if (Context.IsMainPlayer)
+            {
+                return;
+            }
+
+            var farmhandItemManager = new StardewItemManager(_logger);
+            var farmhandLocationChecker = new CoopLocationChecker(_logger, _archipelago, new List<string>(), _modMessaging);
+            CraftingInjections.Initialize(_logger, _helper, _archipelago, farmhandItemManager, farmhandLocationChecker);
         }
 
         private ConnectionResult AttemptConnectionToArchipelago()

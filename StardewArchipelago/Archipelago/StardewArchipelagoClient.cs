@@ -90,6 +90,17 @@ namespace StardewArchipelago.Archipelago
             _slotData = new SlotData.SlotData(slotName, slotDataFields, Logger, _manifest, _testerFeatures);
         }
 
+        // A farmhand never connects (see ModEntry.OnSaveLoaded's Context.IsMainPlayer gate), so it never
+        // goes through InitializeSlotData/ConnectToMultiworld - IsConnected stays false, which is load-bearing
+        // for the host/farmhand boundary. This lets a farmhand still populate SlotData from a snapshot the
+        // host sent over ModMessaging, reusing the exact same SlotData.SlotData constructor the host used, so
+        // code that only reads .SlotData (not .IsConnected) works identically on both.
+        public void SeedSlotDataFromSnapshot(string slotName, Dictionary<string, object> slotDataFields)
+        {
+            SlotDataFields = slotDataFields;
+            _slotData = new SlotData.SlotData(slotName, slotDataFields, Logger, _manifest, _testerFeatures);
+        }
+
         public override ConnectionResult ConnectToMultiworld(ArchipelagoConnectionInfo connectionInfo)
         {
             if (ModEntry.Instance.Config.MultiplayerVision && !connectionInfo.ConnectionTags.Contains(MULTIPLAYER_VISION_TAG))

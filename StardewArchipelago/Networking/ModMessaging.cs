@@ -1,29 +1,31 @@
 using System;
 using System.Collections.Generic;
+using KaitoKid.ArchipelagoUtilities.Net;
 using KaitoKid.Utilities.Interfaces;
 using Microsoft.Xna.Framework;
+using StardewArchipelago.Archipelago;
 using StardewArchipelago.GameModifications.Testing;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
-using ApSlotData = StardewArchipelago.Archipelago.SlotData.SlotData;
 
 namespace StardewArchipelago.Networking
 {
     // Phase 2 "Core Plumbing" skeleton for host -> farmhand sync. Only the host holds the
     // Archipelago connection (see ModEntry.OnSaveLoaded's Context.IsMainPlayer gate); this
-    // is the one channel it has to tell farmhands what happened. Later phases will add real
-    // messages here (received items, traps, bundle completions) - for now this only proves
-    // the round trip works end to end.
+    // is the channel it has to tell farmhands what happened, and the channel farmhands use
+    // to report their own actions back (see CoopLocationChecker).
     public class ModMessaging
     {
         private const string MESSAGE_TYPE_HOST_CONNECTED = "HostConnected";
         private const string MESSAGE_TYPE_SLOT_DATA_SNAPSHOT = "SlotDataSnapshot";
+        private const string MESSAGE_TYPE_LOCATION_CHECKED = "LocationChecked";
 
         private readonly ILogger _logger;
         private readonly IModHelper _helper;
         private readonly IManifest _manifest;
         private readonly TesterFeatures _testerFeatures;
+        private readonly StardewArchipelagoClient _archipelago;
         private readonly string _modId;
 
         // SendMessage has no replay/queueing: a peer who joins after this was first broadcast would
@@ -33,20 +35,31 @@ namespace StardewArchipelago.Networking
         private string _lastKnownSlotName;
         private Dictionary<string, object> _lastKnownSlotDataFields;
 
-        // The farmhand's own local reconstruction of SlotData, built from the fields the host sent.
-        // Not wired to anything yet - this is the sync half; GameModifications patchers still need to
-        // be updated to read from this instead of a live, connected StardewArchipelagoClient.
-        public ApSlotData FarmhandSlotData { get; private set; }
+        // Only meaningful on the host: the real, connected checker that should actually receive a
+        // farmhand's reported checks. Set via SetHostLocationChecker once InitializeAfterConnection
+        // builds it.
+        private LocationChecker _hostLocationChecker;
 
-        public ModMessaging(ILogger logger, IModHelper helper, IManifest manifest, TesterFeatures testerFeatures, string modId)
+        // Fires on a farmhand once its own StardewArchipelagoClient.SlotData has been seeded from the
+        // host's snapshot (see HandleSlotDataSnapshot) - the earliest point it's safe to build
+        // SlotData-dependent objects (e.g. CraftingInjections' CompoundNameMapper) for the farmhand.
+        public event Action FarmhandSlotDataReceived;
+
+        public ModMessaging(ILogger logger, IModHelper helper, IManifest manifest, TesterFeatures testerFeatures, StardewArchipelagoClient archipelago, string modId)
         {
             _logger = logger;
             _helper = helper;
             _manifest = manifest;
             _testerFeatures = testerFeatures;
+            _archipelago = archipelago;
             _modId = modId;
             _helper.Events.Multiplayer.ModMessageReceived += OnModMessageReceived;
             _helper.Events.Multiplayer.PeerConnected += OnPeerConnected;
+        }
+
+        public void SetHostLocationChecker(LocationChecker locationChecker)
+        {
+            _hostLocationChecker = locationChecker;
         }
 
         public void BroadcastHostConnected(string slotName, Dictionary<string, object> slotDataFields)
@@ -61,6 +74,17 @@ namespace StardewArchipelago.Networking
             _lastKnownSlotDataFields = slotDataFields;
             _helper.Multiplayer.SendMessage(new HostConnectedMessage(slotName), MESSAGE_TYPE_HOST_CONNECTED, modIDs: new[] { _modId });
             _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(slotName, slotDataFields), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId });
+        }
+
+        public void BroadcastLocationChecked(string locationName)
+        {
+            if (Context.IsMainPlayer)
+            {
+                _logger.LogWarning("BroadcastLocationChecked was called by the host; only a farmhand should send this message.");
+                return;
+            }
+
+            _helper.Multiplayer.SendMessage(new LocationCheckedMessage(locationName), MESSAGE_TYPE_LOCATION_CHECKED, modIDs: new[] { _modId });
         }
 
         private void OnPeerConnected(object sender, PeerConnectedEventArgs e)
@@ -91,6 +115,9 @@ namespace StardewArchipelago.Networking
                     case MESSAGE_TYPE_SLOT_DATA_SNAPSHOT:
                         HandleSlotDataSnapshot(e.ReadAs<SlotDataSnapshotMessage>());
                         break;
+                    case MESSAGE_TYPE_LOCATION_CHECKED:
+                        HandleLocationChecked(e.ReadAs<LocationCheckedMessage>());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -106,9 +133,21 @@ namespace StardewArchipelago.Networking
 
         private void HandleSlotDataSnapshot(SlotDataSnapshotMessage message)
         {
-            // Rebuild SlotData locally through its own constructor, exactly like the host did when it
-            // first connected - SlotData has mostly private setters, so it can't be deserialized directly.
-            FarmhandSlotData = new ApSlotData(message.SlotName, message.SlotDataFields, _logger, _manifest, _testerFeatures);
+            // Seed the farmhand's own (never-connected) client through the exact same SlotData
+            // constructor the host used, instead of keeping a separate copy - code that only reads
+            // .SlotData (not .IsConnected) then works identically on host and farmhand.
+            _archipelago.SeedSlotDataFromSnapshot(message.SlotName, message.SlotDataFields);
+            FarmhandSlotDataReceived?.Invoke();
+        }
+
+        private void HandleLocationChecked(LocationCheckedMessage message)
+        {
+            if (!Context.IsMainPlayer || _hostLocationChecker == null)
+            {
+                return;
+            }
+
+            _hostLocationChecker.AddCheckedLocation(message.LocationName);
         }
     }
 }
