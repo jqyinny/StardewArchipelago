@@ -367,7 +367,7 @@ namespace StardewArchipelago
             Game1.chatBox?.addMessage($"Connected to Archipelago as {_archipelago.SlotData.SlotName}. Type !!help for client commands", Color.Green);
             ArchipelagoJunimoNoteMenu.CompleteBundleIfExists(MemeBundleNames.CONNECTION);
             Game1.AddNPCs();
-            _modMessaging.BroadcastHostConnected(_archipelago.SlotData.SlotName, _archipelago.SlotDataFields);
+            _modMessaging.BroadcastHostConnected(_archipelago.SlotData.SlotName, _archipelago.SlotDataFields, State);
         }
 
         // Farmhand-reported location checks, now covering every check type VanillaCodeInjectionInitializer
@@ -376,12 +376,17 @@ namespace StardewArchipelago
         // plus the farmhand's half of "every received item applies to every player" (NOTES.md "item
         // distribution"). Fires once the farmhand's own StardewArchipelagoClient has been seeded with the
         // host's SlotData, the earliest point these SlotData-dependent objects can be built for a farmhand.
-        private void OnFarmhandSlotDataReceived()
+        private void OnFarmhandSlotDataReceived(ArchipelagoStateDto state)
         {
             if (Context.IsMainPlayer)
             {
                 return;
             }
+
+            // Previously this method read the farmhand's own (never-populated) State field directly -
+            // null outside split-screen's shared-process quirks, and not reliably non-null even there.
+            // Now it's seeded from the host's snapshot, same as SlotData just above it.
+            State = state;
 
             var farmhandItemManager = new StardewItemManager(_logger);
             var farmhandLocationChecker = new CoopLocationChecker(_logger, _archipelago, new List<string>(), _modMessaging);

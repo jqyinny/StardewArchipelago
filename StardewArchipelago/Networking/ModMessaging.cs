@@ -6,6 +6,7 @@ using KaitoKid.Utilities.Interfaces;
 using Microsoft.Xna.Framework;
 using StardewArchipelago.Archipelago;
 using StardewArchipelago.GameModifications.Testing;
+using StardewArchipelago.Serialization;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -36,6 +37,7 @@ namespace StardewArchipelago.Networking
         // already connected before a farmhand can join) still gets the round trip through.
         private string _lastKnownSlotName;
         private Dictionary<string, object> _lastKnownSlotDataFields;
+        private ArchipelagoStateDto _lastKnownState;
 
         // Only meaningful on the host: the real, connected checker that should actually receive a
         // farmhand's reported checks. Set via SetHostLocationChecker once InitializeAfterConnection
@@ -44,8 +46,10 @@ namespace StardewArchipelago.Networking
 
         // Fires on a farmhand once its own StardewArchipelagoClient.SlotData has been seeded from the
         // host's snapshot (see HandleSlotDataSnapshot) - the earliest point it's safe to build
-        // SlotData-dependent objects (e.g. CraftingInjections' CompoundNameMapper) for the farmhand.
-        public event Action FarmhandSlotDataReceived;
+        // SlotData/State-dependent objects (e.g. CraftingInjections' CompoundNameMapper, TrapExecutor)
+        // for the farmhand. Carries the host's State snapshot since farmhand-local objects need a
+        // non-null State too (previously only true "by accident" in split-screen - see NOTES.md).
+        public event Action<ArchipelagoStateDto> FarmhandSlotDataReceived;
 
         // Fires on a farmhand when the host has processed an AP-received item. Per design decision
         // (NOTES.md "item distribution"): every received item is applied to every connected player,
@@ -70,7 +74,7 @@ namespace StardewArchipelago.Networking
             _hostLocationChecker = locationChecker;
         }
 
-        public void BroadcastHostConnected(string slotName, Dictionary<string, object> slotDataFields)
+        public void BroadcastHostConnected(string slotName, Dictionary<string, object> slotDataFields, ArchipelagoStateDto state)
         {
             if (!Context.IsMainPlayer)
             {
@@ -80,8 +84,9 @@ namespace StardewArchipelago.Networking
 
             _lastKnownSlotName = slotName;
             _lastKnownSlotDataFields = slotDataFields;
+            _lastKnownState = state.ForFarmhandSync();
             _helper.Multiplayer.SendMessage(new HostConnectedMessage(slotName), MESSAGE_TYPE_HOST_CONNECTED, modIDs: new[] { _modId });
-            _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(slotName, slotDataFields), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId });
+            _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(slotName, slotDataFields, _lastKnownState), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId });
         }
 
         public void BroadcastLocationChecked(string locationName)
@@ -118,7 +123,7 @@ namespace StardewArchipelago.Networking
             }
 
             _helper.Multiplayer.SendMessage(new HostConnectedMessage(_lastKnownSlotName), MESSAGE_TYPE_HOST_CONNECTED, modIDs: new[] { _modId }, playerIDs: new[] { e.Peer.PlayerID });
-            _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(_lastKnownSlotName, _lastKnownSlotDataFields), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId }, playerIDs: new[] { e.Peer.PlayerID });
+            _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(_lastKnownSlotName, _lastKnownSlotDataFields, _lastKnownState), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId }, playerIDs: new[] { e.Peer.PlayerID });
         }
 
         private void OnModMessageReceived(object sender, ModMessageReceivedEventArgs e)
@@ -163,7 +168,7 @@ namespace StardewArchipelago.Networking
             // constructor the host used, instead of keeping a separate copy - code that only reads
             // .SlotData (not .IsConnected) then works identically on host and farmhand.
             _archipelago.SeedSlotDataFromSnapshot(message.SlotName, message.SlotDataFields);
-            FarmhandSlotDataReceived?.Invoke();
+            FarmhandSlotDataReceived?.Invoke(message.State);
         }
 
         private void HandleLocationChecked(LocationCheckedMessage message)

@@ -57,5 +57,15 @@ namespace StardewArchipelago.Serialization
             TrapsState = new TrapsStateDto();
             HasFoundFarmhouseBed = false;
         }
+
+        // Used to hand State to a farmhand over ModMessaging. APConnectionInfo (carries the AP room
+        // password) is stripped since a farmhand never connects to the AP server directly - everything
+        // it needs flows through the host via CoopLocationChecker/item fan-out instead.
+        public ArchipelagoStateDto ForFarmhandSync()
+        {
+            var clone = (ArchipelagoStateDto)MemberwiseClone();
+            clone.APConnectionInfo = null;
+            return clone;
+        }
     }
 }
