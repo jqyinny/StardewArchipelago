@@ -425,6 +425,11 @@ namespace StardewArchipelago
             var farmhandSeedShopStockModifier = new SeedShopStockModifier(_logger, _helper, _archipelago, farmhandLocationChecker, farmhandItemManager);
             var farmhandEntranceManager = new EntranceManager(_logger, _archipelago, State);
             farmhandEntranceManager.SetEntranceRandomizerSettings(_archipelago.SlotData);
+            // _checkedEntrancesToday is otherwise only ever initialized by ResetCheckedEntrancesToday,
+            // called host-only from OnDayStarted - without this, the very first entrance warp attempt
+            // NREs on that still-null HashSet. Day-to-day resets still don't happen for a farmhand
+            // (OnDayStarted is entirely host-only), but this at least avoids the crash for now.
+            farmhandEntranceManager.ResetCheckedEntrancesToday(_archipelago.SlotData);
 
             // _giftHandler.Sender is shared process-wide and was wired to the host's own archipelago/mail by
             // InitializeAfterConnection - gifting from a farmhand will misbehave until that's farmhand-aware
@@ -468,6 +473,15 @@ namespace StardewArchipelago
             var farmhandItemPatcher = new ItemPatcher(_logger, _helper, _harmony, _archipelago);
             farmhandItemPatcher.PatchApItems();
             _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: ItemPatcher.PatchApItems completed successfully");
+
+            // And again - JojapocalypseManager. Even with Jojapocalypse disabled in SlotData, its
+            // constructor (via JojapocalypseConsequencesPatcher) is what sets the static fields several
+            // Consequences classes read (e.g. ShippingConsequences._archipelago/_logger) - the
+            // "is Jojapocalypse actually enabled" check happens inside those classes, not before calling
+            // into them, so skipping this construction crashes even when the feature itself is off.
+            var farmhandJojapocalypseManager = new JojapocalypseManager(_logger, _helper, Config, _harmony, _archipelago, farmhandLocationChecker, farmhandJojaLocationChecker, farmhandItemManager, farmhandNameSimplifier);
+            farmhandJojapocalypseManager.PatchAllJojaLogic();
+            _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: JojapocalypseManager.PatchAllJojaLogic completed successfully");
             }
             catch (Exception ex)
             {
