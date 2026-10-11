@@ -442,6 +442,16 @@ namespace StardewArchipelago
             var farmhandLocationPatcher = new LocationPatcher(_logger, _helper, Config, _harmony, _archipelago, State, farmhandLocationChecker, farmhandJojaLocationChecker, farmhandItemManager, farmhandWeaponsManager, farmhandBundlesManager, farmhandSeedShopStockModifier, farmhandFriends, _farmhandItemParser.TrapManager, farmhandBank, farmhandNameSimplifier, _giftHandler.Sender, farmhandShippingBehaviors, _testerFeatures);
             farmhandLocationPatcher.ReplaceAllLocationsRewardsWithChecks();
             _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: LocationPatcher.ReplaceAllLocationsRewardsWithChecks completed successfully");
+
+            // Same bug class as LocationPatcher above: a farmhand could already receive a mailed AP
+            // letter (Mailman writes the text directly, no patch needed for that), but nothing ever
+            // granted the attached item - that only happens in MailPatcher's
+            // ExitThisMenu_ApplyLetterAction_Postfix Harmony patch, only ever installed by the host's
+            // own MailPatcher.PatchMailBoxForApItems call in InitializeAfterConnection.
+            var farmhandLetterActions = new LetterActions(_logger, _helper, _farmhandMail, _archipelago, farmhandWeaponsManager, _farmhandItemParser.TrapManager, farmhandTrapExecutor.BabyBirther, farmhandItemManager);
+            var farmhandMailPatcher = new MailPatcher(_logger, _harmony, _archipelago, farmhandLocationChecker, State, farmhandLetterActions);
+            farmhandMailPatcher.PatchMailBoxForApItems();
+            _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: MailPatcher.PatchMailBoxForApItems completed successfully");
             }
             catch (Exception ex)
             {
