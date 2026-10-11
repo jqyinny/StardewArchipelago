@@ -270,14 +270,12 @@ namespace StardewArchipelago
         {
             try
             {
-                // Phase 2 "Core Plumbing": only the host holds the Archipelago connection and save
-                // data, so only the host should connect and run the AP-driven patchers below. A
-                // farmhand instead waits for the host to fan effects out over ModMessaging (see
-                // ModMessaging.cs); that fan-out isn't implemented yet, so farmhands get nothing
-                // beyond the round-trip "host connected" chat message for now.
+                // Only the host holds the Archipelago connection and save data, so only the host should
+                // connect and run the AP-driven patchers below. A farmhand instead waits for the host to
+                // fan effects out over ModMessaging (see ModMessaging.cs / OnFarmhandSlotDataReceived).
                 if (!Context.IsMainPlayer)
                 {
-                    _logger.LogWarning("Running as a farmhand; Archipelago is only connected by the host. Multiplayer item/location sync is not implemented yet.");
+                    _logger.LogWarning("Running as a farmhand; Archipelago is only connected by the host. Waiting for the host's SlotData/State snapshot over ModMessaging.");
                     return;
                 }
 
@@ -378,11 +376,16 @@ namespace StardewArchipelago
         // host's SlotData, the earliest point these SlotData-dependent objects can be built for a farmhand.
         private void OnFarmhandSlotDataReceived(ArchipelagoStateDto state)
         {
+            // TEMP DIAGNOSTIC (see NOTES.md "remote multiplayer" investigation) - remove once resolved.
+            _logger.LogInfo($"[DIAG] OnFarmhandSlotDataReceived: entered, IsMainPlayer={Context.IsMainPlayer} stateIsNull={state == null}");
+
             if (Context.IsMainPlayer)
             {
                 return;
             }
 
+            try
+            {
             // Previously this method read the farmhand's own (never-populated) State field directly -
             // null outside split-screen's shared-process quirks, and not reliably non-null even there.
             // Now it's seeded from the host's snapshot, same as SlotData just above it.
@@ -398,6 +401,7 @@ namespace StardewArchipelago
             var farmhandGiftTrapManager = new GiftTrapManager(_logger, farmhandTrapExecutor);
             _farmhandMail = new Mailman(_logger, _archipelago, State);
             _farmhandItemParser = new ItemParser(_logger, _helper, _harmony, _archipelago, farmhandLocationChecker, farmhandItemManager, farmhandTrapExecutor, farmhandGiftTrapManager);
+            _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: _farmhandItemParser built");
 
             // The rest of what VanillaCodeInjectionInitializer.Initialize needs beyond what's already
             // built above. All simple/free-sync constructions - nothing here depends on a live connection.
@@ -413,6 +417,17 @@ namespace StardewArchipelago
             // InitializeAfterConnection - gifting from a farmhand will misbehave until that's farmhand-aware
             // too, but it's only used by a couple of the ~80 patches below, not a blocker for the rest.
             VanillaCodeInjectionInitializer.Initialize(_logger, _helper, Config, _archipelago, State, farmhandLocationChecker, farmhandJojaLocationChecker, farmhandItemManager, farmhandWeaponsManager, farmhandBundlesManager, farmhandFriends, _farmhandItemParser.TrapManager, farmhandBank, farmhandNameSimplifier, _giftHandler.Sender, farmhandShippingBehaviors, _testerFeatures);
+            _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: VanillaCodeInjectionInitializer.Initialize completed successfully");
+            }
+            catch (Exception ex)
+            {
+                // TEMP DIAGNOSTIC (see NOTES.md "remote multiplayer" investigation) - remove once resolved.
+                // OnModMessageReceived's own catch would eventually log this too, but logging it here
+                // directly (with LogError, which SMAPI always shows regardless of log level) makes sure
+                // it isn't missed.
+                _logger.LogError($"[DIAG] OnFarmhandSlotDataReceived: threw while building farmhand-local objects. Error: {ex}");
+                throw;
+            }
         }
 
         private void OnFarmhandItemReceived(ReceivedItem receivedItem)
