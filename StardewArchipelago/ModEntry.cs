@@ -422,12 +422,26 @@ namespace StardewArchipelago
             var farmhandNameSimplifier = new NameSimplifier();
             var farmhandFriends = new Friends();
             var farmhandShippingBehaviors = new NightShippingBehaviors(_logger, _archipelago, farmhandLocationChecker, farmhandNameSimplifier);
+            var farmhandSeedShopStockModifier = new SeedShopStockModifier(_logger, _helper, _archipelago, farmhandLocationChecker, farmhandItemManager);
 
             // _giftHandler.Sender is shared process-wide and was wired to the host's own archipelago/mail by
             // InitializeAfterConnection - gifting from a farmhand will misbehave until that's farmhand-aware
             // too, but it's only used by a couple of the ~80 patches below, not a blocker for the rest.
-            VanillaCodeInjectionInitializer.Initialize(_logger, _helper, Config, _archipelago, State, farmhandLocationChecker, farmhandJojaLocationChecker, farmhandItemManager, farmhandWeaponsManager, farmhandBundlesManager, farmhandFriends, _farmhandItemParser.TrapManager, farmhandBank, farmhandNameSimplifier, _giftHandler.Sender, farmhandShippingBehaviors, _testerFeatures);
-            _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: VanillaCodeInjectionInitializer.Initialize completed successfully");
+            //
+            // IMPORTANT: this used to call VanillaCodeInjectionInitializer.Initialize directly, which only
+            // sets the static _locationChecker/etc. fields each XyzInjections class reads - it does NOT
+            // install the Harmony patches that actually call into those classes in the first place. Those
+            // patches only ever got installed by VanillaLocationPatcher, which only the host ever
+            // constructed (via LocationPatcher.ReplaceAllLocationsRewardsWithChecks in
+            // InitializeAfterConnection). That meant a farmhand's crafting/foraging/leveling never did
+            // anything at all - not even an error, since nothing was hooking the vanilla method in that
+            // process in the first place. Constructing a LocationPatcher here does the same thing
+            // InitializeAfterConnection does for the host: it calls CodeInjectionInitializer.Initialize
+            // internally (same static-field wiring as before) AND actually installs the Harmony patches
+            // for this process.
+            var farmhandLocationPatcher = new LocationPatcher(_logger, _helper, Config, _harmony, _archipelago, State, farmhandLocationChecker, farmhandJojaLocationChecker, farmhandItemManager, farmhandWeaponsManager, farmhandBundlesManager, farmhandSeedShopStockModifier, farmhandFriends, _farmhandItemParser.TrapManager, farmhandBank, farmhandNameSimplifier, _giftHandler.Sender, farmhandShippingBehaviors, _testerFeatures);
+            farmhandLocationPatcher.ReplaceAllLocationsRewardsWithChecks();
+            _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: LocationPatcher.ReplaceAllLocationsRewardsWithChecks completed successfully");
             }
             catch (Exception ex)
             {
