@@ -36,25 +36,54 @@ get everything relayed to them over SMAPI's own mod-messaging channel.
 
 ## Current status
 
-**Working (validated via split-screen testing):**
-- Host-only AP connection, `SlotData`/`State` sync, item/trap fan-out.
-- Farmhand location checks for everything wired through
-  `VanillaCodeInjectionInitializer.Initialize` (~80 check types: Craftsanity,
-  Museumsanity, Monstersanity, Booksanity, Fishsanity, Friendsanity, Shipsanity,
-  Walnutsanity, and most of `Locations/CodeInjections/Vanilla/`).
+Remote multiplayer (two separate machines, as opposed to split-screen) is now
+being tested for real, and it surfaced an architecture gap that split-screen
+had been masking:
+
+**The core finding:** `VanillaCodeInjectionInitializer.Initialize` (and the
+similar `CodeInjectionInitializer.Initialize`) only ever set static field
+*references* on each check-detection class (e.g.
+`CraftingInjections._locationChecker = locationChecker`) - they never call
+`_harmony.Patch(...)`. The actual Harmony patch installation that makes the
+game's own methods call into this mod's code at all happens in separate
+patcher classes (`VanillaLocationPatcher`/`LocationPatcher`, `MailPatcher`,
+`RandomizedLogicPatcher`, `ItemPatcher`), **all of which were only ever
+constructed and applied inside the host-only `InitializeAfterConnection`.** A
+farmhand's own process never installed any of these patches, so a farmhand
+crafting/foraging/leveling/opening a mailed letter/walking through a
+randomized entrance just ran unmodified vanilla code - no error, since
+nothing was even hooking the method in that process to produce one.
+
+Fixed by mirroring each of these patcher constructions in
+`OnFarmhandSlotDataReceived`, with farmhand-local objects:
+
+**Confirmed fixed by testing:**
+- `LocationPatcher.ReplaceAllLocationsRewardsWithChecks()` - the ~80
+  Craftsanity/Museumsanity/etc. check-detection patches. A farmhand
+  successfully reported a check after this fix.
+
+**Fixed, not yet independently re-tested:**
+- `MailPatcher.PatchMailBoxForApItems()` - without this, a farmhand would get
+  the AP letter (the letter text itself never needed a patch) but never the
+  item attached to it.
+- `RandomizedLogicPatcher.PatchAllGameLogic()` - entrance randomization,
+  shops, mines, community center, etc.
+- `ItemPatcher.PatchApItems()`.
+
+**Still open, same shape, lower priority (not in current test scope):**
+`GoalManager.InjectGoalMethods()`, `TileSanityManager.PatchWalk()`,
+`JojapocalypseManager.PatchAllJojaLogic()`, `ModRandomizedLogicPatcher` (mod
+content) are all the same host-only-patcher pattern and likely have the same
+farmhand gap.
 
 **Not yet done:**
-- ~30-35 check types in `GameModifications/CodeInjections/` (a separate,
-  more "world configuration"-flavored initializer) are still host-only.
 - `GiftSender` is reused as-is from the host's shared gift handler - gifting
   specifically from a farmhand will misbehave.
-- World-config sync (shop stock, randomized data, entrance warps, building
-  costs): the sync mechanism exists, but the patchers that would need it
-  haven't been updated to read from a farmhand-local source.
-- Remote multiplayer (as opposed to split-screen) is only lightly tested so
-  far - the mod behavior should be identical since `SendMessage` is documented
-  to work the same way regardless of transport, but this hasn't been verified
-  across a real network boundary for every feature above.
+- A farmhand's already-checked-location state isn't synced back to it, so
+  client-side UI that reflects checked locations (tooltips, walksanity
+  overlays) may show stale info on a farmhand's screen.
+- Message volume/reliability under heavy load (many checks firing in quick
+  succession) is untested.
 
 **Known latent risks, not yet causing observed bugs:**
 - `TrapExecutor`/`TrapManager` have a few `static` fields that get silently
