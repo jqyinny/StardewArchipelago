@@ -29,6 +29,7 @@ using StardewArchipelago.Items.Mail;
 using StardewArchipelago.Items.Traps;
 using StardewArchipelago.Json;
 using StardewArchipelago.Locations;
+using StardewArchipelago.Locations.CodeInjections.Initializers;
 using StardewArchipelago.Locations.CodeInjections.Vanilla;
 using StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles;
 using StardewArchipelago.Locations.CodeInjections.Vanilla.MonsterSlayer;
@@ -369,12 +370,12 @@ namespace StardewArchipelago
             _modMessaging.BroadcastHostConnected(_archipelago.SlotData.SlotName, _archipelago.SlotDataFields);
         }
 
-        // Pilot for farmhand-reported location checks (Craftsanity only - see NOTES.md "Design concerns
-        // - farmhand location checks" for the bigger open questions before this gets extended to the
-        // other ~115 check-detecting patches), plus the farmhand's half of "every received item applies
-        // to every player" (NOTES.md "item distribution"). Fires once the farmhand's own
-        // StardewArchipelagoClient has been seeded with the host's SlotData, the earliest point these
-        // SlotData-dependent objects (CompoundNameMapper, etc.) can be built for a farmhand.
+        // Farmhand-reported location checks, now covering every check type VanillaCodeInjectionInitializer
+        // wires up (~80 of the ~115 total - the rest live in GameModifications/CodeInjections/ and are a
+        // separate, not-yet-started pass - see NOTES.md "Design concerns - farmhand location checks"),
+        // plus the farmhand's half of "every received item applies to every player" (NOTES.md "item
+        // distribution"). Fires once the farmhand's own StardewArchipelagoClient has been seeded with the
+        // host's SlotData, the earliest point these SlotData-dependent objects can be built for a farmhand.
         private void OnFarmhandSlotDataReceived()
         {
             if (Context.IsMainPlayer)
@@ -384,7 +385,6 @@ namespace StardewArchipelago
 
             var farmhandItemManager = new StardewItemManager(_logger);
             var farmhandLocationChecker = new CoopLocationChecker(_logger, _archipelago, new List<string>(), _modMessaging);
-            CraftingInjections.Initialize(_logger, _helper, _archipelago, farmhandItemManager, farmhandLocationChecker);
 
             // Mirrors InitializeAfterConnection's host-side construction of the same pipeline, just with
             // farmhand-local instances - the host already decided what the item is (APItemManager.ProcessItem
@@ -393,6 +393,21 @@ namespace StardewArchipelago
             var farmhandGiftTrapManager = new GiftTrapManager(_logger, farmhandTrapExecutor);
             _farmhandMail = new Mailman(_logger, _archipelago, State);
             _farmhandItemParser = new ItemParser(_logger, _helper, _harmony, _archipelago, farmhandLocationChecker, farmhandItemManager, farmhandTrapExecutor, farmhandGiftTrapManager);
+
+            // The rest of what VanillaCodeInjectionInitializer.Initialize needs beyond what's already
+            // built above. All simple/free-sync constructions - nothing here depends on a live connection.
+            var farmhandJojaLocationChecker = new JojaLocationChecker(_archipelago, farmhandLocationChecker, new List<string>());
+            var farmhandWeaponsManager = new WeaponsManager(_archipelago, farmhandItemManager, _archipelago.SlotData.Mods);
+            var farmhandBundlesManager = new BundlesManager(_logger, _helper, _archipelago, farmhandItemManager);
+            var farmhandBank = new BankHandler(_archipelago);
+            var farmhandNameSimplifier = new NameSimplifier();
+            var farmhandFriends = new Friends();
+            var farmhandShippingBehaviors = new NightShippingBehaviors(_logger, _archipelago, farmhandLocationChecker, farmhandNameSimplifier);
+
+            // _giftHandler.Sender is shared process-wide and was wired to the host's own archipelago/mail by
+            // InitializeAfterConnection - gifting from a farmhand will misbehave until that's farmhand-aware
+            // too, but it's only used by a couple of the ~80 patches below, not a blocker for the rest.
+            VanillaCodeInjectionInitializer.Initialize(_logger, _helper, Config, _archipelago, State, farmhandLocationChecker, farmhandJojaLocationChecker, farmhandItemManager, farmhandWeaponsManager, farmhandBundlesManager, farmhandFriends, _farmhandItemParser.TrapManager, farmhandBank, farmhandNameSimplifier, _giftHandler.Sender, farmhandShippingBehaviors, _testerFeatures);
         }
 
         private void OnFarmhandItemReceived(ReceivedItem receivedItem)
