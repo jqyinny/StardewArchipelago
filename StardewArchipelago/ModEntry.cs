@@ -505,6 +505,11 @@ namespace StardewArchipelago
                 return;
             }
 
+            // Keeps GetReceivedItemCountSafe/HasReceivedItemSafe current for this farmhand (see
+            // StardewArchipelagoClient) - recorded before processing so any of the logic below that
+            // queries this same item's count already sees it, matching how a live session would.
+            _archipelago.RecordFarmhandReceivedItem(receivedItem.ItemName);
+
             if (_farmhandItemParser.TrySendItemImmediately(receivedItem))
             {
                 return;

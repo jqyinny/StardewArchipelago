@@ -103,6 +103,42 @@ namespace StardewArchipelago.Archipelago
             _slotData = new SlotData.SlotData(slotName, slotDataFields, Logger, _manifest, _testerFeatures);
         }
 
+        // GetReceivedItemCount/HasReceivedItem (inherited, non-virtual) read from the live
+        // ArchipelagoSession, which is null on a farmhand (never actually connected - see
+        // SeedSlotDataFromSnapshot above). Every one of the ~160 call sites across the mod that ask
+        // "how many of X have I received" would silently get 0/false there instead of the real answer -
+        // this is a farmhand-safe alternative, backed by a local snapshot+live-update cache instead of
+        // a live connection. Seeded once from the host's full GetAllReceivedItemNamesAndCounts() (see
+        // ModMessaging's SlotDataSnapshotMessage), then kept current as new items arrive via
+        // RecordFarmhandReceivedItem (see ModEntry.OnFarmhandItemReceived).
+        private Dictionary<string, int> _farmhandReceivedItemCounts;
+
+        public void SeedReceivedItemCountsFromSnapshot(Dictionary<string, int> receivedItemCounts)
+        {
+            _farmhandReceivedItemCounts = new Dictionary<string, int>(receivedItemCounts);
+        }
+
+        public void RecordFarmhandReceivedItem(string itemName)
+        {
+            _farmhandReceivedItemCounts ??= new Dictionary<string, int>();
+            _farmhandReceivedItemCounts[itemName] = _farmhandReceivedItemCounts.GetValueOrDefault(itemName, 0) + 1;
+        }
+
+        public int GetReceivedItemCountSafe(string itemName)
+        {
+            if (GetSession() != null)
+            {
+                return GetReceivedItemCount(itemName);
+            }
+
+            return _farmhandReceivedItemCounts?.GetValueOrDefault(itemName, 0) ?? 0;
+        }
+
+        public bool HasReceivedItemSafe(string itemName)
+        {
+            return GetReceivedItemCountSafe(itemName) > 0;
+        }
+
         // Set once, right after construction (see ModEntry.Entry) - breaks the circular dependency
         // between this client and ModMessaging (which itself takes this client as a constructor arg).
         // Lets OnMessageReceived below fan the AP textbox out to farmhands, who otherwise never see it

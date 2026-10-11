@@ -214,7 +214,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
         private static void CreateElevatorMenuIfUnlocked()
         {
-            var numberOfMineElevatorReceived = _archipelago.GetReceivedItemCount(VanillaUnlockManager.PROGRESSIVE_MINE_ELEVATOR);
+            var numberOfMineElevatorReceived = _archipelago.GetReceivedItemCountSafe(VanillaUnlockManager.PROGRESSIVE_MINE_ELEVATOR);
 
             if (HasUnlockedElevators(numberOfMineElevatorReceived))
             {
@@ -234,7 +234,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
         public static int ElevatorFloorUnlocked()
         {
-            var numberOfMineElevatorReceived = _archipelago.GetReceivedItemCount(VanillaUnlockManager.PROGRESSIVE_MINE_ELEVATOR);
+            var numberOfMineElevatorReceived = _archipelago.GetReceivedItemCountSafe(VanillaUnlockManager.PROGRESSIVE_MINE_ELEVATOR);
             return ElevatorFloorUnlocked(numberOfMineElevatorReceived);
         }
 
@@ -247,7 +247,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
         private static void CreateSkullCavernElevatorMenuIfUnlocked()
         {
-            var numberOfMineElevatorReceived = _archipelago.GetReceivedItemCount(SkullCavernInjections.SKULL_CAVERN_ELEVATOR_ITEM);
+            var numberOfMineElevatorReceived = _archipelago.GetReceivedItemCountSafe(SkullCavernInjections.SKULL_CAVERN_ELEVATOR_ITEM);
 
             if (HasUnlockedElevators(numberOfMineElevatorReceived))
             {
