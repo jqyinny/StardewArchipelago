@@ -14,6 +14,10 @@ Archipelago implementation for Stardew Valley. Visit [archipelago.gg](https://ar
 
 - [Contributing.md](./Documentation/Contributing/Contributing.md)
 
+## Native Multiplayer Support (work in progress)
+
+- [MultiplayerSupport.md](./Documentation/Multiplayer/MultiplayerSupport.md)
+
 ## Donations
 
 I accept donations on [Ko-fi](https://ko-fi.com/kaitokidsvap). None of the content is paywalled, this is entirely voluntary.
