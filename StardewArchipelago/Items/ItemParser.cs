@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using HarmonyLib;
 using KaitoKid.ArchipelagoUtilities.Net;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
@@ -43,12 +44,37 @@ namespace StardewArchipelago.Items
 
         public TrapManager TrapManager => _trapManager;
 
+        // Golden Walnuts are a single shared, network-synced world counter
+        // (Game1.netWorldState.Value.GoldenWalnuts/GoldenWalnutsFound), not a per-player inventory
+        // item - vanilla's Farmer.foundWalnut increments it directly and never creates an Object.
+        private static readonly Dictionary<string, int> GoldenWalnutStacks = new()
+        {
+            ["Golden Walnut"] = 1,
+            ["3 Golden Walnuts"] = 3,
+            ["5 Golden Walnuts"] = 5,
+        };
+
         public bool TrySendItemImmediately(ReceivedItem receivedItem)
         {
 #if TILESANITY
             if (TileUI.ProcessItem(receivedItem))
                 return true;
 #endif
+
+            if (GoldenWalnutStacks.TryGetValue(receivedItem.ItemName, out var walnutStack))
+            {
+                // Without this, this item would fall through to the generic "give every connected
+                // player their own copy" path below - inflating the total by however many players are
+                // connected, and handing out an inert object that doesn't do anything on its own.
+                // Incrementing once on the host is already visible to every player via normal NetField
+                // sync, so farmhands skip the increment but still report "handled" here.
+                if (Context.IsMainPlayer)
+                {
+                    Game1.netWorldState.Value.GoldenWalnuts += walnutStack;
+                    Game1.netWorldState.Value.GoldenWalnutsFound += walnutStack;
+                }
+                return true;
+            }
 
             if (_trapManager.IsTrap(receivedItem.ItemName))
             {
