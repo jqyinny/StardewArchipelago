@@ -8,6 +8,7 @@ using StardewArchipelago.GameModifications.CodeInjections;
 using StardewArchipelago.Locations;
 using StardewArchipelago.Locations.CodeInjections.Vanilla;
 using StardewArchipelago.Stardew;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Objects;
@@ -43,6 +44,7 @@ namespace StardewArchipelago.GameModifications
                 GivePlayerQuickStart();
                 RemoveStartingTools();
                 RemoveStartingBackpack();
+                GiveQuickStartIridiumBandToCabins();
             }
 
             RemoveHouse();
@@ -110,6 +112,31 @@ namespace StardewArchipelago.GameModifications
             CreateGiftBoxItemInEmptySpot(location, originalTile, paths);
             CreateGiftBoxItemInEmptySpot(location, originalTile, seed_maker);
 #endif
+        }
+
+        // GivePlayerQuickStart above only ever gives the band to the main FarmHouse - this covers every
+        // farmhand's own cabin too. Host-only: this whole method now also runs on a farmhand's process
+        // (RandomizedLogicPatcher.PatchAllGameLogic is mirrored there - see ModEntry.OnFarmhandSlotDataReceived),
+        // and without this gate each connected farmhand's own run would place another copy of every
+        // cabin's band on top of the host's.
+        private void GiveQuickStartIridiumBandToCabins()
+        {
+            if (!Context.IsMainPlayer || !_archipelago.SlotData.QuickStart)
+            {
+                return;
+            }
+
+            foreach (var farmer in Game1.getAllFarmers().Where(x => x != null))
+            {
+                if (Utility.getHomeOfFarmer(farmer) is not FarmHouse home || home.NameOrUniqueName == "FarmHouse")
+                {
+                    continue;
+                }
+
+                var bedSpot = home.GetPlayerBedSpot();
+                var iridiumBand = _stardewItemManager.GetItemByName("Iridium Band").PrepareForGivingToFarmer();
+                CreateGiftBoxItemInEmptySpot(home, Utility.PointToVector2(bedSpot), iridiumBand);
+            }
         }
 
         private (GameLocation, Vector2) GetGiftboxPlacement(FarmHouse farmhouse)
