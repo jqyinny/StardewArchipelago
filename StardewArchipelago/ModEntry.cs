@@ -640,6 +640,17 @@ namespace StardewArchipelago
 
             ArchipelagoJunimoNoteMenu.OnUpdateTickedStatic(e);
             State?.Wallet?.CookieClicker?.DoFrame();
+
+            // TryExecuteTrapImmediately doesn't actually apply the trap despite the name - it only
+            // enqueues it; DequeueTrap() is what actually applies the effect, and has to be called
+            // separately on a timer. The host's own queue is drained below (gated to Context.IsMainPlayer,
+            // same as everything else past this point) - a farmhand needs its own, separate call here,
+            // since its TrapManager is a completely separate instance with its own queue.
+            if (!Context.IsMainPlayer && _farmhandItemParser != null && e.IsMultipleOf(300))
+            {
+                _farmhandItemParser.TrapManager.DequeueTrap();
+            }
+
             if (!Context.IsMainPlayer || !_archipelago.IsConnected || _itemManager == null)
             {
                 return;
