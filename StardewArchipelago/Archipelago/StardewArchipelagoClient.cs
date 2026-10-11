@@ -608,6 +608,14 @@ namespace StardewArchipelago.Archipelago
         const string EntrancesKey = "found_entrances";
         public void SaveEntrancesTraversedToServer(Dictionary<string, string> slotDataModifiedEntrances, List<string> stateEntrancesTraversed)
         {
+            // _bigIntegerDataStorage is only ever set up in ConnectToMultiworld - null on a farmhand,
+            // whose client is only ever seeded from the host's snapshot. Skip the server write rather
+            // than crash; the host has its own State.EntrancesTraversed and saves this independently.
+            if (_bigIntegerDataStorage == null)
+            {
+                return;
+            }
+
             _bigIntegerDataStorage.ReadAsync(Scope.Slot, EntrancesKey, (x) => SaveEntrancesTraversedToServer(slotDataModifiedEntrances, stateEntrancesTraversed, x));
         }
 
