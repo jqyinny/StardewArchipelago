@@ -73,6 +73,50 @@ Build like any other change to the mod (see
 [Contributing.md](../Contributing/Contributing.md)) - this branch doesn't add
 any new build steps or dependencies.
 
+### Setting up a farmhand/second machine from GitHub
+
+A farmhand needs this exact branch's build, not the stock released mod - the
+stock mod has no `Context.IsMainPlayer` gating or `ModMessaging`, so it won't
+understand anything the host sends and will try to open its own independent AP
+connection instead of joining the host's. Two ways to get it onto a second
+machine:
+
+**Option A: Build from source on that machine.**
+1. Install the prerequisites from Contributing.md's Software section (Stardew
+   Valley, SMAPI, the .NET SDK, a git client - a full IDE isn't required, the
+   `dotnet` CLI is enough).
+2. Clone this fork at the `multiplayer-support` branch:
+   ```
+   git clone --branch multiplayer-support https://github.com/jqyinny/StardewArchipelago.git
+   ```
+3. Build it against that machine's own Stardew Valley install:
+   ```
+   dotnet build StardewArchipelago/StardewArchipelago/StardewArchipelago.csproj -c Debug -p:GamePath="<path to Stardew Valley>"
+   ```
+   MSBuild usually auto-detects the game path, so `-p:GamePath` is only needed
+   if that fails (see Contributing.md's "Game Path" section for the
+   `Directory.Build.props` alternative). This build step uses
+   [ModBuildConfig](https://github.com/Pathoschild/SMAPI-ModBuildConfig), which
+   packages and copies the mod straight into
+   `<GamePath>/Mods/StardewArchipelago/` - no separate install/copy step.
+4. Launch the game through SMAPI and confirm `KaitoKid.StardewArchipelago`
+   loads without errors in the SMAPI console.
+
+**Option B: Copy an already-built mod folder.** If someone else already built
+this branch, copying their deployed `<GamePath>/Mods/StardewArchipelago/`
+folder onto the second machine's `Mods/` folder works too - the mod is fully
+self-contained (its own DLL, its dependency DLLs, and its content folders), so
+there's no separate install step. Either way, make sure there isn't already a
+different copy of the mod (e.g. the stock release) providing the same
+`KaitoKid.StardewArchipelago` UniqueID somewhere else in `Mods/` - SMAPI will
+only load one of them, and which one it picks isn't something to rely on.
+
+The farmhand machine does **not** need an Archipelago account, server access,
+or an Archipelago client of any kind - it never connects to Archipelago
+directly, only to the host, over SMAPI's own multiplayer connection.
+
+### Testing
+
 To exercise the multiplayer-specific code paths you need a second player, either:
 
 - **Split-screen (same machine):** create/load the save normally - the mod's
