@@ -136,7 +136,11 @@ namespace StardewArchipelago.GameModifications
         {
             try
             {
-                if (!(TitleMenu.subMenu is CharacterCustomization characterMenu) || TitleMenu.subMenu is CharacterCustomizationArchipelago || characterMenu.source != CharacterCustomization.Source.NewGame)
+                // Source.HostNewFarm is the "Co-op -> Host New Farm" wizard - a separate character-
+                // creation entry point from the single-player "New" flow (Source.NewGame), which is why
+                // that screen previously had nowhere to enter the AP server: this swap never ran for it.
+                if (!(TitleMenu.subMenu is CharacterCustomization characterMenu) || TitleMenu.subMenu is CharacterCustomizationArchipelago ||
+                    (characterMenu.source != CharacterCustomization.Source.NewGame && characterMenu.source != CharacterCustomization.Source.HostNewFarm))
                 {
                     return;
                 }
