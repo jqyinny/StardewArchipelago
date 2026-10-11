@@ -23,6 +23,7 @@ namespace StardewArchipelago.Networking
         private const string MESSAGE_TYPE_SLOT_DATA_SNAPSHOT = "SlotDataSnapshot";
         private const string MESSAGE_TYPE_LOCATION_CHECKED = "LocationChecked";
         private const string MESSAGE_TYPE_ITEM_RECEIVED = "ItemReceived";
+        private const string MESSAGE_TYPE_CHAT_MESSAGE = "ChatMessage";
 
         private readonly ILogger _logger;
         private readonly IModHelper _helper;
@@ -120,6 +121,21 @@ namespace StardewArchipelago.Networking
             _helper.Multiplayer.SendMessage(new ItemReceivedMessage(receivedItem), MESSAGE_TYPE_ITEM_RECEIVED, modIDs: new[] { _modId });
         }
 
+        // Fans the AP textbox (chat, item-send announcements, hints, goal completion, etc.) out to
+        // every connected farmhand - see StardewArchipelagoClient.ShowArchipelagoMessage, the only
+        // caller. A farmhand's own client never receives these in the first place (it's never actually
+        // connected), so this is the only way a farmhand ever sees them.
+        public void BroadcastChatMessage(string message, Color color)
+        {
+            if (!Context.IsMainPlayer)
+            {
+                _logger.LogWarning("BroadcastChatMessage was called by a farmhand; only the host should send this message.");
+                return;
+            }
+
+            _helper.Multiplayer.SendMessage(new ChatMessageMessage(message, color.PackedValue), MESSAGE_TYPE_CHAT_MESSAGE, modIDs: new[] { _modId });
+        }
+
         private void OnPeerConnected(object sender, PeerConnectedEventArgs e)
         {
             // TEMP DIAGNOSTIC (see NOTES.md "remote multiplayer" investigation) - remove once resolved.
@@ -160,6 +176,9 @@ namespace StardewArchipelago.Networking
                         break;
                     case MESSAGE_TYPE_ITEM_RECEIVED:
                         HandleItemReceived(e.ReadAs<ItemReceivedMessage>());
+                        break;
+                    case MESSAGE_TYPE_CHAT_MESSAGE:
+                        HandleChatMessage(e.ReadAs<ChatMessageMessage>());
                         break;
                 }
             }
@@ -211,6 +230,16 @@ namespace StardewArchipelago.Networking
             _logger.LogInfo($"[DIAG] HandleItemReceived: item={message.ReceivedItem?.ItemName} time={DateTime.Now:HH:mm:ss.fff} thread={System.Threading.Thread.CurrentThread.ManagedThreadId} IsMainPlayer={Context.IsMainPlayer} Game1.player={Game1.player?.Name} screenId={Context.ScreenId}");
 
             FarmhandItemReceived?.Invoke(message.ReceivedItem);
+        }
+
+        private void HandleChatMessage(ChatMessageMessage message)
+        {
+            if (Context.IsMainPlayer)
+            {
+                return;
+            }
+
+            Game1.chatBox?.addMessage(message.Text, new Color { PackedValue = message.PackedColor });
         }
     }
 }

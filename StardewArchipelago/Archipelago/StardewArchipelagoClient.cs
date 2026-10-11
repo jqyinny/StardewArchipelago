@@ -18,6 +18,7 @@ using StardewArchipelago.GameModifications.MultiplayerVision;
 using StardewArchipelago.GameModifications.MultiSleep;
 using StardewArchipelago.GameModifications.Testing;
 using StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles;
+using StardewArchipelago.Networking;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Extensions;
@@ -56,6 +57,7 @@ namespace StardewArchipelago.Archipelago
 
         private List<string> _messagesToIgnore;
         private int _numberFailedReconnections = 0;
+        private ModMessaging _modMessaging;
 
         public StardewArchipelagoClient(ILogger logger, IModHelper modHelper, IManifest manifest, Harmony harmony, Action itemReceivedFunction, IJsonLoader jsonLoader, TesterFeatures testerFeatures) :
             base(logger, new StardewDatapackageCache(new ArchipelagoItemLoader(jsonLoader), new StardewArchipelagoLocationLoader(jsonLoader), "stardew_valley", "IdTables"), itemReceivedFunction)
@@ -99,6 +101,15 @@ namespace StardewArchipelago.Archipelago
         {
             SlotDataFields = slotDataFields;
             _slotData = new SlotData.SlotData(slotName, slotDataFields, Logger, _manifest, _testerFeatures);
+        }
+
+        // Set once, right after construction (see ModEntry.Entry) - breaks the circular dependency
+        // between this client and ModMessaging (which itself takes this client as a constructor arg).
+        // Lets OnMessageReceived below fan the AP textbox out to farmhands, who otherwise never see it
+        // since only the host's client is ever actually connected to receive these in the first place.
+        public void SetModMessaging(ModMessaging modMessaging)
+        {
+            _modMessaging = modMessaging;
         }
 
         public override ConnectionResult ConnectToMultiworld(ArchipelagoConnectionInfo connectionInfo)
@@ -173,7 +184,7 @@ namespace StardewArchipelago.Archipelago
                     }
 
                     var color = chatMessage.Player.Name.GetAsBrightColor();
-                    Game1.chatBox?.addMessage(stardewFullMessage, color);
+                    ShowArchipelagoMessage(stardewFullMessage, color);
                     return;
                 }
                 case ItemSendLogMessage itemSendLogMessage:
@@ -190,13 +201,13 @@ namespace StardewArchipelago.Archipelago
 
                     var color = Color.Gold;
 
-                    Game1.chatBox?.addMessage(stardewFullMessage, color);
+                    ShowArchipelagoMessage(stardewFullMessage, color);
                     return;
                 }
                 case GoalLogMessage:
                 {
                     var color = Color.Green;
-                    Game1.chatBox?.addMessage(stardewFullMessage, color);
+                    ShowArchipelagoMessage(stardewFullMessage, color);
                     return;
                 }
                 case JoinLogMessage:
@@ -209,17 +220,27 @@ namespace StardewArchipelago.Archipelago
                     }
 
                     var color = Color.Gray;
-                    Game1.chatBox?.addMessage(stardewFullMessage, color);
+                    ShowArchipelagoMessage(stardewFullMessage, color);
                     return;
                 }
                 case CommandResultLogMessage:
                 case not null:
                 {
                     var color = Color.Gray;
-                    Game1.chatBox?.addMessage(stardewFullMessage, color);
+                    ShowArchipelagoMessage(stardewFullMessage, color);
                     return;
                 }
             }
+        }
+
+        // Shows an AP textbox line on the host's own screen, same as before, and fans it out to every
+        // connected farmhand (who never see these otherwise - only the host's client is ever actually
+        // connected to receive them). No-op on a farmhand since _modMessaging.BroadcastChatMessage
+        // itself is a no-op there (only the host should ever call OnMessageReceived in the first place).
+        private void ShowArchipelagoMessage(string message, Color color)
+        {
+            Game1.chatBox?.addMessage(message, color);
+            _modMessaging?.BroadcastChatMessage(message, color);
         }
 
         protected override void OnPacketReceived(ArchipelagoPacketBase packet)

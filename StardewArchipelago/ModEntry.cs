@@ -132,6 +132,7 @@ namespace StardewArchipelago
 
             _archipelago = new StardewArchipelagoClient(_logger, _helper, ModManifest, _harmony, OnItemReceived, new SmapiJsonLoader(_helper), _testerFeatures);
             _modMessaging = new ModMessaging(_logger, _helper, ModManifest, _testerFeatures, _archipelago, ModManifest.UniqueID);
+            _archipelago.SetModMessaging(_modMessaging);
             _modMessaging.FarmhandSlotDataReceived += OnFarmhandSlotDataReceived;
             _modMessaging.FarmhandItemReceived += OnFarmhandItemReceived;
 
