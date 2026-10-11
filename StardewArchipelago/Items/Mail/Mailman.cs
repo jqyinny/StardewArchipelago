@@ -109,7 +109,13 @@ namespace StardewArchipelago.Items.Mail
         public void GenerateMail(string mailKey, string mailContent)
         {
             mailContent = mailContent.Replace("<3", "<");
-            mailContent = mailContent.AnonymizePlayerNames(_archipelago.GetSession().Players);
+            // GetSession() is null on a farmhand - its StardewArchipelagoClient is only ever seeded
+            // from the host's SlotData/State snapshot, never actually connected to the AP server.
+            var session = _archipelago.GetSession();
+            if (session != null)
+            {
+                mailContent = mailContent.AnonymizePlayerNames(session.Players);
+            }
             var mailData = DataLoader.Mail(Game1.content);
             mailData[mailKey] = mailContent;
             if (_state.LettersGenerated.ContainsKey(mailKey))
