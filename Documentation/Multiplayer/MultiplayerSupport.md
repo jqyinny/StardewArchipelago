@@ -62,19 +62,35 @@ Fixed by mirroring each of these patcher constructions in
   Craftsanity/Museumsanity/etc. check-detection patches. A farmhand
   successfully reported a check after this fix.
 
-**Fixed, not yet independently re-tested:**
-- `MailPatcher.PatchMailBoxForApItems()` - without this, a farmhand would get
-  the AP letter (the letter text itself never needed a patch) but never the
-  item attached to it.
-- `RandomizedLogicPatcher.PatchAllGameLogic()` - entrance randomization,
-  shops, mines, community center, etc.
-- `ItemPatcher.PatchApItems()`.
+**Confirmed fixed by testing (more):**
+- `MailPatcher.PatchMailBoxForApItems()`, `RandomizedLogicPatcher.PatchAllGameLogic()`
+  (entrance randomization, shops, mines, community center, etc.),
+  `ItemPatcher.PatchApItems()`, `JojapocalypseManager` (needed even with
+  Jojapocalypse disabled - a different farmhand-mirrored class calls
+  unconditionally into one of its Consequences classes, whose static fields
+  are only ever set in this constructor), `EntranceManager.ResetCheckedEntrancesToday()`
+  (a second, separate NRE blocking entrance randomization after the first fix).
 
 **Still open, same shape, lower priority (not in current test scope):**
 `GoalManager.InjectGoalMethods()`, `TileSanityManager.PatchWalk()`,
-`JojapocalypseManager.PatchAllJojaLogic()`, `ModRandomizedLogicPatcher` (mod
-content) are all the same host-only-patcher pattern and likely have the same
-farmhand gap.
+`ModRandomizedLogicPatcher` (mod content) are all the same host-only-patcher
+pattern and likely have the same farmhand gap.
+
+**A second, larger architectural gap:** `GetReceivedItemCount`/`HasReceivedItem`
+(inherited, non-virtual) read from the live `ArchipelagoSession` - null on a
+farmhand, so these silently return 0/false instead of the real answer (e.g.
+a Progressive Mine Elevator release showed the new floor for the host but not
+a farmhand). A repo-wide search found **160+ call sites across 50+ files**
+using this pattern - skill levels, masteries, TV unlocks, movie theater,
+shortcuts, bundles, recipes, weapons, buffs, and more. Rewriting all of them
+isn't realistic in one pass, so this adds `StardewArchipelagoClient.
+GetReceivedItemCountSafe`/`HasReceivedItemSafe` - backed by a local cache
+seeded once from the host's complete `GetAllReceivedItemNamesAndCounts()`
+(sent alongside `SlotData`/`State` in `SlotDataSnapshotMessage`) and kept
+live via `RecordFarmhandReceivedItem` as new items arrive. Only the
+confirmed case (`MineshaftInjections`' elevator checks) has been migrated to
+the `*Safe` methods so far - everything else of the 160+ is still on the raw
+methods and will misbehave for a farmhand until migrated incrementally.
 
 **Not yet done:**
 - `GiftSender` is reused as-is from the host's shared gift handler - gifting
