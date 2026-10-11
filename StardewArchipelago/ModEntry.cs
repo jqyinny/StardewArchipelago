@@ -423,6 +423,8 @@ namespace StardewArchipelago
             var farmhandFriends = new Friends();
             var farmhandShippingBehaviors = new NightShippingBehaviors(_logger, _archipelago, farmhandLocationChecker, farmhandNameSimplifier);
             var farmhandSeedShopStockModifier = new SeedShopStockModifier(_logger, _helper, _archipelago, farmhandLocationChecker, farmhandItemManager);
+            var farmhandEntranceManager = new EntranceManager(_logger, _archipelago, State);
+            farmhandEntranceManager.SetEntranceRandomizerSettings(_archipelago.SlotData);
 
             // _giftHandler.Sender is shared process-wide and was wired to the host's own archipelago/mail by
             // InitializeAfterConnection - gifting from a farmhand will misbehave until that's farmhand-aware
@@ -452,6 +454,20 @@ namespace StardewArchipelago
             var farmhandMailPatcher = new MailPatcher(_logger, _harmony, _archipelago, farmhandLocationChecker, State, farmhandLetterActions);
             farmhandMailPatcher.PatchMailBoxForApItems();
             _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: MailPatcher.PatchMailBoxForApItems completed successfully");
+
+            // Same bug class again - RandomizedLogicPatcher is the "world configuration" patcher
+            // (entrance randomization, shops, mines, community center, etc.), only ever constructed and
+            // applied by the host in InitializeAfterConnection. Entrance randomization specifically is
+            // the thing this was caught testing for - without this, a farmhand walking through a
+            // randomized entrance would just get the vanilla, unrandomized destination.
+            var farmhandLogicPatcher = new RandomizedLogicPatcher(_logger, _helper, Config, _harmony, _archipelago, farmhandLocationChecker, farmhandItemManager, farmhandEntranceManager, farmhandSeedShopStockModifier, farmhandNameSimplifier, farmhandFriends, State, new BundleReader());
+            farmhandLogicPatcher.PatchAllGameLogic();
+            _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: RandomizedLogicPatcher.PatchAllGameLogic completed successfully");
+
+            // And again - ItemPatcher.PatchApItems, only ever installed by the host.
+            var farmhandItemPatcher = new ItemPatcher(_logger, _helper, _harmony, _archipelago);
+            farmhandItemPatcher.PatchApItems();
+            _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: ItemPatcher.PatchApItems completed successfully");
             }
             catch (Exception ex)
             {
