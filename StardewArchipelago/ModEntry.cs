@@ -229,6 +229,15 @@ namespace StardewArchipelago
 
         private void OnSaving(object sender, SavingEventArgs e)
         {
+            // Only the host actually owns the save file - a farmhand's _saveCleaner/_itemManager/
+            // _locationChecker/_jojaLocationChecker fields are never set (it builds its own separate
+            // farmhand-local objects instead, see OnFarmhandSlotDataReceived), so every single one of
+            // these would NRE on a farmhand's very first save/sleep.
+            if (!Context.IsMainPlayer)
+            {
+                return;
+            }
+
             _saveCleaner.OnSaving(sender, e);
 
             SeasonsRandomizer.PrepareDateForSaveGame();
