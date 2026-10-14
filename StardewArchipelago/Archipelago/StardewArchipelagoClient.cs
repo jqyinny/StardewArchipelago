@@ -176,6 +176,39 @@ namespace StardewArchipelago.Archipelago
             return _farmhandLocationNames?.Contains(locationName) ?? false;
         }
 
+        // All locations that exist in this seed, farmhand-safe - same fallback shape as
+        // LocationExistsSafe above, used by StardewLocationChecker's GetAllLocationsSafe/
+        // GetAllLocationsNotCheckedSafe (see there for why GetAllLocations()/GetAllLocationsNotChecked()
+        // on the inherited LocationChecker can't be used directly on a farmhand).
+        public HashSet<string> GetAllLocationNamesSafe()
+        {
+            return GetAllLocationNamesForSync() ?? _farmhandLocationNames ?? new HashSet<string>();
+        }
+
+        // LocationChecker.GetAllLocationsAlreadyChecked() is purely local (no session dependency) but
+        // is only ever populated by LocationChecker.AddCheckedLocation - which CoopLocationChecker
+        // deliberately skips calling on a farmhand (it forwards to the host instead, see
+        // CoopLocationChecker.AddCheckedLocation). So a farmhand's own checks need a separate local
+        // cache here: seeded once from the host's own already-checked set (see SlotDataSnapshotMessage),
+        // then kept current as the farmhand sends new checks (see CoopLocationChecker).
+        private HashSet<string> _farmhandCheckedLocations;
+
+        public void SeedCheckedLocationsFromSnapshot(HashSet<string> checkedLocationNames)
+        {
+            _farmhandCheckedLocations = new HashSet<string>(checkedLocationNames);
+        }
+
+        public void RecordFarmhandCheckedLocation(string locationName)
+        {
+            _farmhandCheckedLocations ??= new HashSet<string>();
+            _farmhandCheckedLocations.Add(locationName);
+        }
+
+        public HashSet<string> GetFarmhandCheckedLocationsSafe()
+        {
+            return _farmhandCheckedLocations ?? new HashSet<string>();
+        }
+
         // Set once, right after construction (see ModEntry.Entry) - breaks the circular dependency
         // between this client and ModMessaging (which itself takes this client as a constructor arg).
         // Lets OnMessageReceived below fan the AP textbox out to farmhands, who otherwise never see it

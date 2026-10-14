@@ -10,18 +10,20 @@ namespace StardewArchipelago.Networking
         public ArchipelagoStateDto State { get; set; }
         public Dictionary<string, int> ReceivedItemCounts { get; set; }
         public HashSet<string> LocationNames { get; set; }
+        public HashSet<string> CheckedLocationNames { get; set; }
 
         public SlotDataSnapshotMessage()
         {
         }
 
-        public SlotDataSnapshotMessage(string slotName, Dictionary<string, object> slotDataFields, ArchipelagoStateDto state, Dictionary<string, int> receivedItemCounts, HashSet<string> locationNames)
+        public SlotDataSnapshotMessage(string slotName, Dictionary<string, object> slotDataFields, ArchipelagoStateDto state, Dictionary<string, int> receivedItemCounts, HashSet<string> locationNames, HashSet<string> checkedLocationNames)
         {
             SlotName = slotName;
             SlotDataFields = slotDataFields;
             State = state;
             ReceivedItemCounts = receivedItemCounts;
             LocationNames = locationNames;
+            CheckedLocationNames = checkedLocationNames;
         }
     }
 }

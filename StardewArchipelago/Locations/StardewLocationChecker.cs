@@ -40,49 +40,78 @@ namespace StardewArchipelago.Locations
             _locationNameMatcher.ClearCache();
         }
 
+        // GetAllLocationsNotChecked()/GetAllLocations() (inherited, non-virtual) gate on IsConnected and
+        // return empty with no live connection - same bug family as GetReceivedItemCount/LocationExists
+        // (see StardewArchipelagoClient), confirmed via IL inspection. On a farmhand that made every one
+        // of these methods return nothing, so the AP symbol never appeared on an un-checked item (e.g. a
+        // craftable recipe) even when it genuinely hadn't been checked yet. These farmhand-safe
+        // equivalents fall back to the client's synced location-name snapshot and its own locally
+        // tracked checked-location cache (see StardewArchipelagoClient.GetAllLocationNamesSafe/
+        // GetFarmhandCheckedLocationsSafe) instead of the live session.
+        private IEnumerable<string> GetAllLocationsSafe()
+        {
+            return _archipelago.GetSession() != null ? GetAllLocations() : _archipelago.GetAllLocationNamesSafe();
+        }
+
+        private IEnumerable<string> GetAllLocationsNotCheckedSafe()
+        {
+            if (_archipelago.GetSession() != null)
+            {
+                return GetAllLocationsNotChecked();
+            }
+
+            var alreadyChecked = _archipelago.GetFarmhandCheckedLocationsSafe();
+            return _archipelago.GetAllLocationNamesSafe().Where(x => !alreadyChecked.Contains(x));
+        }
+
+        private IEnumerable<string> GetAllLocationsAlreadyCheckedSafe()
+        {
+            return _archipelago.GetSession() != null ? GetAllLocationsAlreadyChecked() : _archipelago.GetFarmhandCheckedLocationsSafe();
+        }
+
         public IEnumerable<string> GetAllLocationsNotChecked(string filter)
         {
-            return _locationNameMatcher.GetAllLocationsMatching(GetAllLocationsNotChecked(), filter);
+            return _locationNameMatcher.GetAllLocationsMatching(GetAllLocationsNotCheckedSafe(), filter);
         }
 
         public IEnumerable<string> GetAllLocationsNotCheckedMatchingExactly(string filter)
         {
-            return _locationNameMatcher.GetAllLocationsMatchingExactly(GetAllLocationsNotChecked(), filter);
+            return _locationNameMatcher.GetAllLocationsMatchingExactly(GetAllLocationsNotCheckedSafe(), filter);
         }
 
         public IEnumerable<string> GetAllLocationsNotCheckedStartingWith(string prefix)
         {
-            return _locationNameMatcher.GetAllLocationsStartingWith(GetAllLocationsNotChecked(), prefix);
+            return _locationNameMatcher.GetAllLocationsStartingWith(GetAllLocationsNotCheckedSafe(), prefix);
         }
 
         public IEnumerable<string> GetAllLocationsStartingWith(string prefix)
         {
-            return _locationNameMatcher.GetAllLocationsStartingWith(GetAllLocations(), prefix);
+            return _locationNameMatcher.GetAllLocationsStartingWith(GetAllLocationsSafe(), prefix);
         }
 
         public string[] GetAllLocationsNotCheckedContainingWord(string wordFilter)
         {
-            return _locationNameMatcher.GetAllLocationsContainingWord(GetAllLocationsNotChecked(), wordFilter);
+            return _locationNameMatcher.GetAllLocationsContainingWord(GetAllLocationsNotCheckedSafe(), wordFilter);
         }
 
         public bool IsAnyLocationNotChecked(string filter)
         {
-            return _locationNameMatcher.IsAnyLocationMatching(GetAllLocationsNotChecked(), filter);
+            return _locationNameMatcher.IsAnyLocationMatching(GetAllLocationsNotCheckedSafe(), filter);
         }
 
         public bool IsAnyLocationNotCheckedStartingWith(string prefix)
         {
-            return _locationNameMatcher.IsAnyLocationStartingWith(GetAllLocationsNotChecked(), prefix);
+            return _locationNameMatcher.IsAnyLocationStartingWith(GetAllLocationsNotCheckedSafe(), prefix);
         }
 
         public bool IsAnyLocationNotCheckedEndingWith(string prefix)
         {
-            return _locationNameMatcher.IsAnyLocationEndingWith(GetAllLocationsNotChecked(), prefix);
+            return _locationNameMatcher.IsAnyLocationEndingWith(GetAllLocationsNotCheckedSafe(), prefix);
         }
 
         public IEnumerable<string> GetLocationsByTag(string locationTag)
         {
-            return GetAllLocations().Where(x => _archipelago.DataPackageCache.GetLocation(x).LocationTags.Contains(locationTag));
+            return GetAllLocationsSafe().Where(x => _archipelago.DataPackageCache.GetLocation(x).LocationTags.Contains(locationTag));
         }
 
         public IEnumerable<string> GetMissingLocationsByTag(string locationTag)
@@ -92,12 +121,12 @@ namespace StardewArchipelago.Locations
 
         public IEnumerable<string> GetCheckedLocationsByTag(string locationTag)
         {
-            return GetAllLocationsAlreadyChecked().Where(x => _archipelago.DataPackageCache.GetLocation(x).LocationTags.Contains(locationTag));
+            return GetAllLocationsAlreadyCheckedSafe().Where(x => _archipelago.DataPackageCache.GetLocation(x).LocationTags.Contains(locationTag));
         }
         public double GetPercentLocationsChecked()
         {
-            var numChecked = GetAllLocationsAlreadyChecked().Count;
-            var numTotal = GetAllLocations().Count();
+            var numChecked = GetAllLocationsAlreadyCheckedSafe().Count();
+            var numTotal = GetAllLocationsSafe().Count();
             return (double)numChecked / (double)numTotal;
         }
     }

@@ -15,11 +15,13 @@ namespace StardewArchipelago.Locations
     public class CoopLocationChecker : StardewLocationChecker
     {
         private readonly ILogger _logger;
+        private readonly StardewArchipelagoClient _archipelago;
         private readonly ModMessaging _modMessaging;
 
         public CoopLocationChecker(ILogger logger, StardewArchipelagoClient archipelago, List<string> locationsAlreadyChecked, ModMessaging modMessaging) : base(logger, archipelago, locationsAlreadyChecked)
         {
             _logger = logger;
+            _archipelago = archipelago;
             _modMessaging = modMessaging;
         }
 
@@ -35,6 +37,13 @@ namespace StardewArchipelago.Locations
                 return;
             }
 
+            // base.AddCheckedLocation is skipped here on purpose (it would try to send the check to the
+            // AP server, which a farmhand has no live connection to) - but that also means the base
+            // class's own local _checkedLocations never gets this entry. Recording it here instead is
+            // what GetAllLocationsNotCheckedSafe/GetAllLocationsAlreadyCheckedSafe (see
+            // StardewLocationChecker) read back, so the AP symbol disappears for a farmhand too once
+            // they've actually checked something, instead of just never appearing at all.
+            _archipelago.RecordFarmhandCheckedLocation(locationName);
             _modMessaging.BroadcastLocationChecked(locationName);
         }
 
@@ -50,6 +59,7 @@ namespace StardewArchipelago.Locations
 
             foreach (var locationName in locationNames)
             {
+                _archipelago.RecordFarmhandCheckedLocation(locationName);
                 _modMessaging.BroadcastLocationChecked(locationName);
             }
         }
