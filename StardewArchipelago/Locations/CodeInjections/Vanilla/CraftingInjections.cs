@@ -20,7 +20,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
         private static ILogger _logger;
         private static IModHelper _helper;
-        private static ArchipelagoClient _archipelago;
+        private static StardewArchipelagoClient _archipelago;
         private static LocationChecker _locationChecker;
         private static StardewItemManager _stardewItemManager;
         private static CompoundNameMapper _nameMapper;
@@ -68,14 +68,14 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         private static bool TryGetExistingCraftsanityLocationName(string recipeId, out string locationName)
         {
             locationName = $"{CRAFTING_LOCATION_PREFIX}{recipeId}";
-            if (_archipelago.LocationExists(locationName))
+            if (_archipelago.LocationExistsSafe(locationName))
             {
                 return true;
             }
 
             var itemName = _nameMapper.GetItemName(recipeId); // Some names are iffy
             locationName = $"{CRAFTING_LOCATION_PREFIX}{itemName}";
-            if (_archipelago.LocationExists(locationName))
+            if (_archipelago.LocationExistsSafe(locationName))
             {
                 return true;
             }
@@ -91,7 +91,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             if (yieldItemName != null)
             {
                 locationName = $"{CRAFTING_LOCATION_PREFIX}{yieldItemName}";
-                if (_archipelago.LocationExists(locationName))
+                if (_archipelago.LocationExistsSafe(locationName))
                 {
                     return true;
                 }
@@ -101,7 +101,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             if (yieldItemName != null)
             {
                 locationName = $"{CRAFTING_LOCATION_PREFIX}{yieldItemName}";
-                if (_archipelago.LocationExists(locationName))
+                if (_archipelago.LocationExistsSafe(locationName))
                 {
                     return true;
                 }

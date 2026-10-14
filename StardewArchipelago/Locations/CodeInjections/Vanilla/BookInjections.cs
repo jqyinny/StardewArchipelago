@@ -221,7 +221,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                     return;
                 }
 
-                isThisBookRandomized = isThisBookRandomized || _archipelago.LocationExists(locationName);
+                isThisBookRandomized = isThisBookRandomized || _archipelago.LocationExistsSafe(locationName);
             }
 
             var itemId = book.ItemId;

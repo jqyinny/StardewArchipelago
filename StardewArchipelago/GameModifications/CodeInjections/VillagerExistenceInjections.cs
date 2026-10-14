@@ -297,7 +297,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
                 }
 
                 var arrivalName = GetArrivalItem(name);
-                if (_archipelago.SlotData.StartWithout.HasFlag(StartWithout.Villagers) && _archipelago.LocationExists($"Meet {name}")) // This check is bullshit, until we get proper check if items exist, I check the location instead.
+                if (_archipelago.SlotData.StartWithout.HasFlag(StartWithout.Villagers) && _archipelago.LocationExistsSafe($"Meet {name}")) // This check is bullshit, until we get proper check if items exist, I check the location instead.
                 {
                     __result = Nobody;
                     return;

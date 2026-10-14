@@ -100,7 +100,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             {
                 var recipeName = EventRecipes.CookingRecipeEvents[eventID];
                 var nameWithRecipe = $"{recipeName}{Suffix.CHEFSANITY}";
-                if (!_archipelago.LocationExists(nameWithRecipe))
+                if (!_archipelago.LocationExistsSafe(nameWithRecipe))
                 {
                     return false;
                 }
@@ -118,7 +118,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             {
                 var recipeName = EventRecipes.CraftingRecipeEvents[eventID];
                 var nameWithRecipe = $"{recipeName}{Suffix.CRAFTSANITY}";
-                if (!_archipelago.LocationExists(nameWithRecipe))
+                if (!_archipelago.LocationExistsSafe(nameWithRecipe))
                 {
                     return false;
                 }
@@ -182,7 +182,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
             var locationName = $"{EventRecipes.CookingRecipeEvents[id]}{Suffix.CHEFSANITY}";
             _locationChecker.AddCheckedLocation(locationName);
-            return _archipelago.LocationExists(locationName);
+            return _archipelago.LocationExistsSafe(locationName);
         }
 
         public static bool CheckCraftsanityLocation(string id)
@@ -196,7 +196,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
             var locationName = $"{EventRecipes.CraftingRecipeEvents[id]}{Suffix.CRAFTSANITY}";
             _locationChecker.AddCheckedLocation(locationName);
-            return _archipelago.LocationExists(locationName);
+            return _archipelago.LocationExistsSafe(locationName);
         }
 
         private static void DoEndBehaviors(Event eventBeingSkipped)

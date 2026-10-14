@@ -139,6 +139,43 @@ namespace StardewArchipelago.Archipelago
             return GetReceivedItemCountSafe(itemName) > 0;
         }
 
+        // Same bug family, confirmed via IL inspection this time: LocationExists (inherited,
+        // non-virtual) calls MakeSureConnected() first and short-circuits to false with no live
+        // connection, before ever checking _session.Locations.AllLocations.Contains(id) - so on a
+        // farmhand it always returns false, regardless of whether the location is actually part of
+        // this seed. This is what was zeroing out ArchipelagoFriend.ShuffledUpTo for every NPC on a
+        // farmhand, capping AP-granted friendship hearts at 0 no matter how many "X Hearts" items had
+        // actually been received. Same farmhand-safe pattern: a full snapshot of every location name
+        // that exists in this seed, sent once from the host (which has a live session) alongside
+        // SlotData/State/received-item-counts.
+        private HashSet<string> _farmhandLocationNames;
+
+        public void SeedLocationNamesFromSnapshot(HashSet<string> locationNames)
+        {
+            _farmhandLocationNames = locationNames;
+        }
+
+        public HashSet<string> GetAllLocationNamesForSync()
+        {
+            var session = GetSession();
+            if (session == null)
+            {
+                return null;
+            }
+
+            return session.Locations.AllLocations.Select(id => GetLocationName(id, GameName)).ToHashSet();
+        }
+
+        public bool LocationExistsSafe(string locationName)
+        {
+            if (GetSession() != null)
+            {
+                return LocationExists(locationName);
+            }
+
+            return _farmhandLocationNames?.Contains(locationName) ?? false;
+        }
+
         // Set once, right after construction (see ModEntry.Entry) - breaks the circular dependency
         // between this client and ModMessaging (which itself takes this client as a constructor arg).
         // Lets OnMessageReceived below fan the AP textbox out to farmhands, who otherwise never see it

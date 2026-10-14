@@ -40,6 +40,7 @@ namespace StardewArchipelago.Networking
         private Dictionary<string, object> _lastKnownSlotDataFields;
         private ArchipelagoStateDto _lastKnownState;
         private Dictionary<string, int> _lastKnownReceivedItemCounts;
+        private HashSet<string> _lastKnownLocationNames;
 
         // Only meaningful on the host: the real, connected checker that should actually receive a
         // farmhand's reported checks. Set via SetHostLocationChecker once InitializeAfterConnection
@@ -91,10 +92,14 @@ namespace StardewArchipelago.Networking
             // without this, a farmhand's local received-item cache would only ever reflect items received
             // after it joined, missing anything the host already had beforehand.
             _lastKnownReceivedItemCounts = _archipelago.GetAllReceivedItemNamesAndCounts();
+            // Full baseline for LocationExistsSafe (see StardewArchipelagoClient) - LocationExists
+            // itself short-circuits to false with no live connection, which was zeroing out
+            // ArchipelagoFriend.ShuffledUpTo (and anything else that calls it) for a farmhand.
+            _lastKnownLocationNames = _archipelago.GetAllLocationNamesForSync();
             // TEMP DIAGNOSTIC (see NOTES.md "remote multiplayer" investigation) - remove once resolved.
             _logger.LogInfo($"[DIAG] BroadcastHostConnected: slotName={slotName} slotDataFieldCount={slotDataFields?.Count} IsMainPlayer={Context.IsMainPlayer}");
             _helper.Multiplayer.SendMessage(new HostConnectedMessage(slotName), MESSAGE_TYPE_HOST_CONNECTED, modIDs: new[] { _modId });
-            _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(slotName, slotDataFields, _lastKnownState, _lastKnownReceivedItemCounts), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId });
+            _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(slotName, slotDataFields, _lastKnownState, _lastKnownReceivedItemCounts, _lastKnownLocationNames), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId });
         }
 
         public void BroadcastLocationChecked(string locationName)
@@ -154,8 +159,9 @@ namespace StardewArchipelago.Networking
             // Refetch rather than reuse the cached copy from BroadcastHostConnected - a second farmhand
             // joining later should see every item received since then too, not a stale snapshot.
             _lastKnownReceivedItemCounts = _archipelago.GetAllReceivedItemNamesAndCounts();
+            _lastKnownLocationNames = _archipelago.GetAllLocationNamesForSync();
             _helper.Multiplayer.SendMessage(new HostConnectedMessage(_lastKnownSlotName), MESSAGE_TYPE_HOST_CONNECTED, modIDs: new[] { _modId }, playerIDs: new[] { e.Peer.PlayerID });
-            _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(_lastKnownSlotName, _lastKnownSlotDataFields, _lastKnownState, _lastKnownReceivedItemCounts), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId }, playerIDs: new[] { e.Peer.PlayerID });
+            _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(_lastKnownSlotName, _lastKnownSlotDataFields, _lastKnownState, _lastKnownReceivedItemCounts, _lastKnownLocationNames), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId }, playerIDs: new[] { e.Peer.PlayerID });
             _logger.LogInfo($"[DIAG] OnPeerConnected: resent HostConnected+SlotDataSnapshot to peer {e.Peer.PlayerID}");
         }
 
@@ -216,6 +222,10 @@ namespace StardewArchipelago.Networking
             if (message.ReceivedItemCounts != null)
             {
                 _archipelago.SeedReceivedItemCountsFromSnapshot(message.ReceivedItemCounts);
+            }
+            if (message.LocationNames != null)
+            {
+                _archipelago.SeedLocationNamesFromSnapshot(message.LocationNames);
             }
             FarmhandSlotDataReceived?.Invoke(message.State);
 
