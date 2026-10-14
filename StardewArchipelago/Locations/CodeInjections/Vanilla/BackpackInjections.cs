@@ -97,7 +97,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             }
 
             var indexNextBackpack = Array.IndexOf(_backpackLocationsInOrder, nextBackpack);
-            return _archipelago.GetReceivedItemCount(PROGRESSIVE_BACKPACK) >= indexNextBackpack;
+            return _archipelago.GetReceivedItemCountSafe(PROGRESSIVE_BACKPACK) >= indexNextBackpack;
         }
 
         private static int GetTier(string location)

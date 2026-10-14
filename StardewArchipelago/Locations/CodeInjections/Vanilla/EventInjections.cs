@@ -106,7 +106,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 }
 
                 _locationChecker.AddCheckedLocation(nameWithRecipe);
-                if (_archipelago.GetReceivedItemCount(nameWithRecipe) <= 0)
+                if (_archipelago.GetReceivedItemCountSafe(nameWithRecipe) <= 0)
                 {
                     Game1.player.cookingRecipes.Remove(recipeName);
                 }
@@ -124,7 +124,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 }
 
                 _locationChecker.AddCheckedLocation(nameWithRecipe);
-                if (_archipelago.GetReceivedItemCount(nameWithRecipe) <= 0)
+                if (_archipelago.GetReceivedItemCountSafe(nameWithRecipe) <= 0)
                 {
                     Game1.player.craftingRecipes.Remove(recipeName);
                 }

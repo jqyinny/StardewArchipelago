@@ -104,7 +104,7 @@ namespace StardewArchipelago.Items.Unlocks.Vanilla
         {
             if (archipelago.SlotData.ToolProgression.HasFlag(ToolProgression.Progressive))
             {
-                return archipelago.HasReceivedItem(PROGRESSIVE_FISHING_ROD);
+                return archipelago.HasReceivedItemSafe(PROGRESSIVE_FISHING_ROD);
             }
 
             return PlayerHasFishingRodAnywhere();
@@ -114,7 +114,7 @@ namespace StardewArchipelago.Items.Unlocks.Vanilla
         {
             if (archipelago.SlotData.ToolProgression.HasFlag(ToolProgression.Progressive) && archipelago.SlotData.StartWithout.HasFlag(StartWithout.Tools))
             {
-                return archipelago.HasReceivedItem(PROGRESSIVE_AXE);
+                return archipelago.HasReceivedItemSafe(PROGRESSIVE_AXE);
             }
 
             return true;
@@ -124,7 +124,7 @@ namespace StardewArchipelago.Items.Unlocks.Vanilla
         {
             if (archipelago.SlotData.ToolProgression.HasFlag(ToolProgression.Progressive) && archipelago.SlotData.StartWithout.HasFlag(StartWithout.Tools))
             {
-                return archipelago.HasReceivedItem(PROGRESSIVE_PICKAXE);
+                return archipelago.HasReceivedItemSafe(PROGRESSIVE_PICKAXE);
             }
 
             return true;

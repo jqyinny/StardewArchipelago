@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
 using StardewArchipelago.Archipelago;
@@ -49,8 +50,8 @@ namespace StardewArchipelago.Items.Unlocks.Vanilla
         {
             const Skill skill = Skill.Farming;
             var apItem = $"{skill} Level";
-            var receivedLevels = _archipelago.GetReceivedItemCount(apItem);
-            foreach (var farmer in Game1.getAllFarmers())
+            var receivedLevels = _archipelago.GetReceivedItemCountSafe(apItem);
+            foreach (var farmer in Game1.getAllFarmers().Where(x => x != null))
             {
                 var currentLevel = farmer.farmingLevel.Value;
                 var newLevel = currentLevel + 1;
@@ -71,8 +72,8 @@ namespace StardewArchipelago.Items.Unlocks.Vanilla
         {
             const Skill skill = Skill.Fishing;
             var apItem = $"{skill} Level";
-            var receivedLevels = _archipelago.GetReceivedItemCount(apItem);
-            foreach (var farmer in Game1.getAllFarmers())
+            var receivedLevels = _archipelago.GetReceivedItemCountSafe(apItem);
+            foreach (var farmer in Game1.getAllFarmers().Where(x => x != null))
             {
                 var currentLevel = farmer.fishingLevel.Value;
                 var newLevel = currentLevel + 1;
@@ -93,8 +94,8 @@ namespace StardewArchipelago.Items.Unlocks.Vanilla
         {
             const Skill skill = Skill.Foraging;
             var apItem = $"{skill} Level";
-            var receivedLevels = _archipelago.GetReceivedItemCount(apItem);
-            foreach (var farmer in Game1.getAllFarmers())
+            var receivedLevels = _archipelago.GetReceivedItemCountSafe(apItem);
+            foreach (var farmer in Game1.getAllFarmers().Where(x => x != null))
             {
                 var currentLevel = farmer.foragingLevel.Value;
                 var newLevel = currentLevel + 1;
@@ -115,8 +116,8 @@ namespace StardewArchipelago.Items.Unlocks.Vanilla
         {
             const Skill skill = Skill.Mining;
             var apItem = $"{skill} Level";
-            var receivedLevels = _archipelago.GetReceivedItemCount(apItem);
-            foreach (var farmer in Game1.getAllFarmers())
+            var receivedLevels = _archipelago.GetReceivedItemCountSafe(apItem);
+            foreach (var farmer in Game1.getAllFarmers().Where(x => x != null))
             {
                 var currentLevel = farmer.miningLevel.Value;
                 var newLevel = currentLevel + 1;
@@ -137,8 +138,8 @@ namespace StardewArchipelago.Items.Unlocks.Vanilla
         {
             const Skill skill = Skill.Combat;
             var apItem = $"{skill} Level";
-            var receivedLevels = _archipelago.GetReceivedItemCount(apItem);
-            foreach (var farmer in Game1.getAllFarmers())
+            var receivedLevels = _archipelago.GetReceivedItemCountSafe(apItem);
+            foreach (var farmer in Game1.getAllFarmers().Where(x => x != null))
             {
                 var currentLevel = farmer.combatLevel.Value;
                 var newLevel = currentLevel + 1;
@@ -158,7 +159,7 @@ namespace StardewArchipelago.Items.Unlocks.Vanilla
         private LetterAttachment SendFarmingMastery(ReceivedItem receivedItem)
         {
             const Skill skill = Skill.Farming;
-            foreach (var farmer in Game1.getAllFarmers())
+            foreach (var farmer in Game1.getAllFarmers().Where(x => x != null))
             {
                 AddCraftingRecipes(farmer, new[] { "Statue Of Blessings" });
                 GiveItemsToFarmer(farmer, "(W)66");
@@ -170,7 +171,7 @@ namespace StardewArchipelago.Items.Unlocks.Vanilla
         private LetterAttachment SendForagingMastery(ReceivedItem receivedItem)
         {
             const Skill skill = Skill.Foraging;
-            foreach (var farmer in Game1.getAllFarmers())
+            foreach (var farmer in Game1.getAllFarmers().Where(x => x != null))
             {
                 AddCraftingRecipes(farmer, new[] { "Mystic Tree Seed", "Treasure Totem" });
                 farmer.stats.Increment(StatKeys.Mastery((int)skill), 1);
@@ -181,7 +182,7 @@ namespace StardewArchipelago.Items.Unlocks.Vanilla
         private LetterAttachment SendFishingMastery(ReceivedItem receivedItem)
         {
             const Skill skill = Skill.Fishing;
-            foreach (var farmer in Game1.getAllFarmers())
+            foreach (var farmer in Game1.getAllFarmers().Where(x => x != null))
             {
                 AddCraftingRecipes(farmer, new[] { "Challenge Bait" });
                 GiveItemsToFarmer(farmer, "(T)AdvancedIridiumRod");
