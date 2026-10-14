@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using KaitoKid.ArchipelagoUtilities.Net.Client;
 using KaitoKid.Utilities.Interfaces;
+using StardewArchipelago.Archipelago;
 using StardewArchipelago.Constants;
 using StardewModdingAPI;
 using StardewValley;
@@ -19,7 +19,7 @@ namespace StardewArchipelago.Items
 
         private static ILogger _logger;
         private static IModHelper _helper;
-        private static ArchipelagoClient _archipelago;
+        private static StardewArchipelagoClient _archipelago;
 
         private static int _numberOfSpeedBonuses = 0;
         private static int _numberOfLuckBonuses = 0;
@@ -36,7 +36,7 @@ namespace StardewArchipelago.Items
 
         public static int CurrentStaminaBonus => STAMINA_AMOUNT * _numberOfStaminaBonuses;
 
-        public static void Initialize(ILogger logger, IModHelper helper, ArchipelagoClient archipelago)
+        public static void Initialize(ILogger logger, IModHelper helper, StardewArchipelagoClient archipelago)
         {
             _logger = logger;
             _helper = helper;
@@ -60,7 +60,7 @@ namespace StardewArchipelago.Items
 
         private static int GetNumberOfBuff(string buffName, int maximum = int.MaxValue)
         {
-            var numberReceived = _archipelago.GetReceivedItemCount(buffName);
+            var numberReceived = _archipelago.GetReceivedItemCountSafe(buffName);
             return Math.Min(numberReceived, maximum);
         }
 

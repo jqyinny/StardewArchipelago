@@ -474,6 +474,14 @@ namespace StardewArchipelago
             farmhandItemPatcher.PatchApItems();
             _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: ItemPatcher.PatchApItems completed successfully");
 
+            // PlayerBuffInjections caches its bonus counts (_numberOfSpeedBonuses etc.) in static fields,
+            // only ever refreshed by CheckForApBuffs - which is only ever called host-only, from
+            // DoArchipelagoDayStartedProcesses (OnDayStarted is entirely host-only). Without this, a
+            // farmhand's own cached counts would stay at their default of 0 forever, regardless of how
+            // many buff items were actually received - e.g. the movement speed buff silently doing
+            // nothing for a farmhand. Also re-called in OnFarmhandItemReceived to stay current.
+            PlayerBuffInjections.CheckForApBuffs();
+
             // And again - JojapocalypseManager. Even with Jojapocalypse disabled in SlotData, its
             // constructor (via JojapocalypseConsequencesPatcher) is what sets the static fields several
             // Consequences classes read (e.g. ShippingConsequences._archipelago/_logger) - the
@@ -509,6 +517,10 @@ namespace StardewArchipelago
             // StardewArchipelagoClient) - recorded before processing so any of the logic below that
             // queries this same item's count already sees it, matching how a live session would.
             _archipelago.RecordFarmhandReceivedItem(receivedItem.ItemName);
+            // Refreshes PlayerBuffInjections' cached bonus counts (see the call in
+            // OnFarmhandSlotDataReceived for why this is needed at all) so a newly-received buff item
+            // takes effect immediately instead of only at the next (host-only) day start.
+            PlayerBuffInjections.CheckForApBuffs();
 
             if (_farmhandItemParser.TrySendItemImmediately(receivedItem))
             {
