@@ -101,7 +101,7 @@ namespace StardewArchipelago.GameModifications
                 cookingRecipesData[recipeName] = modifiedRecipe;
                 foreach (var farmer in Game1.getAllFarmers().Where(x => x != null))
                 {
-                    if (farmer.cookingRecipes.ContainsKey(recipeName) && !_archipelago.HasReceivedItem($"{recipeName} Recipe"))
+                    if (farmer.cookingRecipes.ContainsKey(recipeName) && !_archipelago.HasReceivedItemSafe($"{recipeName} Recipe"))
                     {
                         farmer.cookingRecipes.Remove(recipeName);
                     }
@@ -185,7 +185,7 @@ namespace StardewArchipelago.GameModifications
                 craftingRecipesData[recipeName] = modifiedRecipe;
                 foreach (var farmer in Game1.getAllFarmers().Where(x => x != null))
                 {
-                    if (farmer.craftingRecipes.ContainsKey(recipeName) && !_archipelago.HasReceivedItem($"{recipeName} Recipe"))
+                    if (farmer.craftingRecipes.ContainsKey(recipeName) && !_archipelago.HasReceivedItemSafe($"{recipeName} Recipe"))
                     {
                         farmer.craftingRecipes.Remove(recipeName);
                     }
@@ -242,7 +242,7 @@ namespace StardewArchipelago.GameModifications
                 var recipeData = craftingRecipesData[recipeName];
                 foreach (var farmer in Game1.getAllFarmers().Where(x => x != null))
                 {
-                    if (!farmer.craftingRecipes.ContainsKey(recipeName) && _archipelago.HasReceivedItem($"{recipeName} Recipe"))
+                    if (!farmer.craftingRecipes.ContainsKey(recipeName) && _archipelago.HasReceivedItemSafe($"{recipeName} Recipe"))
                     {
                         farmer.craftingRecipes.Add(recipeName, 0);
                     }
