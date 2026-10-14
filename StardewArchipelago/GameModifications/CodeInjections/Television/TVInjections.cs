@@ -67,7 +67,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections.Television
 
         private static void AddWeatherChannel(List<Response> channelsList)
         {
-            if (!_archipelago.HasReceivedItem(AP_WEATHER_REPORT))
+            if (!_archipelago.HasReceivedItemSafe(AP_WEATHER_REPORT))
             {
                 return;
             }
@@ -77,7 +77,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections.Television
 
         private static void AddFortuneTellerChannel(List<Response> channelsList)
         {
-            if (!_archipelago.HasReceivedItem(AP_FORTUNE_TELLER))
+            if (!_archipelago.HasReceivedItemSafe(AP_FORTUNE_TELLER))
             {
                 return;
             }
@@ -87,7 +87,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections.Television
 
         private static void AddLivingOffTheLandChannel(string dayOfWeek, List<Response> channelsList)
         {
-            if (!ModEntry.Instance.Config.StartWithLivingOffTheLand && !_archipelago.HasReceivedItem(AP_LIVING_OFF_THE_LAND))
+            if (!ModEntry.Instance.Config.StartWithLivingOffTheLand && !_archipelago.HasReceivedItemSafe(AP_LIVING_OFF_THE_LAND))
             {
                 return;
             }
@@ -109,7 +109,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections.Television
 
         private static void AddQueenOfSauceChannels(string dayOfWeek, List<Response> channelsList)
         {
-            if (!_archipelago.HasReceivedItem(AP_QUEEN_OF_SAUCE))
+            if (!_archipelago.HasReceivedItemSafe(AP_QUEEN_OF_SAUCE))
             {
                 return;
             }
@@ -144,7 +144,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections.Television
                 return;
             }
 
-            if (!_archipelago.HasReceivedItem(AP_SINISTER_SIGNAL))
+            if (!_archipelago.HasReceivedItemSafe(AP_SINISTER_SIGNAL))
             {
                 return;
             }
@@ -154,7 +154,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections.Television
 
         private static void AddFishingChannel(List<Response> channelsList)
         {
-            if (!_archipelago.HasReceivedItem(AP_FISHING))
+            if (!_archipelago.HasReceivedItemSafe(AP_FISHING))
             {
                 return;
             }
@@ -166,7 +166,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections.Television
         {
             var hasWrongEntranceRando = _archipelago.SlotData.EntranceRandomization is EntranceRandomization.Disabled;
             var hasWrongDay = !dayOfWeek.Equals("Mon") && !dayOfWeek.Equals("Fri");
-            var missingChannel = !ModEntry.Instance.Config.StartWithGatewayGazette && !_archipelago.HasReceivedItem(AP_GATEWAY_GAZETTE);
+            var missingChannel = !ModEntry.Instance.Config.StartWithGatewayGazette && !_archipelago.HasReceivedItemSafe(AP_GATEWAY_GAZETTE);
             if (hasWrongEntranceRando || hasWrongDay || missingChannel)
             {
                 return;
