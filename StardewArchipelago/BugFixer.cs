@@ -98,9 +98,21 @@ namespace StardewArchipelago
             for (var key = 0; key < 7; ++key)
             {
                 areaToBundleDictionary.Add(key, new List<int>());
-                var netMutex = new NetMutex();
-                communityCenter.bundleMutexes.Add(netMutex);
-                communityCenter.NetFields.AddField(netMutex.NetFields, "m.NetFields");
+
+                // This method runs once per day (via FixKnownBugs, host-only). Unconditionally adding a
+                // mutex every single call left communityCenter.NetFields growing by 7 more child fields
+                // every day forever - invisible in single-player (nothing else ever needs to deserialize
+                // a network delta against this schema), but in true multiplayer the host's schema for this
+                // shared, network-synced location drifts further from a farmhand's (which never runs this
+                // host-only code) with every passing day, until a delta read against the mismatched schema
+                // throws - this is what crashed a farmhand entering the Community Center. Only backfill if
+                // a mutex for this index doesn't already exist, matching what the loop actually needs.
+                if (communityCenter.bundleMutexes.Count <= key)
+                {
+                    var netMutex = new NetMutex();
+                    communityCenter.bundleMutexes.Add(netMutex);
+                    communityCenter.NetFields.AddField(netMutex.NetFields, "m.NetFields");
+                }
             }
 
             foreach (var keyValuePair in Game1.netWorldState.Value.BundleData)
