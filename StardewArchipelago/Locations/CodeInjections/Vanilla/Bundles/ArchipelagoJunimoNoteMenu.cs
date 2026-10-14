@@ -262,7 +262,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
 
         protected override bool CanReadNote()
         {
-            return _archipelago.HasReceivedItem("Forest Magic");
+            return _archipelago.HasReceivedItemSafe("Forest Magic");
         }
 
         private void AssignBundleIcon(ArchipelagoBundle bundle, Texture2D remixedBundlesTexture)

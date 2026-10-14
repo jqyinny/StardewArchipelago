@@ -102,7 +102,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
 
                 if (ArchipelagoJunimoNoteMenu.FloorIsLavaHasTouchedGroundToday == 0 &&
                     ArchipelagoJunimoNoteMenu.IsBundleRemaining(MemeBundleNames.FLOOR_IS_LAVA) &&
-                    _archipelago.HasReceivedItem("Forest Magic"))
+                    _archipelago.HasReceivedItemSafe("Forest Magic"))
                 {
                     PlayFireFeetEffect(tile);
                 }

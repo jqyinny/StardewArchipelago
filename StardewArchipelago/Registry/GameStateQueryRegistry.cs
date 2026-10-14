@@ -58,7 +58,7 @@ namespace StardewArchipelago.Registry
 
             var amount = int.Parse(query[1]);
             var itemName = string.Join(' ', query.Skip(2));
-            var receivedCount = _archipelago.GetReceivedItemCount(itemName);
+            var receivedCount = _archipelago.GetReceivedItemCountSafe(itemName);
             return receivedCount >= amount;
         }
 
@@ -71,7 +71,7 @@ namespace StardewArchipelago.Registry
 
             var amount = int.Parse(query[1]);
             var itemName = string.Join(' ', query.Skip(2));
-            var receivedCount = _archipelago.GetReceivedItemCount(itemName);
+            var receivedCount = _archipelago.GetReceivedItemCountSafe(itemName);
             return receivedCount == amount;
         }
 

@@ -1,8 +1,8 @@
 ﻿using System;
 using Netcode;
-using KaitoKid.ArchipelagoUtilities.Net.Client;
 using KaitoKid.ArchipelagoUtilities.Net.Constants;
 using KaitoKid.Utilities.Interfaces;
+using StardewArchipelago.Archipelago;
 using StardewArchipelago.Items.Unlocks.Vanilla;
 using StardewModdingAPI;
 using StardewValley;
@@ -19,9 +19,9 @@ namespace StardewArchipelago.GameModifications.CodeInjections
 
         private static ILogger _logger;
         private static IModHelper _modHelper;
-        private static ArchipelagoClient _archipelago;
+        private static StardewArchipelagoClient _archipelago;
 
-        public static void Initialize(ILogger logger, IModHelper modHelper, ArchipelagoClient archipelago)
+        public static void Initialize(ILogger logger, IModHelper modHelper, StardewArchipelagoClient archipelago)
         {
             _logger = logger;
             _modHelper = modHelper;
@@ -33,7 +33,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
         {
             try
             {
-                if (__instance.treehouseBuilt || !_archipelago.HasReceivedItem(VanillaUnlockManager.TREEHOUSE))
+                if (__instance.treehouseBuilt || !_archipelago.HasReceivedItemSafe(VanillaUnlockManager.TREEHOUSE))
                 {
                     return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
                 }
@@ -97,12 +97,12 @@ namespace StardewArchipelago.GameModifications.CodeInjections
         {
             // private readonly NetBool railroadAreaBlocked = new NetBool(Game1.stats.DaysPlayed < 31U);
             var railroadAreaBlockedField = _modHelper.Reflection.GetField<NetBool>(mountain, "railroadAreaBlocked");
-            railroadAreaBlockedField.GetValue().Value = !_archipelago.HasReceivedItem(RAILROAD_BOULDER_ITEM);
+            railroadAreaBlockedField.GetValue().Value = !_archipelago.HasReceivedItemSafe(RAILROAD_BOULDER_ITEM);
         }
 
         public static void SetLandslideBasedOnArchipelagoItem(Mountain mountain)
         {
-            var isLandslideRemoved = _archipelago.HasReceivedItem(LANDSLIDE_REMOVED_ITEM);
+            var isLandslideRemoved = _archipelago.HasReceivedItemSafe(LANDSLIDE_REMOVED_ITEM);
 
             // private readonly NetBool landslide = new NetBool(Game1.stats.DaysPlayed < 5U);
             var landslideField = _modHelper.Reflection.GetField<NetBool>(mountain, "landslide");

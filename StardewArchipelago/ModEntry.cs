@@ -427,6 +427,18 @@ namespace StardewArchipelago
             // (OnDayStarted is entirely host-only), but this at least avoids the crash for now.
             farmhandEntranceManager.ResetCheckedEntrancesToday(_archipelago.SlotData);
 
+            // Same bug class as the patchers below, but for RegistryManager (GameStateQueryRegistry,
+            // ItemQueryRegistry, ChatCommandsRegistry, ConsoleCommandsRegistry, TriggerActionRegistry):
+            // RegisterOnModEntry (which installs e.g. the "HasReceivedItem"/"HasReceivedItemExactAmount"
+            // GameStateQuery delegates) runs unconditionally for every process, but Initialize (which
+            // actually sets each sub-registry's _archipelago field) was only ever called from the
+            // host-only InitializeAfterConnection. On a farmhand those delegates were being invoked with
+            // a null _archipelago - every vanilla Data/Powers (etc.) unlock condition using
+            // "ARCHIPELAGO_HasReceivedItem" (e.g. Community Center Key, Landslide Removed, Railroad
+            // Boulder Removed) would throw and the game engine treats a throwing condition as false, so
+            // it silently never unlocked for a farmhand no matter what was received.
+            _registry.Initialize(_archipelago, farmhandItemManager, farmhandLocationChecker, _giftHandler, farmhandWeaponsManager, State, _farmhandItemParser.TrapManager);
+
             // _giftHandler.Sender is shared process-wide and was wired to the host's own archipelago/mail by
             // InitializeAfterConnection - gifting from a farmhand will misbehave until that's farmhand-aware
             // too, but it's only used by a couple of the ~80 patches below, not a blocker for the rest.
