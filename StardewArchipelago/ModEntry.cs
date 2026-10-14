@@ -409,6 +409,32 @@ namespace StardewArchipelago
             _farmhandMail = new Mailman(_logger, _archipelago, State);
             _farmhandItemParser = new ItemParser(_logger, _helper, _harmony, _archipelago, farmhandLocationChecker, farmhandItemManager, farmhandTrapExecutor, farmhandGiftTrapManager);
 
+            // OnFarmhandItemReceived only replays items broadcast *after* this farmhand connects
+            // (ModMessaging.BroadcastItemReceived fires once, from inside APItemManager.ProcessItem, the
+            // moment the host first processes a given item) - it was never meant to be a catch-up
+            // mechanism. GetAllReceivedItemNamesAndCounts (seeding GetReceivedItemCountSafe/
+            // HasReceivedItemSafe) catches the farmhand up on *counts*, but the actual one-time unlock
+            // side effects (letters, vanilla mail flags like "canReadJunimoText" for Forest Magic,
+            // Game1.player.hasMagicInk, etc. - see VanillaUnlockManager's `unlocks` dictionary) only ever
+            // ran once, on whichever process was connected at the time. A farmhand joining after an item
+            // was already received by the host - including every item from a previous session - would
+            // correctly report "received" via HasReceivedItemSafe, but never actually get the letter/mail
+            // flag granted to their own Farmer, which is why e.g. Forest Magic could pass custom AP
+            // checks (floor-is-lava effect, Junimo note reading) while still showing locked in the
+            // vanilla Powers tab (whose unlock condition reads the real "canReadJunimoText" mail flag,
+            // not our AP check). Deliberately replays through ProcessItemAsLetter+SendToPlayer only, not
+            // TrySendItemImmediately - traps/counters already executed for real when the host first
+            // received them and must not refire for a farmhand catching up, and shared state like Golden
+            // Walnuts (Game1.netWorldState) already arrives via ordinary NetField sync. Every letter/mail
+            // path below (Mailman.SendVanillaMail/SendArchipelagoMail/SendArchipelagoInvisibleMail) checks
+            // hasOrWillReceiveMail first, so this is idempotent against anything the farmhand already
+            // correctly has from an earlier session or a live broadcast.
+            foreach (var historicalItem in state.ItemsReceived ?? new List<ReceivedItem>())
+            {
+                var historicalAttachment = _farmhandItemParser.ProcessItemAsLetter(historicalItem);
+                historicalAttachment.SendToPlayer(_farmhandMail);
+            }
+
             // The rest of what VanillaCodeInjectionInitializer.Initialize needs beyond what's already
             // built above. All simple/free-sync constructions - nothing here depends on a live connection.
             var farmhandJojaLocationChecker = new JojaLocationChecker(_archipelago, farmhandLocationChecker, new List<string>());
