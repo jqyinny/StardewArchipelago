@@ -109,6 +109,18 @@ namespace StardewArchipelago.Locations
             return _locationNameMatcher.IsAnyLocationEndingWith(GetAllLocationsNotCheckedSafe(), prefix);
         }
 
+        // LocationChecker.LocationExists(string) (inherited) is a separate wrapper around the same
+        // non-virtual, session-gated StardewArchipelagoClient.LocationExists this file already works
+        // around elsewhere (see GetAllLocationsSafe above) - same bug, reached through the location
+        // checker instead of the client directly. Several callers use _locationChecker.LocationExists(...)
+        // rather than _archipelago.LocationExistsSafe(...) (SpecialOrderInjections, CollectionsInjections,
+        // QueenOfSauceInjections, ArchipelagoJunimoNoteMenu, TileUI) - this is the farmhand-safe
+        // equivalent for that call shape.
+        public bool LocationExistsSafe(string locationName)
+        {
+            return _archipelago.LocationExistsSafe(locationName);
+        }
+
         public IEnumerable<string> GetLocationsByTag(string locationTag)
         {
             return GetAllLocationsSafe().Where(x => _archipelago.DataPackageCache.GetLocation(x).LocationTags.Contains(locationTag));

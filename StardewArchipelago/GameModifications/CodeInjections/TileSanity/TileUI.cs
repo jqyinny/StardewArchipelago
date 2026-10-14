@@ -86,7 +86,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections.Tilesanity
                         {
                             _tileColors[x, y] = tileColor = TileColor.LOCKED;
                         }
-                        else if (_locationChecker.LocationExists(tileName) && _tileSanityManager.HasLocationLeft(tileName))
+                        else if (_locationChecker.LocationExistsSafe(tileName) && _tileSanityManager.HasLocationLeft(tileName))
                         {
                             _tileColors[x, y] = tileColor = TileColor.LOCATION;
                         }

@@ -17,11 +17,11 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
         private static ILogger _logger;
         private static StardewArchipelagoClient _archipelago;
-        private static LocationChecker _locationChecker;
+        private static StardewLocationChecker _locationChecker;
         private static StardewItemManager _stardewItemManager;
         private static NightShippingBehaviors _nightShippingBehaviors;
 
-        public static void Initialize(ILogger logger, StardewArchipelagoClient archipelago, LocationChecker locationChecker, StardewItemManager stardewItemManager, NightShippingBehaviors nightShippingBehaviors)
+        public static void Initialize(ILogger logger, StardewArchipelagoClient archipelago, StardewLocationChecker locationChecker, StardewItemManager stardewItemManager, NightShippingBehaviors nightShippingBehaviors)
         {
             _logger = logger;
             _archipelago = archipelago;
@@ -37,7 +37,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             {
                 var shippingCollection = __instance.collections[SHIPPING_INDEX];
                 var allShippables = _stardewItemManager.GetAllItemsMatching(x => x.canBeShipped());
-                var allActiveShippables = allShippables.Where(x => _locationChecker.LocationExists(GetShipsanityLocationName(x))).ToArray();
+                var allActiveShippables = allShippables.Where(x => _locationChecker.LocationExistsSafe(GetShipsanityLocationName(x))).ToArray();
 
                 var allShippingComponents = shippingCollection.SelectMany(x => x.ToArray()).Select(x => x.name.Split(" ").First()).ToHashSet();
 

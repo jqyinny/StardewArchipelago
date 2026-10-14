@@ -57,7 +57,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
         private static ArchipelagoStateDto _state;
         private static ArchipelagoWalletDto _wallet;
         private static BankHandler _bank;
-        protected static LocationChecker _locationChecker;
+        protected static StardewLocationChecker _locationChecker;
         private static BundleReader _bundleReader;
         private static TrapManager _trapManager;
         private BundleCurrencyManager _currencyManager;
@@ -142,7 +142,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
             _clothesMenu = new ClothesMenu(_modHelper, xPositionOnScreen + 128, yPositionOnScreen + 140, width, height);
         }
 
-        public static void InitializeArchipelago(LogHandler logger, IModHelper modHelper, StardewArchipelagoClient archipelago, ArchipelagoStateDto state, BankHandler bank, LocationChecker locationChecker, TrapManager trapManager)
+        public static void InitializeArchipelago(LogHandler logger, IModHelper modHelper, StardewArchipelagoClient archipelago, ArchipelagoStateDto state, BankHandler bank, StardewLocationChecker locationChecker, TrapManager trapManager)
         {
             _logger = logger;
             _modHelper = modHelper;
@@ -646,13 +646,13 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
             }
 
             apLocationToScout = bundle.name + " Bundle";
-            if (_locationChecker.LocationExists(apLocationToScout))
+            if (_locationChecker.LocationExistsSafe(apLocationToScout))
             {
                 return true;
             }
 
             apLocationToScout = bundle.name;
-            return _locationChecker.LocationExists(apLocationToScout);
+            return _locationChecker.LocationExistsSafe(apLocationToScout);
         }
 
         private bool TryGetRoomLocationToScout(int whichArea, out string apAreaToScout)

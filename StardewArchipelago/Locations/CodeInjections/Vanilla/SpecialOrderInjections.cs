@@ -469,7 +469,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         private static bool StillNeedsToCompleteOrder(Dictionary<string, SpecialOrder> specialOrders, string key)
         {
             var orderName = specialOrders[key].GetName();
-            if (_locationChecker.LocationExists(orderName) && _locationChecker.IsLocationMissing(orderName))
+            if (_locationChecker.LocationExistsSafe(orderName) && _locationChecker.IsLocationMissing(orderName))
             {
                 return true;
             }
