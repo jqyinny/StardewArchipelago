@@ -142,7 +142,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Relationship
         private static int GetEffectiveFriendshipPoints(ArchipelagoFriend friend)
         {
             var archipelagoHeartItems =
-                _archipelago.GetReceivedItemCount(string.Format(HEARTS_PATTERN, friend.ArchipelagoName));
+                _archipelago.GetReceivedItemCountSafe(string.Format(HEARTS_PATTERN, friend.ArchipelagoName));
             var receivedHearts = archipelagoHeartItems * _archipelago.SlotData.FriendsanityHeartSize;
 
             var maxShuffled = friend.ShuffledUpTo(_archipelago);
@@ -311,7 +311,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Relationship
                 }
                 petBowl?.watered?.Set(false);
 
-                var archipelagoHeartItems = _archipelago.GetReceivedItemCount(string.Format(HEARTS_PATTERN, petFriend.ArchipelagoName));
+                var archipelagoHeartItems = _archipelago.GetReceivedItemCountSafe(string.Format(HEARTS_PATTERN, petFriend.ArchipelagoName));
                 var receivedHearts = archipelagoHeartItems * _archipelago.SlotData.FriendsanityHeartSize;
                 var maxShuffled = petFriend.ShuffledUpTo(_archipelago);
                 if (receivedHearts > maxShuffled)
