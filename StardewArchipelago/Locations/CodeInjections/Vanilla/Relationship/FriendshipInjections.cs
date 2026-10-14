@@ -115,6 +115,26 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Relationship
             try
             {
                 var friend = _friends.GetFriend(__instance);
+
+                // TEMP DIAGNOSTIC (see NOTES.md "farmhand friendship" investigation) - remove once resolved.
+                // GetFriend silently falls back to vanilla (RUN_ORIGINAL_METHOD) when it can't resolve
+                // __instance to an NPC name - that fallback is exactly what "AP hearts don't apply" would
+                // look like, with no error anywhere. Only logging for a farmhand to avoid flooding the
+                // host's log, since Friendship.Points is read very often (UI, events, etc.).
+                if (!Context.IsMainPlayer)
+                {
+                    if (friend == null)
+                    {
+                        var matches = Game1.player.friendshipData.Keys
+                            .Select(k => $"{k}={ReferenceEquals(Game1.player.friendshipData[k], __instance)}");
+                        _logger.LogInfo($"[DIAG] GetPoints_ArchipelagoHearts_Prefix: FAILED to resolve friend for Game1.player={Game1.player?.Name} - falling back to vanilla Points. friendshipData reference matches: {string.Join(", ", matches)}");
+                    }
+                    else
+                    {
+                        _logger.LogInfo($"[DIAG] GetPoints_ArchipelagoHearts_Prefix: resolved friend={friend.StardewName} for Game1.player={Game1.player?.Name}, about to compute AP points");
+                    }
+                }
+
                 if (friend == null)
                 {
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
@@ -122,6 +142,11 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Relationship
 
                 var friendshipPoints = GetEffectiveFriendshipPoints(friend);
                 SetBackendFriendshipPoints(__instance, friendshipPoints);
+
+                if (!Context.IsMainPlayer)
+                {
+                    _logger.LogInfo($"[DIAG] GetPoints_ArchipelagoHearts_Prefix: computed friendshipPoints={friendshipPoints} for friend={friend.StardewName}, Game1.player={Game1.player?.Name}");
+                }
 
                 __result = friendshipPoints;
                 return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
