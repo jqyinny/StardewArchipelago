@@ -178,11 +178,18 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Relationship
 
             var friendshipPoints = receivedHearts * POINTS_PER_HEART;
             friendshipPoints = GetBoundedToCurrentRelationState(friendshipPoints, friend.StardewName);
+            int earnedPoints = 0;
             if (receivedHearts >= maxShuffled)
             {
-                var earnedPoints = (int)GetFriendshipPoints(friend.StardewName);
+                earnedPoints = (int)GetFriendshipPoints(friend.StardewName);
                 var earnedPointsAboveMaxShuffled = Math.Max(0, earnedPoints - (maxShuffled * POINTS_PER_HEART));
                 friendshipPoints += earnedPointsAboveMaxShuffled;
+            }
+
+            // TEMP DIAGNOSTIC (see NOTES.md "farmhand friendship" investigation) - remove once resolved.
+            if (!Context.IsMainPlayer)
+            {
+                _logger.LogInfo($"[DIAG] GetEffectiveFriendshipPoints: friend={friend.StardewName} archipelagoHeartItems={archipelagoHeartItems} heartSize={_archipelago.SlotData.FriendsanityHeartSize} receivedHearts={receivedHearts} maxShuffled={maxShuffled} earnedPoints(_friendshipPoints dict)={earnedPoints} -> friendshipPoints={friendshipPoints}");
             }
 
             return friendshipPoints;
