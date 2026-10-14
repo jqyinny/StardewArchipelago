@@ -386,9 +386,6 @@ namespace StardewArchipelago
         // host's SlotData, the earliest point these SlotData-dependent objects can be built for a farmhand.
         private void OnFarmhandSlotDataReceived(ArchipelagoStateDto state)
         {
-            // TEMP DIAGNOSTIC (see NOTES.md "remote multiplayer" investigation) - remove once resolved.
-            _logger.LogInfo($"[DIAG] OnFarmhandSlotDataReceived: entered, IsMainPlayer={Context.IsMainPlayer} stateIsNull={state == null}");
-
             if (Context.IsMainPlayer)
             {
                 return;
@@ -411,7 +408,6 @@ namespace StardewArchipelago
             var farmhandGiftTrapManager = new GiftTrapManager(_logger, farmhandTrapExecutor);
             _farmhandMail = new Mailman(_logger, _archipelago, State);
             _farmhandItemParser = new ItemParser(_logger, _helper, _harmony, _archipelago, farmhandLocationChecker, farmhandItemManager, farmhandTrapExecutor, farmhandGiftTrapManager);
-            _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: _farmhandItemParser built");
 
             // The rest of what VanillaCodeInjectionInitializer.Initialize needs beyond what's already
             // built above. All simple/free-sync constructions - nothing here depends on a live connection.
@@ -448,7 +444,6 @@ namespace StardewArchipelago
             // for this process.
             var farmhandLocationPatcher = new LocationPatcher(_logger, _helper, Config, _harmony, _archipelago, State, farmhandLocationChecker, farmhandJojaLocationChecker, farmhandItemManager, farmhandWeaponsManager, farmhandBundlesManager, farmhandSeedShopStockModifier, farmhandFriends, _farmhandItemParser.TrapManager, farmhandBank, farmhandNameSimplifier, _giftHandler.Sender, farmhandShippingBehaviors, _testerFeatures);
             farmhandLocationPatcher.ReplaceAllLocationsRewardsWithChecks();
-            _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: LocationPatcher.ReplaceAllLocationsRewardsWithChecks completed successfully");
 
             // Same bug class as LocationPatcher above: a farmhand could already receive a mailed AP
             // letter (Mailman writes the text directly, no patch needed for that), but nothing ever
@@ -458,7 +453,6 @@ namespace StardewArchipelago
             var farmhandLetterActions = new LetterActions(_logger, _helper, _farmhandMail, _archipelago, farmhandWeaponsManager, _farmhandItemParser.TrapManager, farmhandTrapExecutor.BabyBirther, farmhandItemManager);
             var farmhandMailPatcher = new MailPatcher(_logger, _harmony, _archipelago, farmhandLocationChecker, State, farmhandLetterActions);
             farmhandMailPatcher.PatchMailBoxForApItems();
-            _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: MailPatcher.PatchMailBoxForApItems completed successfully");
 
             // Same bug class again - RandomizedLogicPatcher is the "world configuration" patcher
             // (entrance randomization, shops, mines, community center, etc.), only ever constructed and
@@ -467,12 +461,10 @@ namespace StardewArchipelago
             // randomized entrance would just get the vanilla, unrandomized destination.
             var farmhandLogicPatcher = new RandomizedLogicPatcher(_logger, _helper, Config, _harmony, _archipelago, farmhandLocationChecker, farmhandItemManager, farmhandEntranceManager, farmhandSeedShopStockModifier, farmhandNameSimplifier, farmhandFriends, State, new BundleReader());
             farmhandLogicPatcher.PatchAllGameLogic();
-            _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: RandomizedLogicPatcher.PatchAllGameLogic completed successfully");
 
             // And again - ItemPatcher.PatchApItems, only ever installed by the host.
             var farmhandItemPatcher = new ItemPatcher(_logger, _helper, _harmony, _archipelago);
             farmhandItemPatcher.PatchApItems();
-            _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: ItemPatcher.PatchApItems completed successfully");
 
             // PlayerBuffInjections caches its bonus counts (_numberOfSpeedBonuses etc.) in static fields,
             // only ever refreshed by CheckForApBuffs - which is only ever called host-only, from
@@ -489,25 +481,19 @@ namespace StardewArchipelago
             // into them, so skipping this construction crashes even when the feature itself is off.
             var farmhandJojapocalypseManager = new JojapocalypseManager(_logger, _helper, Config, _harmony, _archipelago, farmhandLocationChecker, farmhandJojaLocationChecker, farmhandItemManager, farmhandNameSimplifier);
             farmhandJojapocalypseManager.PatchAllJojaLogic();
-            _logger.LogInfo("[DIAG] OnFarmhandSlotDataReceived: JojapocalypseManager.PatchAllJojaLogic completed successfully");
             }
             catch (Exception ex)
             {
-                // TEMP DIAGNOSTIC (see NOTES.md "remote multiplayer" investigation) - remove once resolved.
-                // OnModMessageReceived's own catch would eventually log this too, but logging it here
-                // directly (with LogError, which SMAPI always shows regardless of log level) makes sure
-                // it isn't missed.
-                _logger.LogError($"[DIAG] OnFarmhandSlotDataReceived: threw while building farmhand-local objects. Error: {ex}");
+                // Logged directly with LogError (which SMAPI always shows regardless of log level)
+                // rather than relying on OnModMessageReceived's own catch, so a failure building any of
+                // the farmhand-local objects above isn't missed.
+                _logger.LogError($"OnFarmhandSlotDataReceived: threw while building farmhand-local objects. Error: {ex}");
                 throw;
             }
         }
 
         private void OnFarmhandItemReceived(ReceivedItem receivedItem)
         {
-            // TEMP DIAGNOSTIC (see NOTES.md "farmhand fan-out" investigation) - remove once the
-            // split-screen delivery-timing question is resolved.
-            _logger.LogInfo($"[DIAG] OnFarmhandItemReceived: item={receivedItem?.ItemName} time={DateTime.Now:HH:mm:ss.fff} thread={System.Threading.Thread.CurrentThread.ManagedThreadId} IsMainPlayer={Context.IsMainPlayer} Game1.player={Game1.player?.Name} screenId={Context.ScreenId} parserBuilt={_farmhandItemParser != null} willSkip={Context.IsMainPlayer || _farmhandItemParser == null}");
-
             if (Context.IsMainPlayer || _farmhandItemParser == null)
             {
                 return;

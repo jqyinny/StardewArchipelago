@@ -102,8 +102,6 @@ namespace StardewArchipelago.Networking
             // StardewArchipelagoClient) - this is what makes GetAllLocationsNotCheckedSafe (behind the
             // crafting-recipe AP symbol, among others) correct for a farmhand instead of just empty.
             _lastKnownCheckedLocationNames = _hostLocationChecker?.GetAllLocationsAlreadyChecked()?.ToHashSet();
-            // TEMP DIAGNOSTIC (see NOTES.md "remote multiplayer" investigation) - remove once resolved.
-            _logger.LogInfo($"[DIAG] BroadcastHostConnected: slotName={slotName} slotDataFieldCount={slotDataFields?.Count} IsMainPlayer={Context.IsMainPlayer}");
             _helper.Multiplayer.SendMessage(new HostConnectedMessage(slotName), MESSAGE_TYPE_HOST_CONNECTED, modIDs: new[] { _modId });
             _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(slotName, slotDataFields, _lastKnownState, _lastKnownReceivedItemCounts, _lastKnownLocationNames, _lastKnownCheckedLocationNames), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId });
         }
@@ -116,9 +114,6 @@ namespace StardewArchipelago.Networking
                 return;
             }
 
-            // TEMP DIAGNOSTIC (see NOTES.md "remote multiplayer" investigation) - remove once resolved.
-            _logger.LogInfo($"[DIAG] BroadcastLocationChecked: location={locationName} IsMainPlayer={Context.IsMainPlayer} Game1.player={Game1.player?.Name}");
-
             _helper.Multiplayer.SendMessage(new LocationCheckedMessage(locationName), MESSAGE_TYPE_LOCATION_CHECKED, modIDs: new[] { _modId });
         }
 
@@ -129,10 +124,6 @@ namespace StardewArchipelago.Networking
                 _logger.LogWarning("BroadcastItemReceived was called by a farmhand; only the host should send this message.");
                 return;
             }
-
-            // TEMP DIAGNOSTIC (see NOTES.md "farmhand fan-out" investigation) - remove once the
-            // split-screen delivery-timing question is resolved.
-            _logger.LogInfo($"[DIAG] BroadcastItemReceived: item={receivedItem?.ItemName} time={DateTime.Now:HH:mm:ss.fff} thread={System.Threading.Thread.CurrentThread.ManagedThreadId} IsMainPlayer={Context.IsMainPlayer} Game1.player={Game1.player?.Name} screenId={Context.ScreenId}");
 
             _helper.Multiplayer.SendMessage(new ItemReceivedMessage(receivedItem), MESSAGE_TYPE_ITEM_RECEIVED, modIDs: new[] { _modId });
         }
@@ -154,9 +145,6 @@ namespace StardewArchipelago.Networking
 
         private void OnPeerConnected(object sender, PeerConnectedEventArgs e)
         {
-            // TEMP DIAGNOSTIC (see NOTES.md "remote multiplayer" investigation) - remove once resolved.
-            _logger.LogInfo($"[DIAG] OnPeerConnected: peerPlayerID={e.Peer.PlayerID} IsMainPlayer={Context.IsMainPlayer} haveLastKnownSlotName={_lastKnownSlotName != null}");
-
             if (!Context.IsMainPlayer || _lastKnownSlotName == null)
             {
                 return;
@@ -169,14 +157,10 @@ namespace StardewArchipelago.Networking
             _lastKnownCheckedLocationNames = _hostLocationChecker?.GetAllLocationsAlreadyChecked()?.ToHashSet();
             _helper.Multiplayer.SendMessage(new HostConnectedMessage(_lastKnownSlotName), MESSAGE_TYPE_HOST_CONNECTED, modIDs: new[] { _modId }, playerIDs: new[] { e.Peer.PlayerID });
             _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(_lastKnownSlotName, _lastKnownSlotDataFields, _lastKnownState, _lastKnownReceivedItemCounts, _lastKnownLocationNames, _lastKnownCheckedLocationNames), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId }, playerIDs: new[] { e.Peer.PlayerID });
-            _logger.LogInfo($"[DIAG] OnPeerConnected: resent HostConnected+SlotDataSnapshot to peer {e.Peer.PlayerID}");
         }
 
         private void OnModMessageReceived(object sender, ModMessageReceivedEventArgs e)
         {
-            // TEMP DIAGNOSTIC (see NOTES.md "remote multiplayer" investigation) - remove once resolved.
-            _logger.LogInfo($"[DIAG] OnModMessageReceived: type={e.Type} fromModID={e.FromModID} expectedModID={_modId} fromPlayerID={e.FromPlayerID} IsMainPlayer={Context.IsMainPlayer}");
-
             if (e.FromModID != _modId)
             {
                 return;
@@ -211,17 +195,11 @@ namespace StardewArchipelago.Networking
 
         private void HandleHostConnected(HostConnectedMessage message)
         {
-            // TEMP DIAGNOSTIC (see NOTES.md "remote multiplayer" investigation) - remove once resolved.
-            _logger.LogInfo($"[DIAG] HandleHostConnected: slotName={message.SlotName}");
-
             Game1.chatBox?.addMessage($"The host connected to Archipelago as {message.SlotName}.", Color.Green);
         }
 
         private void HandleSlotDataSnapshot(SlotDataSnapshotMessage message)
         {
-            // TEMP DIAGNOSTIC (see NOTES.md "remote multiplayer" investigation) - remove once resolved.
-            _logger.LogInfo($"[DIAG] HandleSlotDataSnapshot: slotName={message.SlotName} slotDataFieldCount={message.SlotDataFields?.Count} stateIsNull={message.State == null}");
-
             // Seed the farmhand's own (never-connected) client through the exact same SlotData
             // constructor the host used, instead of keeping a separate copy - code that only reads
             // .SlotData (not .IsConnected) then works identically on host and farmhand.
@@ -239,15 +217,10 @@ namespace StardewArchipelago.Networking
                 _archipelago.SeedCheckedLocationsFromSnapshot(message.CheckedLocationNames);
             }
             FarmhandSlotDataReceived?.Invoke(message.State);
-
-            _logger.LogInfo("[DIAG] HandleSlotDataSnapshot: FarmhandSlotDataReceived invoked and returned without throwing");
         }
 
         private void HandleLocationChecked(LocationCheckedMessage message)
         {
-            // TEMP DIAGNOSTIC (see NOTES.md "remote multiplayer" investigation) - remove once resolved.
-            _logger.LogInfo($"[DIAG] HandleLocationChecked: location={message.LocationName} IsMainPlayer={Context.IsMainPlayer} hostLocationCheckerIsNull={_hostLocationChecker == null}");
-
             if (!Context.IsMainPlayer || _hostLocationChecker == null)
             {
                 return;
@@ -258,10 +231,6 @@ namespace StardewArchipelago.Networking
 
         private void HandleItemReceived(ItemReceivedMessage message)
         {
-            // TEMP DIAGNOSTIC (see NOTES.md "farmhand fan-out" investigation) - remove once the
-            // split-screen delivery-timing question is resolved.
-            _logger.LogInfo($"[DIAG] HandleItemReceived: item={message.ReceivedItem?.ItemName} time={DateTime.Now:HH:mm:ss.fff} thread={System.Threading.Thread.CurrentThread.ManagedThreadId} IsMainPlayer={Context.IsMainPlayer} Game1.player={Game1.player?.Name} screenId={Context.ScreenId}");
-
             FarmhandItemReceived?.Invoke(message.ReceivedItem);
         }
 

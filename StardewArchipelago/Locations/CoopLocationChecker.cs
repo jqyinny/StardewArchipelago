@@ -14,23 +14,17 @@ namespace StardewArchipelago.Locations
     // only the host's StardewArchipelagoClient is ever actually connected.
     public class CoopLocationChecker : StardewLocationChecker
     {
-        private readonly ILogger _logger;
         private readonly StardewArchipelagoClient _archipelago;
         private readonly ModMessaging _modMessaging;
 
         public CoopLocationChecker(ILogger logger, StardewArchipelagoClient archipelago, List<string> locationsAlreadyChecked, ModMessaging modMessaging) : base(logger, archipelago, locationsAlreadyChecked)
         {
-            _logger = logger;
             _archipelago = archipelago;
             _modMessaging = modMessaging;
         }
 
         public override void AddCheckedLocation(string locationName)
         {
-            // TEMP DIAGNOSTIC (see NOTES.md "remote multiplayer" investigation) - remove once the
-            // farmhand-checks-not-registering issue is resolved.
-            _logger.LogInfo($"[DIAG] CoopLocationChecker.AddCheckedLocation: location={locationName} IsMainPlayer={Context.IsMainPlayer}");
-
             if (Context.IsMainPlayer)
             {
                 base.AddCheckedLocation(locationName);
@@ -49,8 +43,6 @@ namespace StardewArchipelago.Locations
 
         public override void AddCheckedLocations(string[] locationNames)
         {
-            _logger.LogInfo($"[DIAG] CoopLocationChecker.AddCheckedLocations: locations=[{string.Join(", ", locationNames)}] IsMainPlayer={Context.IsMainPlayer}");
-
             if (Context.IsMainPlayer)
             {
                 base.AddCheckedLocations(locationNames);
