@@ -135,6 +135,7 @@ namespace StardewArchipelago
             _archipelago.SetModMessaging(_modMessaging);
             _modMessaging.FarmhandSlotDataReceived += OnFarmhandSlotDataReceived;
             _modMessaging.FarmhandItemReceived += OnFarmhandItemReceived;
+            _modMessaging.FarmhandForceSleep += MultiSleepManager.TrySleepNowForFarmhand;
 
             _helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             _helper.Events.GameLoop.SaveCreating += OnSaveCreating;
@@ -171,7 +172,7 @@ namespace StardewArchipelago
             _bundlesManager?.CleanEvents();
             _bundlesManager = null;
             SeasonsRandomizer.ResetMailKeys();
-            _multiSleepManager = new MultiSleepManager(_logger, _helper, _archipelago, _harmony);
+            _multiSleepManager = new MultiSleepManager(_logger, _helper, _archipelago, _harmony, _modMessaging);
             _advancedOptionsManager = new AdvancedOptionsManager(this, _logger, _helper, _harmony, _archipelago, _testerFeatures);
             _advancedOptionsManager.InjectArchipelagoAdvancedOptions();
             _giftHandler?.Dispose();

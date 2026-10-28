@@ -25,6 +25,7 @@ namespace StardewArchipelago.Networking
         private const string MESSAGE_TYPE_LOCATION_CHECKED = "LocationChecked";
         private const string MESSAGE_TYPE_ITEM_RECEIVED = "ItemReceived";
         private const string MESSAGE_TYPE_CHAT_MESSAGE = "ChatMessage";
+        private const string MESSAGE_TYPE_FORCE_SLEEP = "ForceSleep";
 
         private readonly ILogger _logger;
         private readonly IModHelper _helper;
@@ -61,6 +62,14 @@ namespace StardewArchipelago.Networking
         // not just the host - this is the farmhand's half of that, applying the exact same item the
         // host already decided on, to its own local Game1.player.
         public event Action<ReceivedItem> FarmhandItemReceived;
+
+        // Fires on a farmhand when the host is driving a multi-day sleep (see MultiSleepManager) and
+        // needs the farmhand to also be "asleep" that night, since day transitions are host-authoritative
+        // in real multiplayer and the host's own repeated advance would otherwise be unsafe/out of sync
+        // with a farmhand who never interacted with their own bed. The farmhand's handler is expected to
+        // perform its own ordinary, vanilla-safe "go to sleep" locally - never to drive the day-advance
+        // itself (see NOTES.md "eighth gap").
+        public event Action FarmhandForceSleep;
 
         public ModMessaging(ILogger logger, IModHelper helper, IManifest manifest, TesterFeatures testerFeatures, StardewArchipelagoClient archipelago, string modId)
         {
@@ -143,6 +152,18 @@ namespace StardewArchipelago.Networking
             _helper.Multiplayer.SendMessage(new ChatMessageMessage(message, color.PackedValue), MESSAGE_TYPE_CHAT_MESSAGE, modIDs: new[] { _modId });
         }
 
+        // See FarmhandForceSleep. Host-only, like every other Broadcast* here.
+        public void BroadcastForceSleep()
+        {
+            if (!Context.IsMainPlayer)
+            {
+                _logger.LogWarning("BroadcastForceSleep was called by a farmhand; only the host should send this message.");
+                return;
+            }
+
+            _helper.Multiplayer.SendMessage(new ForceSleepMessage(), MESSAGE_TYPE_FORCE_SLEEP, modIDs: new[] { _modId });
+        }
+
         private void OnPeerConnected(object sender, PeerConnectedEventArgs e)
         {
             if (!Context.IsMainPlayer || _lastKnownSlotName == null)
@@ -184,6 +205,9 @@ namespace StardewArchipelago.Networking
                         break;
                     case MESSAGE_TYPE_CHAT_MESSAGE:
                         HandleChatMessage(e.ReadAs<ChatMessageMessage>());
+                        break;
+                    case MESSAGE_TYPE_FORCE_SLEEP:
+                        HandleForceSleep();
                         break;
                 }
             }
@@ -242,6 +266,16 @@ namespace StardewArchipelago.Networking
             }
 
             Game1.chatBox?.addMessage(message.Text, new Color { PackedValue = message.PackedColor });
+        }
+
+        private void HandleForceSleep()
+        {
+            if (Context.IsMainPlayer)
+            {
+                return;
+            }
+
+            FarmhandForceSleep?.Invoke();
         }
     }
 }

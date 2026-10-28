@@ -13,6 +13,7 @@ using StardewArchipelago.Constants;
 using StardewArchipelago.GameModifications.CodeInjections;
 using StardewArchipelago.Locations.CodeInjections.Vanilla;
 using StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles;
+using StardewArchipelago.Networking;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
@@ -24,6 +25,7 @@ namespace StardewArchipelago.GameModifications.MultiSleep
         private static ILogger _logger;
         private static IModHelper _modHelper;
         private static StardewArchipelagoClient _archipelago;
+        private static ModMessaging _modMessaging;
         private readonly Harmony _harmony;
 
         public static MultiSleepBehavior _currentMultiSleep;
@@ -31,12 +33,13 @@ namespace StardewArchipelago.GameModifications.MultiSleep
         private static bool _multiSleepEnabled = false;
         private static int _multiSleepPrice = 0;
 
-        public MultiSleepManager(ILogger logger, IModHelper modHelper, StardewArchipelagoClient archipelago, Harmony harmony)
+        public MultiSleepManager(ILogger logger, IModHelper modHelper, StardewArchipelagoClient archipelago, Harmony harmony, ModMessaging modMessaging)
         {
             _logger = logger;
             _modHelper = modHelper;
             _archipelago = archipelago;
             _harmony = harmony;
+            _modMessaging = modMessaging;
             _currentMultiSleep = new DontMultiSleepBehavior();
         }
 
@@ -61,8 +64,45 @@ namespace StardewArchipelago.GameModifications.MultiSleep
             }
 
             Game1.player.Money -= _multiSleepPrice;
+            // This whole method is only ever reachable on the host - see InjectMultiSleepOption's
+            // comment and NOTES.md "eighth gap" for why a farmhand must never drive this itself. Tell
+            // every farmhand to also go to sleep tonight (their own, ordinary, vanilla-safe bed
+            // interaction - see MultiSleepManager.TrySleepNowForFarmhand/ModEntry.OnFarmhandForceSleep),
+            // so the host's own repeated day-advance isn't left waiting on someone who never touched
+            // their bed.
+            if (Context.IsMainPlayer)
+            {
+                _modMessaging?.BroadcastForceSleep();
+            }
             _currentMultiSleep.KeepSleeping();
             return true;
+        }
+
+        // Called on a farmhand's process when the host broadcasts that it's continuing a multi-day
+        // sleep (see ModMessaging.FarmhandForceSleep/BroadcastForceSleep). Deliberately does nothing
+        // but the farmhand's own ordinary "go to sleep" - the actual day-advance (Game1.newDaySync
+        // etc.) stays entirely host-driven. If it's not safe to sleep right now (mid-event, already
+        // mid-transition, passed out), this silently skips rather than forcing through a bad state -
+        // the farmhand may lag a day behind rather than the game breaking.
+        public static void TrySleepNowForFarmhand()
+        {
+            if (Context.IsMainPlayer)
+            {
+                return;
+            }
+
+            if (Game1.eventUp || Game1.newDay || !Game1.shouldTimePass() || Game1.player.passedOut)
+            {
+                return;
+            }
+
+            if (Utility.getHomeOfFarmer(Game1.player) is not FarmHouse home)
+            {
+                return;
+            }
+
+            var startSleepMethod = _modHelper.Reflection.GetMethod(home, "startSleep");
+            startSleepMethod.Invoke();
         }
 
         public void InjectMultiSleepOption(SlotData slotData)
@@ -294,6 +334,15 @@ namespace StardewArchipelago.GameModifications.MultiSleep
 
         private static void StartSleep(GameLocation instance)
         {
+            // Covers the very first night of a multi-sleep too, not just the continuations in
+            // TryDoMultiSleepOnDayStarted - vanilla multiplayer already waits for every connected player
+            // to be in bed before any day can advance, and a farmhand who hasn't gone to bed yet would
+            // block this first night exactly the same way.
+            if (Context.IsMainPlayer)
+            {
+                _modMessaging?.BroadcastForceSleep();
+            }
+
             var startSleepMethod = _modHelper.Reflection.GetMethod(instance, "startSleep");
             startSleepMethod.Invoke();
         }
