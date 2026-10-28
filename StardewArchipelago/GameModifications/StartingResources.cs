@@ -38,14 +38,24 @@ namespace StardewArchipelago.GameModifications
         {
             _logger.LogDebug($"Starting {nameof(GivePlayerStartingResources)} (Game1.Date.TotalDays: {Game1.Date.TotalDays})");
             GivePlayerStartingMoney();
-            if (Game1.Date.TotalDays == 0)
+            if (Game1.Date.TotalDays == 0 && Context.IsMainPlayer)
             {
                 _logger.LogDebug($"It's the first day! Taking care of Quick Start, Tools and Backpacks!");
                 GivePlayerQuickStart();
                 RemoveStartingTools();
                 RemoveStartingBackpack();
-                GiveQuickStartIridiumBandToCabins();
             }
+
+            // GivePlayerQuickStart above only ever targets the shared "FarmHouse" by name, so it must
+            // stay host-only (above) - a farmhand's own GivePlayerStartingResources call (this whole
+            // method also runs on a farmhand's process, see ModEntry.OnFarmhandSlotDataReceived) would
+            // otherwise dump a second full starter kit into the host's house. This covers the actual
+            // per-player need instead: whichever player is running right now gets an Iridium Band in
+            // their OWN cabin specifically (skipped entirely for the host, whose home is "FarmHouse").
+            // Unlike the Day-0-only block above, this isn't day-gated, since a farmhand can join - and
+            // get their cabin - on any day; it's idempotent via a mail flag so a farmhand reconnecting
+            // later doesn't get a second band.
+            GiveQuickStartIridiumBandToMyOwnCabin();
 
             RemoveHouse();
             RemoveShippingBin();
@@ -114,29 +124,27 @@ namespace StardewArchipelago.GameModifications
 #endif
         }
 
-        // GivePlayerQuickStart above only ever gives the band to the main FarmHouse - this covers every
-        // farmhand's own cabin too. Host-only: this whole method now also runs on a farmhand's process
-        // (RandomizedLogicPatcher.PatchAllGameLogic is mirrored there - see ModEntry.OnFarmhandSlotDataReceived),
-        // and without this gate each connected farmhand's own run would place another copy of every
-        // cabin's band on top of the host's.
-        private void GiveQuickStartIridiumBandToCabins()
+        private const string QUICK_START_CABIN_BAND_MAIL_KEY = "apQuickStartIridiumBandGiven";
+
+        // Runs per-player (see the call site in GivePlayerStartingResources) rather than host-only
+        // sweeping every cabin, so it works regardless of whether a farmhand's cabin existed yet on Day
+        // 0 - including one built well after the host already finished their own Day-0 setup.
+        private void GiveQuickStartIridiumBandToMyOwnCabin()
         {
-            if (!Context.IsMainPlayer || !_archipelago.SlotData.QuickStart)
+            if (!_archipelago.SlotData.QuickStart || Game1.player.hasOrWillReceiveMail(QUICK_START_CABIN_BAND_MAIL_KEY))
             {
                 return;
             }
 
-            foreach (var farmer in Game1.getAllFarmers().Where(x => x != null))
+            if (Utility.getHomeOfFarmer(Game1.player) is not FarmHouse home || home.NameOrUniqueName == "FarmHouse")
             {
-                if (Utility.getHomeOfFarmer(farmer) is not FarmHouse home || home.NameOrUniqueName == "FarmHouse")
-                {
-                    continue;
-                }
-
-                var bedSpot = home.GetPlayerBedSpot();
-                var iridiumBand = _stardewItemManager.GetItemByName("Iridium Band").PrepareForGivingToFarmer();
-                CreateGiftBoxItemInEmptySpot(home, Utility.PointToVector2(bedSpot), iridiumBand);
+                return;
             }
+
+            var bedSpot = home.GetPlayerBedSpot();
+            var iridiumBand = _stardewItemManager.GetItemByName("Iridium Band").PrepareForGivingToFarmer();
+            CreateGiftBoxItemInEmptySpot(home, Utility.PointToVector2(bedSpot), iridiumBand);
+            Game1.player.mailReceived.Add(QUICK_START_CABIN_BAND_MAIL_KEY);
         }
 
         private (GameLocation, Vector2) GetGiftboxPlacement(FarmHouse farmhouse)
