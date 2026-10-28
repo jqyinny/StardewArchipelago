@@ -504,15 +504,19 @@ namespace StardewArchipelago
             var farmhandItemPatcher = new ItemPatcher(_logger, _helper, _harmony, _archipelago);
             farmhandItemPatcher.PatchApItems();
 
-            // Same bug class once more - MultiSleepManager.InjectMultiSleepOption, only ever called by
-            // the host in InitializeAfterConnection. Without the performTouchAction/answerDialogueAction
-            // Harmony patches it installs, a farmhand's own bed never offers the "Many"/"Until"
-            // multi-day-sleep responses at all - only vanilla "Yes"/"No" - which is why the option only
-            // ever showed up for the host. _multiSleepManager itself is already a per-process object
-            // (constructed in ResetArchipelago, which runs on every process's own OnGameLaunched), so
-            // this just needs the same Inject call the host makes, reusing that existing instance rather
-            // than building a new farmhand-local one.
-            _multiSleepManager.InjectMultiSleepOption(_archipelago.SlotData);
+            // UNLIKE every other patcher mirrored in this method, MultiSleepManager is deliberately NOT
+            // mirrored here. It was briefly mirrored (same pattern as everything else) so a farmhand's
+            // bed would also offer "Many"/"Until" responses, but that caused intermittent crashes:
+            // multi-day sleep works by repeatedly calling the vanilla startSleep()/day-transition flow
+            // across several days via OnDayStarted (see MultiSleepManager.TryDoMultiSleepOnDayStarted),
+            // and day transitions are host-authoritative in real network multiplayer - only the host's
+            // process should ever drive Game1.Date/stats forward. A farmhand's own process doing this
+            // independently races against the host's synced game clock instead of waiting for it, which
+            // is a fundamentally different problem than "Harmony patch not installed" and isn't fixed by
+            // just mirroring the Inject call. Supporting this properly would mean the farmhand's
+            // sleep-many/until request gets relayed to the host (ModMessaging) and the HOST performs the
+            // multi-day skip for everyone - not yet implemented. For now a farmhand's bed stays
+            // vanilla-safe (Yes/No only), which is strictly better than a crash.
 
             // PlayerBuffInjections caches its bonus counts (_numberOfSpeedBonuses etc.) in static fields,
             // only ever refreshed by CheckForApBuffs - which is only ever called host-only, from
