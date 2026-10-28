@@ -103,7 +103,15 @@ namespace StardewArchipelago.GameModifications
                 ForceFarmTypeToArchipelagoProvidedFarm();
                 Game1.bundleType = Game1.BundleType.Default;
                 Game1.game1.SetNewGameOption<bool>("YearOneCompletable", false);
-                Game1.startingCabins = _testerFeatures.Multiplayer.Value;
+                // Multiplayer is a tester-only override (set via tester.json, defaults to 0) meant for
+                // quickly spinning up a local test save with a specific cabin count - it was
+                // unconditionally stomping Game1.startingCabins to 0 for every real player too, silently
+                // discarding whatever cabin count they actually picked in the Co-op "Host New Farm"
+                // wizard. Only apply it when a tester has actually configured a non-default value.
+                if (_testerFeatures.Multiplayer.Value > 0)
+                {
+                    Game1.startingCabins = _testerFeatures.Multiplayer.Value;
+                }
                 Game1.cabinsSeparate = false;
 
                 return MethodPrefix.RUN_ORIGINAL_METHOD;
