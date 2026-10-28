@@ -504,6 +504,16 @@ namespace StardewArchipelago
             var farmhandItemPatcher = new ItemPatcher(_logger, _helper, _harmony, _archipelago);
             farmhandItemPatcher.PatchApItems();
 
+            // Same bug class once more - MultiSleepManager.InjectMultiSleepOption, only ever called by
+            // the host in InitializeAfterConnection. Without the performTouchAction/answerDialogueAction
+            // Harmony patches it installs, a farmhand's own bed never offers the "Many"/"Until"
+            // multi-day-sleep responses at all - only vanilla "Yes"/"No" - which is why the option only
+            // ever showed up for the host. _multiSleepManager itself is already a per-process object
+            // (constructed in ResetArchipelago, which runs on every process's own OnGameLaunched), so
+            // this just needs the same Inject call the host makes, reusing that existing instance rather
+            // than building a new farmhand-local one.
+            _multiSleepManager.InjectMultiSleepOption(_archipelago.SlotData);
+
             // PlayerBuffInjections caches its bonus counts (_numberOfSpeedBonuses etc.) in static fields,
             // only ever refreshed by CheckForApBuffs - which is only ever called host-only, from
             // DoArchipelagoDayStartedProcesses (OnDayStarted is entirely host-only). Without this, a
