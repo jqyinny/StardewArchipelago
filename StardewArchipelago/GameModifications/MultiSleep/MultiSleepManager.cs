@@ -334,15 +334,12 @@ namespace StardewArchipelago.GameModifications.MultiSleep
 
         private static void StartSleep(GameLocation instance)
         {
-            // Covers the very first night of a multi-sleep too, not just the continuations in
-            // TryDoMultiSleepOnDayStarted - vanilla multiplayer already waits for every connected player
-            // to be in bed before any day can advance, and a farmhand who hasn't gone to bed yet would
-            // block this first night exactly the same way.
-            if (Context.IsMainPlayer)
-            {
-                _modMessaging?.BroadcastForceSleep();
-            }
-
+            // Deliberately does NOT broadcast ForceSleep here - the very first night of a multi-sleep
+            // should still require the farmhand to independently confirm sleep too, exactly like any
+            // ordinary vanilla multiplayer night (both players must be in bed before the day ends).
+            // Only the host has the UI to kick off multi-day sleep in the first place; once it's
+            // running, the automatic continuation nights (TryDoMultiSleepOnDayStarted) are the ones a
+            // farmhand has no dialogue to participate in at all, which is where forcing applies.
             var startSleepMethod = _modHelper.Reflection.GetMethod(instance, "startSleep");
             startSleepMethod.Invoke();
         }
