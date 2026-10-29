@@ -446,6 +446,17 @@ namespace StardewArchipelago
             }
             _farmhandMail.SendTomorrow();
 
+            // SeasonsRandomizer's Game1.NewDay patch (NewDay_SeasonChoice_Prefix) is installed via
+            // RandomizedLogicPatcher, which IS already mirrored for farmhand below - but the patch reads
+            // SeasonsRandomizer's own static _logger/_archipelago/_state fields, which are only ever set
+            // by its constructor, only ever called host-side (InitializeAfterConnection/OnSaveCreating).
+            // On a farmhand those stayed null, so the first season change (receiveNewDaySync invoking
+            // the patched Game1.NewDay on day 28) NREs inside PromptForNextSeason - and then NREs AGAIN
+            // trying to log that first exception (_logger also null), crashing the game outright instead
+            // of just logging an error. Same bug class as every other host-only constructor this
+            // session, just for a patch that lives in an already-mirrored patcher instead of its own.
+            _seasonsRandomizer = new SeasonsRandomizer(_logger, _helper, _archipelago, State);
+
             // The rest of what VanillaCodeInjectionInitializer.Initialize needs beyond what's already
             // built above. All simple/free-sync constructions - nothing here depends on a live connection.
             var farmhandJojaLocationChecker = new JojaLocationChecker(_archipelago, farmhandLocationChecker, new List<string>());
