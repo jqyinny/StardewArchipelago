@@ -430,11 +430,21 @@ namespace StardewArchipelago
             // path below (Mailman.SendVanillaMail/SendArchipelagoMail/SendArchipelagoInvisibleMail) checks
             // hasOrWillReceiveMail first, so this is idempotent against anything the farmhand already
             // correctly has from an earlier session or a live broadcast.
+            // Mailman.SendMail defaults to queuing for "tomorrow" (Game1.addMailForTomorrow) - correct
+            // for the live OnFarmhandItemReceived path (matches the host's own experience: an item
+            // received live mid-day shows up the next morning), but wrong for this catch-up replay. Mail
+            // queued for "tomorrow" only actually arrives after the NEXT host-driven day transition, so
+            // if the farmhand doesn't happen to sleep through a full cycle, every item from before they
+            // joined would sit in limbo looking like it never arrived at all. SendToday/SendTomorrow here
+            // mirrors ModEntry.DoArchipelagoDayStartedProcesses' own host-side pattern for exactly this
+            // situation (a batch of catch-up items should appear today, not tomorrow).
+            _farmhandMail.SendToday();
             foreach (var historicalItem in state.ItemsReceived ?? new List<ReceivedItem>())
             {
                 var historicalAttachment = _farmhandItemParser.ProcessItemAsLetter(historicalItem);
                 historicalAttachment.SendToPlayer(_farmhandMail);
             }
+            _farmhandMail.SendTomorrow();
 
             // The rest of what VanillaCodeInjectionInitializer.Initialize needs beyond what's already
             // built above. All simple/free-sync constructions - nothing here depends on a live connection.
