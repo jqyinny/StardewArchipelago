@@ -190,7 +190,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             }
             else
             {
-                missingRerunRecipes = allRerunRecipes.Where(x => Game1.player.cookingRecipes.ContainsKey(GetRecipeName(cookingRecipes, x))).ToList();
+                missingRerunRecipes = allRerunRecipes.Where(x => !Game1.player.cookingRecipes.ContainsKey(GetRecipeName(cookingRecipes, x))).ToList();
             }
 
             if (missingRerunRecipes.Any())
