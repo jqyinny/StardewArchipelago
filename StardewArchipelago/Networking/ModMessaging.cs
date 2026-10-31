@@ -50,6 +50,14 @@ namespace StardewArchipelago.Networking
         // builds it.
         private LocationChecker _hostLocationChecker;
 
+        // Only meaningful on the host: the live State and a way to read the item manager's current
+        // received-item list. State.ItemsReceived itself is only refreshed in ModEntry.OnSaving, and
+        // ForFarmhandSync is a shallow clone, so a snapshot taken once at connect time never included
+        // anything received afterwards - a farmhand joining later (e.g. after the host received checks
+        // and slept while they were offline) never got those items' letters. Rebuilt per snapshot.
+        private ArchipelagoStateDto _hostState;
+        private Func<List<ReceivedItem>> _hostItemsReceivedProvider;
+
         // Fires on a farmhand once its own StardewArchipelagoClient.SlotData has been seeded from the
         // host's snapshot (see HandleSlotDataSnapshot) - the earliest point it's safe to build
         // SlotData/State-dependent objects (e.g. CraftingInjections' CompoundNameMapper, TrapExecutor)
@@ -88,6 +96,23 @@ namespace StardewArchipelago.Networking
             _hostLocationChecker = locationChecker;
         }
 
+        public void SetHostItemsReceivedProvider(Func<List<ReceivedItem>> itemsReceivedProvider)
+        {
+            _hostItemsReceivedProvider = itemsReceivedProvider;
+        }
+
+        private ArchipelagoStateDto BuildFarmhandStateSnapshot()
+        {
+            var snapshot = _hostState.ForFarmhandSync();
+            var currentItems = _hostItemsReceivedProvider?.Invoke();
+            if (currentItems != null)
+            {
+                snapshot.ItemsReceived = currentItems;
+            }
+
+            return snapshot;
+        }
+
         public void BroadcastHostConnected(string slotName, Dictionary<string, object> slotDataFields, ArchipelagoStateDto state)
         {
             if (!Context.IsMainPlayer)
@@ -98,7 +123,8 @@ namespace StardewArchipelago.Networking
 
             _lastKnownSlotName = slotName;
             _lastKnownSlotDataFields = slotDataFields;
-            _lastKnownState = state.ForFarmhandSync();
+            _hostState = state;
+            _lastKnownState = BuildFarmhandStateSnapshot();
             // Full baseline for GetReceivedItemCountSafe/HasReceivedItemSafe (see StardewArchipelagoClient) -
             // without this, a farmhand's local received-item cache would only ever reflect items received
             // after it joined, missing anything the host already had beforehand.
@@ -173,6 +199,7 @@ namespace StardewArchipelago.Networking
 
             // Refetch rather than reuse the cached copy from BroadcastHostConnected - a second farmhand
             // joining later should see every item received since then too, not a stale snapshot.
+            _lastKnownState = BuildFarmhandStateSnapshot();
             _lastKnownReceivedItemCounts = _archipelago.GetAllReceivedItemNamesAndCounts();
             _lastKnownLocationNames = _archipelago.GetAllLocationNamesForSync();
             _lastKnownCheckedLocationNames = _hostLocationChecker?.GetAllLocationsAlreadyChecked()?.ToHashSet();

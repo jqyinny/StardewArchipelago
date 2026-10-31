@@ -351,6 +351,7 @@ namespace StardewArchipelago
             _questCleaner = new QuestCleaner(_locationChecker);
 
             _itemManager = new APItemManager(_logger, _helper, _harmony, _archipelago, _locationChecker, _stardewItemManager, _mail, trapExecutor, giftTrapManager, State.ItemsReceived, _modMessaging);
+            _modMessaging.SetHostItemsReceivedProvider(() => _itemManager.GetAllItemsAlreadyProcessed());
             _weaponsManager = new WeaponsManager(_archipelago, _stardewItemManager, _archipelago.SlotData.Mods);
 
             _registry.Initialize(_archipelago, _stardewItemManager, _locationChecker, _giftHandler, _weaponsManager, State, _itemManager.TrapManager);
