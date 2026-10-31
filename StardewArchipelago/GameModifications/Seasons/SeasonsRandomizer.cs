@@ -140,6 +140,15 @@ namespace StardewArchipelago.GameModifications.Seasons
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
                 }
 
+                // Only the host picks the next season. A farmhand still has to run vanilla's own
+                // Game1.NewDay(), though: on a farmhand this call comes from Multiplayer.receiveNewDaySync,
+                // and it's what joins the farmhand into the host's new-day sync. Skipping it leaves the
+                // host waiting at the new-day barriers forever (a silent hang, no exception).
+                if (!Context.IsMainPlayer)
+                {
+                    return MethodPrefix.RUN_ORIGINAL_METHOD;
+                }
+
                 PromptForNextSeason();
                 return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
             }
