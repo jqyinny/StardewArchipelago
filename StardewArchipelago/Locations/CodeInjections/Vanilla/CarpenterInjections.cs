@@ -199,7 +199,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         private static int GetAvailableHouseUpgrades()
         {
 
-            var receivedHouseUpgrades = _archipelago.GetReceivedItemCount(BUILDING_PROGRESSIVE_HOUSE);
+            var receivedHouseUpgrades = _archipelago.GetReceivedItemCountSafe(BUILDING_PROGRESSIVE_HOUSE);
             if (_archipelago.SlotData.StartWithout.HasFlag(StartWithout.House))
             {
                 // The first upgrade creates a free house but does not unlock an upgrade
@@ -262,7 +262,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         {
             try
             {
-                var receivedHouseUpgrades = _archipelago.GetReceivedItemCount(BUILDING_PROGRESSIVE_HOUSE);
+                var receivedHouseUpgrades = _archipelago.GetReceivedItemCountSafe(BUILDING_PROGRESSIVE_HOUSE);
                 if (Game1.player.HouseUpgradeLevel >= receivedHouseUpgrades)
                 {
                     return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;

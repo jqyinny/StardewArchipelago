@@ -46,7 +46,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         {
             try
             {
-                var receivedTrashBear = _archipelago.HasReceivedItem("Trash Bear Arrival");
+                var receivedTrashBear = _archipelago.HasReceivedItemSafe("Trash Bear Arrival");
                 var trashBear = __instance.getCharacterFromName("TrashBear");
                 var trashBearIsHere = trashBear != null;
                 if (receivedTrashBear)
@@ -64,7 +64,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                     }
                 }
 
-                var hasReceivedCleanup = _archipelago.HasReceivedItem("Trash Bear Cleanup");
+                var hasReceivedCleanup = _archipelago.HasReceivedItemSafe("Trash Bear Cleanup");
                 var hasSeenCutscene = NetWorldState.checkAnywhereForWorldStateID("trashBearDone");
 
                 if (hasReceivedCleanup && !hasSeenCutscene)

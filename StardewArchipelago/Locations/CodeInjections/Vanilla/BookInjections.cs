@@ -77,7 +77,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                         break;
                 }
 
-                var receivedDays = Math.Min(_archipelago.GetReceivedItemCount(APItem.BOOKSELLER_DAY), dayCandidates.Length);
+                var receivedDays = Math.Min(_archipelago.GetReceivedItemCountSafe(APItem.BOOKSELLER_DAY), dayCandidates.Length);
                 for (var i = 0; i < receivedDays; i++)
                 {
                     var index = random.Next(dayCandidates.Length);
@@ -116,7 +116,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
                 CallBaseResetLocalState(__instance);
 
-                var lostBooksFound = _archipelago.GetReceivedItemCount("Progressive Lost Book");
+                var lostBooksFound = _archipelago.GetReceivedItemCountSafe("Progressive Lost Book");
 
                 // private Dictionary<int, Vector2> getLostBooksLocations()
                 var getLostBooksLocationsMethod = _modHelper.Reflection.GetMethod(__instance, "getLostBooksLocations");
@@ -154,7 +154,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         {
             try
             {
-                var lostBooksFound = _archipelago.GetReceivedItemCount("Progressive Lost Book");
+                var lostBooksFound = _archipelago.GetReceivedItemCountSafe("Progressive Lost Book");
                 if (lostBooksFound >= which)
                 {
                     var bookTitle = LostBooks.BooksByNumber[which];

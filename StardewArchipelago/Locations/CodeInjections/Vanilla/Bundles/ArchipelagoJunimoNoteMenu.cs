@@ -465,7 +465,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
             var myName = _archipelago.GetPlayerName();
             foreach (var goodItem in goodItems)
             {
-                if (!_archipelago.HasReceivedItem(goodItem))
+                if (!_archipelago.HasReceivedItemSafe(goodItem))
                 {
                     specialRewardName = $"Reward: {myName}'s {goodItem}";
                     return true;
@@ -473,7 +473,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
             }
 
             var goodRepeatItems = new[] { "Progressive Weapon", "Progressive Coop", "Progressive Barn" };
-            goodRepeatItems = goodRepeatItems.OrderBy(x => _archipelago.GetReceivedItemCount(x)).ToArray();
+            goodRepeatItems = goodRepeatItems.OrderBy(x => _archipelago.GetReceivedItemCountSafe(x)).ToArray();
 
             specialRewardName = $"Reward: {myName}'s {goodRepeatItems[0]}";
             return true;
@@ -2576,7 +2576,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
                 return;
             }
 
-            if (!IsBundleRemaining(MemeBundleNames.MINISTRY_OF_MADNESS) || !_archipelago.HasReceivedItem(APItem.FOREST_MAGIC))
+            if (!IsBundleRemaining(MemeBundleNames.MINISTRY_OF_MADNESS) || !_archipelago.HasReceivedItemSafe(APItem.FOREST_MAGIC))
             {
                 return;
             }

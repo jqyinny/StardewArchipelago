@@ -1184,7 +1184,7 @@ namespace StardewArchipelago.Items.Traps
         {
             var inflationRate = _difficultyBalancer.InflationAmount[_archipelago.SlotData.TrapItemsDifficulty];
             var softcapMultiplier = _difficultyBalancer.InflationSoftcapThreshold[_archipelago.SlotData.TrapItemsDifficulty];
-            var receivedCount = _archipelago.GetReceivedItemCount("Inflation Trap");
+            var receivedCount = _archipelago.GetReceivedItemCountSafe("Inflation Trap");
             var inflationMultiplier = GetInflationMultiplier(inflationRate, softcapMultiplier, receivedCount);
             return (int)(price * inflationMultiplier);
         }

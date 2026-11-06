@@ -104,7 +104,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         private static void RemoveObsoleteRewards(SpecialOrder specialOrder)
         {
             var specialOrderName = GetEnglishQuestName(specialOrder.questName.Value);
-            if (!_archipelago.LocationExists(specialOrderName))
+            if (!_archipelago.LocationExistsSafe(specialOrderName))
             {
                 return;
             }
@@ -200,7 +200,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 }
 
                 var specialOrderName = GetEnglishQuestName(__instance.questName.Value);
-                if (!_archipelago.LocationExists(specialOrderName))
+                if (!_archipelago.LocationExistsSafe(specialOrderName))
                 {
                     return;
                 }

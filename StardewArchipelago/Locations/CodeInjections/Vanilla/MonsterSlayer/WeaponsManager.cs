@@ -85,7 +85,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.MonsterSlayer
 
         private IEnumerable<ItemQueryResult> GetWeaponsToSell(string archipelagoItemName, Dictionary<int, List<StardewItem>> weaponsByTier, bool isRecovery, double priceMultiplier, Random random)
         {
-            var receivedTier = _archipelago.GetReceivedItemCount(archipelagoItemName);
+            var receivedTier = _archipelago.GetReceivedItemCountSafe(archipelagoItemName);
             for (var i = 1; i <= weaponsByTier.Keys.Max(); i++)
             {
                 var weaponsInTier = weaponsByTier.ContainsKey(i) ? weaponsByTier[i] : new List<StardewItem>();
@@ -94,7 +94,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.MonsterSlayer
                 {
                     var weaponToSell = weaponsInTier[index];
 
-                    var isWeaponAllowed = i <= receivedTier || _archipelago.HasReceivedItem(weaponToSell.Name);
+                    var isWeaponAllowed = i <= receivedTier || _archipelago.HasReceivedItemSafe(weaponToSell.Name);
                     if (!isWeaponAllowed)
                     {
                         continue;
@@ -122,7 +122,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.MonsterSlayer
 
         private IEnumerable<ItemQueryResult> GetBootsToSell(bool isRecovery, double priceMultiplier, Random random)
         {
-            var receivedTier = _archipelago.GetReceivedItemCount(EquipmentUnlockManager.PROGRESSIVE_BOOTS);
+            var receivedTier = _archipelago.GetReceivedItemCountSafe(EquipmentUnlockManager.PROGRESSIVE_BOOTS);
             if (_archipelago.SlotData.Monstersanity == Monstersanity.None && receivedTier >= 3)
             {
                 receivedTier++;
@@ -135,7 +135,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.MonsterSlayer
                 {
                     var bootsToSell = bootsInTier[index];
 
-                    var isBootsAllowed = i <= receivedTier || _archipelago.HasReceivedItem(bootsToSell.Name);
+                    var isBootsAllowed = i <= receivedTier || _archipelago.HasReceivedItemSafe(bootsToSell.Name);
                     if (!isBootsAllowed)
                     {
                         continue;
@@ -163,7 +163,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.MonsterSlayer
 
         private IEnumerable<ItemQueryResult> GetSlingshotsToSell(bool isRecovery, double priceMultiplier, Random random)
         {
-            var receivedTier = _archipelago.GetReceivedItemCount("Progressive Slingshot");
+            var receivedTier = _archipelago.GetReceivedItemCountSafe("Progressive Slingshot");
             for (var i = 1; i <= SlingshotsByTier.Keys.Max(); i++)
             {
                 var slingShotsInTier = SlingshotsByTier.ContainsKey(i) ? SlingshotsByTier[i] : new List<StardewItem>();
@@ -172,7 +172,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.MonsterSlayer
                 {
                     var slingshotToSell = slingShotsInTier[index];
 
-                    var isSlingshotAllowed = i <= receivedTier || _archipelago.HasReceivedItem(slingshotToSell.Name);
+                    var isSlingshotAllowed = i <= receivedTier || _archipelago.HasReceivedItemSafe(slingshotToSell.Name);
                     if (!isSlingshotAllowed)
                     {
                         continue;
@@ -202,7 +202,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.MonsterSlayer
         {
             foreach (var stardewRing in Rings)
             {
-                if (!_archipelago.HasReceivedItem(stardewRing.Name))
+                if (!_archipelago.HasReceivedItemSafe(stardewRing.Name))
                 {
                     continue;
                 }

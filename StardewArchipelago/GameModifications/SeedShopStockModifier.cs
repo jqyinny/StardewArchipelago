@@ -308,7 +308,7 @@ namespace StardewArchipelago.GameModifications
                 maxAmount *= 2;
             }
 
-            var numberMovieTheater = _archipelago.GetReceivedItemCount(APItem.MOVIE_THEATER);
+            var numberMovieTheater = _archipelago.GetReceivedItemCountSafe(APItem.MOVIE_THEATER);
             maxAmount *= (int)Math.Pow(2, numberMovieTheater);
             priceMultiplier *= (int)Math.Pow(1.5f, numberMovieTheater);
 

@@ -261,7 +261,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         private static bool CanEarnMasteryXPWithSkill(Skill skill)
         {
             var apSkillName = skill.ToString();
-            return _archipelago.GetReceivedItemCount($"{apSkillName} Level") >= 10;
+            return _archipelago.GetReceivedItemCountSafe($"{apSkillName} Level") >= 10;
         }
 
         private static double GetMultipliedExperience(int amount)

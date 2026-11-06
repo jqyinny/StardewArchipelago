@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using System;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
 using StardewArchipelago.Items.Unlocks.Vanilla;
@@ -15,10 +16,10 @@ namespace StardewArchipelago.Locations.GingerIsland.WalnutRoom
     {
         private static ILogger _logger;
         private static IModHelper _modHelper;
-        private static ArchipelagoClient _archipelago;
+        private static StardewArchipelagoClient _archipelago;
         private static LocationChecker _locationChecker;
 
-        public static void Initialize(ILogger logger, IModHelper modHelper, ArchipelagoClient archipelago, LocationChecker locationChecker)
+        public static void Initialize(ILogger logger, IModHelper modHelper, StardewArchipelagoClient archipelago, LocationChecker locationChecker)
         {
             _logger = logger;
             _modHelper = modHelper;
@@ -37,7 +38,7 @@ namespace StardewArchipelago.Locations.GingerIsland.WalnutRoom
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
                 }
 
-                if (_archipelago.HasReceivedItem(VanillaUnlockManager.QI_WALNUT_ROOM))
+                if (_archipelago.HasReceivedItemSafe(VanillaUnlockManager.QI_WALNUT_ROOM))
                 {
                     Game1.playSound("doorClose");
                     Game1.warpFarmer("QiNutRoom", 7, 8, 0);

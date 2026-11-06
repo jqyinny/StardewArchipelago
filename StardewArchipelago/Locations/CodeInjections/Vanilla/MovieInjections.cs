@@ -64,7 +64,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 return false;
             }
 
-            return _archipelago.HasReceivedItem(flavor);
+            return _archipelago.HasReceivedItemSafe(flavor);
         }
 
         // public void RequestEndMovie(long uid)
