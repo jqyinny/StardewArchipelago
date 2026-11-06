@@ -188,7 +188,14 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Arcade
 
                 __instance.RefreshHighScore();
 
+                // The multiworld leaderboard lives in AP data storage, which only the host can reach. On a
+                // farmhand the local score above is already recorded; skip the upload rather than throwing
+                // (which fell back to vanilla and submitted the score a second time).
                 var session = _archipelago.GetSession();
+                if (session == null)
+                {
+                    return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
+                }
                 session.DataStorage[Scope.Global, JK_DATASTORAGE_SCORE].Initialize(EmptyScoresDictionary);
 
                 var existingScores = Game1.player.team.junimoKartScores.GetScores();
@@ -230,14 +237,18 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Arcade
                     _latestScores.Add(new KeyValuePair<string, int>(entry.name.Value, entry.score.Value));
                 }
 
+                // Farmhand: no AP session, so no multiworld scores - still show the local + NPC board.
                 var session = _archipelago.GetSession();
-                session.DataStorage[Scope.Global, JK_DATASTORAGE_SCORE].Initialize(EmptyScoresDictionary);
-                var multiworldScores = session.DataStorage[Scope.Global, JK_DATASTORAGE_SCORE].To<Dictionary<string, int>>();
-                foreach (var (name, score) in multiworldScores)
+                if (session != null)
                 {
-                    if (!_latestScores.Any(x => x.Key.Equals(name)))
+                    session.DataStorage[Scope.Global, JK_DATASTORAGE_SCORE].Initialize(EmptyScoresDictionary);
+                    var multiworldScores = session.DataStorage[Scope.Global, JK_DATASTORAGE_SCORE].To<Dictionary<string, int>>();
+                    foreach (var (name, score) in multiworldScores)
                     {
-                        _latestScores.Add(new KeyValuePair<string, int>(name, score));
+                        if (!_latestScores.Any(x => x.Key.Equals(name)))
+                        {
+                            _latestScores.Add(new KeyValuePair<string, int>(name, score));
+                        }
                     }
                 }
 

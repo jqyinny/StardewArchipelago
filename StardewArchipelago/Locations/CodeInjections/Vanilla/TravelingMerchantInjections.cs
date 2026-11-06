@@ -271,8 +271,14 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 return MAX_STOCK;
             }
 
-            double checksCompleted = _archipelago.GetSession().Locations.AllLocationsChecked.Count;
-            double totalChecks = _archipelago.GetSession().Locations.AllLocations.Count;
+            // A farmhand has no AP session; use its synced location sets (seeded at join, kept live by the host).
+            var session = _archipelago.GetSession();
+            double checksCompleted = session != null ? session.Locations.AllLocationsChecked.Count : _archipelago.GetFarmhandCheckedLocationsSafe().Count;
+            double totalChecks = session != null ? session.Locations.AllLocations.Count : _archipelago.GetAllLocationNamesSafe().Count;
+            if (totalChecks <= 0)
+            {
+                totalChecks = 1;
+            }
             var checksPercentComplete = (checksCompleted / totalChecks) * 100;
             var totalPurchases = _archipelagoState.TravelingMerchantPurchases;
             var stockFromApItems = stockUpgrades * STOCK_AMOUNT_PER_UPGRADE_FOR_RANDOM_ITEMS;
