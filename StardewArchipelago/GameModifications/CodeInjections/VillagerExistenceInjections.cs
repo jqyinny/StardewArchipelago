@@ -561,6 +561,12 @@ namespace StardewArchipelago.GameModifications.CodeInjections
 
     internal class FakeEventNPC : NPC
     {
+        // Netcode safety: event actors are local, but if this ever lands in a synced character list the
+        // other player recreates it through a parameterless constructor (see ParrotUpgradePerchArchipelago).
+        public FakeEventNPC() : base()
+        {
+        }
+
         public FakeEventNPC(string name) : base(new AnimatedSprite(Game1.content, Game1.player.getTexture()), Vector2.Zero, 0, name)
         {
 

@@ -20,6 +20,12 @@ namespace StardewArchipelago.Locations.InGameLocations
         private int _minPrice;
         private int _maxPrice;
 
+        // Netcode/serialization safety only (same as the base class's): this is shop stock and shouldn't
+        // normally be synced, but a missing parameterless constructor crashes the other player if it ever is.
+        public JojaObtainableArchipelagoLocation() : base()
+        {
+        }
+
         public JojaObtainableArchipelagoLocation(string locationName, LogHandler logger, IModHelper modHelper, JojaLocationChecker locationChecker, StardewArchipelagoClient archipelago, JojaPriceCalculator jojaPriceCalculator) : this(locationName, locationName, logger, modHelper, locationChecker, archipelago, jojaPriceCalculator)
         {
         }

@@ -12,6 +12,12 @@ namespace StardewArchipelago.Registry.Definition
 {
     internal class MemeBundleItem : Object
     {
+        // Required by Netcode: an item in a synced inventory/chest is recreated on other players' machines
+        // through a parameterless constructor (missing one crashes their update loop - see
+        // ParrotUpgradePerchArchipelago). ItemId/name are NetFields, so they arrive with the sync.
+        public MemeBundleItem()
+        {
+        }
 
         public MemeBundleItem(ParsedItemData parsedItemData)
         {
