@@ -748,6 +748,38 @@ namespace StardewArchipelago
             }
         }
 
+        // AP location items are normally consumed the moment they're picked up (ArchipelagoLocationsInjections
+        // sends the check and removes them). If that ever failed, the item ended up in the inventory instead
+        // (invisible, if it was a synced placeholder copy) and the check was never sent. Recover those each
+        // morning on every player's process.
+        private void SendStuckApLocationItemsInInventory()
+        {
+            try
+            {
+                var items = Game1.player?.Items;
+                if (items == null)
+                {
+                    return;
+                }
+
+                for (var i = 0; i < items.Count; i++)
+                {
+                    if (items[i] is not ObtainableArchipelagoLocation apLocation)
+                    {
+                        continue;
+                    }
+
+                    _logger.LogInfo($"Sending a check that was stuck in the inventory: {apLocation.ItemId}");
+                    apLocation.SendCheck();
+                    items[i] = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to send stuck AP location items: {ex}");
+            }
+        }
+
         private void OnFarmhandItemReceived(ReceivedItem receivedItem)
         {
             if (Context.IsMainPlayer || _farmhandItemParser == null)
@@ -890,6 +922,7 @@ namespace StardewArchipelago
         {
             SeasonsRandomizer.CorrectFarmhandSeasonIfNeeded();
             DeathManager.ResetDeathLinkFlag();
+            SendStuckApLocationItemsInInventory();
             DoArchipelagoNewDayProcesses();
 
             if (MultiSleepManager.TryDoMultiSleepOnDayStarted())

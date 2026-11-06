@@ -166,7 +166,23 @@ namespace StardewArchipelago.Locations.InGameLocations
 
         public virtual void SendCheck()
         {
-            _locationChecker.AddCheckedLocation(LocationName);
+            // A copy synced from another player (parameterless constructor - e.g. a puzzle reward the host
+            // dropped, picked up by a farmhand) only has the synced ItemId: no LocationName, no checker.
+            var locationName = !string.IsNullOrWhiteSpace(LocationName) ? LocationName : GetLocationNameFromItemId();
+            var locationChecker = _locationChecker ?? ArchipelagoLocationDataDefinition.LocationChecker;
+            if (string.IsNullOrWhiteSpace(locationName) || locationChecker == null)
+            {
+                ModEntry.Instance.Logger.LogError($"Could not send the check for AP item '{ItemId}': no location name or location checker.");
+                return;
+            }
+
+            locationChecker.AddCheckedLocation(locationName);
+        }
+
+        private string GetLocationNameFromItemId()
+        {
+            var prefix = $"{IDProvider.AP_LOCATION}_";
+            return ItemId != null && ItemId.StartsWith(prefix) ? ItemId[prefix.Length..] : null;
         }
 
         public override string getDescription()

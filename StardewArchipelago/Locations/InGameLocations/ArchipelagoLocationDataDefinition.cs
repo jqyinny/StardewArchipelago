@@ -21,6 +21,10 @@ namespace StardewArchipelago.Locations.InGameLocations
         private static StardewArchipelagoClient _archipelago;
         private static StardewLocationChecker _locationChecker;
 
+        // This process's location checker (host's or farmhand's), for placeholder AP items that were synced
+        // from another player and so never got one of their own (see ObtainableArchipelagoLocation.SendCheck).
+        public static StardewLocationChecker LocationChecker => _locationChecker;
+
         public static void Initialize(LogHandler logger, IModHelper modHelper, StardewArchipelagoClient archipelago, StardewLocationChecker locationChecker)
         {
             _logger = logger;
