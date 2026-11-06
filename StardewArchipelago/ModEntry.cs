@@ -446,6 +446,11 @@ namespace StardewArchipelago
 
             var farmhandItemManager = new StardewItemManager(_logger);
             var farmhandLocationChecker = new CoopLocationChecker(_logger, _archipelago, new List<string>(), _modMessaging);
+            // The AP location item type ("(AP)..." items) is registered on every process, but its static
+            // dependencies were only set in the host's InitializeAfterConnection - so every time the game
+            // created one on a farmhand (e.g. the walnut-bush check in StoryQuestInjections.ShakeForBushItem)
+            // it threw a NullReferenceException, every tick, from inside the bush's update loop.
+            ArchipelagoLocationDataDefinition.Initialize(_logger, _helper, _archipelago, farmhandLocationChecker);
 
             // Mirrors InitializeAfterConnection's host-side construction of the same pipeline, just with
             // farmhand-local instances - the host already decided what the item is (APItemManager.ProcessItem
