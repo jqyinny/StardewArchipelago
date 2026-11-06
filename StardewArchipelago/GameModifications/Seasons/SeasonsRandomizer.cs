@@ -69,6 +69,45 @@ namespace StardewArchipelago.GameModifications.Seasons
             {
                 _state.SeasonsOrder[currentSeasonNumber] = season;
             }
+
+            SeasonsOrderChanged?.Invoke(_state.SeasonsOrder.ToList());
+        }
+
+        // Multiplayer: only the host picks seasons (NewDay_SeasonChoice_Prefix), but every player's own
+        // process applies the new season itself (OnNewSeason_UsePredefinedChoice_Prefix reads
+        // _state.SeasonsOrder.Last()). A farmhand's _state is only a join-time snapshot, so without syncing,
+        // its season silently stays on whatever order it saw at join. ModEntry wires this to
+        // ModMessaging.BroadcastSeasonsOrder on the host.
+        public static event Action<List<string>> SeasonsOrderChanged;
+
+        // Farmhand: adopt the host's season order (same list instance the prefix reads).
+        public static void ApplySyncedSeasonsOrder(List<string> seasonsOrder)
+        {
+            if (_state == null || seasonsOrder == null)
+            {
+                return;
+            }
+
+            _state.SeasonsOrder.Clear();
+            _state.SeasonsOrder.AddRange(seasonsOrder);
+        }
+
+        // Farmhand fallback, at day start: if the season change ran before the host's order arrived (or
+        // anything else left it stale), snap to the host's current season.
+        public static void CorrectFarmhandSeasonIfNeeded()
+        {
+            if (Context.IsMainPlayer || _state == null || !_state.SeasonsOrder.Any() || _archipelago?.SlotData == null ||
+                _archipelago.SlotData.SeasonRandomization == SeasonRandomization.Disabled)
+            {
+                return;
+            }
+
+            var expectedSeason = _state.SeasonsOrder.Last().ToLower();
+            if (Game1.currentSeason != expectedSeason)
+            {
+                _logger.LogInfo($"Farmhand season was '{Game1.currentSeason}', host's is '{expectedSeason}'; correcting.");
+                SetSeason(expectedSeason);
+            }
         }
 
         public static void SetSeason(string season)

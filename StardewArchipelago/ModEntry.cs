@@ -138,6 +138,9 @@ namespace StardewArchipelago
             _modMessaging.FarmhandSlotDataReceived += OnFarmhandSlotDataReceived;
             _modMessaging.FarmhandItemReceived += OnFarmhandItemReceived;
             _modMessaging.FarmhandForceSleep += MultiSleepManager.TrySleepNowForFarmhand;
+            // Season order: host -> farmhands whenever the host picks a season (see SeasonsRandomizer.SeasonsOrderChanged).
+            _modMessaging.FarmhandSeasonsOrderReceived += SeasonsRandomizer.ApplySyncedSeasonsOrder;
+            SeasonsRandomizer.SeasonsOrderChanged += seasonsOrder => _modMessaging.BroadcastSeasonsOrder(seasonsOrder);
 
             _helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             _helper.Events.GameLoop.SaveCreating += OnSaveCreating;
@@ -730,6 +733,7 @@ namespace StardewArchipelago
         [EventPriority((EventPriority)((int)EventPriority.Low * 10))]
         private void OnDayStarted(object sender, DayStartedEventArgs e)
         {
+            SeasonsRandomizer.CorrectFarmhandSeasonIfNeeded();
             DoArchipelagoNewDayProcesses();
 
             if (MultiSleepManager.TryDoMultiSleepOnDayStarted())

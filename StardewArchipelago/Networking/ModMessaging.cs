@@ -27,6 +27,7 @@ namespace StardewArchipelago.Networking
         private const string MESSAGE_TYPE_CHAT_MESSAGE = "ChatMessage";
         private const string MESSAGE_TYPE_FORCE_SLEEP = "ForceSleep";
         private const string MESSAGE_TYPE_HOST_LOCATION_CHECKED = "HostLocationChecked";
+        private const string MESSAGE_TYPE_SEASONS_ORDER = "SeasonsOrder";
 
         private readonly ILogger _logger;
         private readonly IModHelper _helper;
@@ -80,6 +81,9 @@ namespace StardewArchipelago.Networking
         // perform its own ordinary, vanilla-safe "go to sleep" locally - never to drive the day-advance
         // itself (see NOTES.md "eighth gap").
         public event Action FarmhandForceSleep;
+
+        // Fires on a farmhand when the host picks a new season (see SeasonsRandomizer.SeasonsOrderChanged).
+        public event Action<List<string>> FarmhandSeasonsOrderReceived;
 
         public ModMessaging(ILogger logger, IModHelper helper, IManifest manifest, TesterFeatures testerFeatures, StardewArchipelagoClient archipelago, string modId)
         {
@@ -183,6 +187,16 @@ namespace StardewArchipelago.Networking
             _helper.Multiplayer.SendMessage(new LocationCheckedMessage(locationName), MESSAGE_TYPE_HOST_LOCATION_CHECKED, modIDs: new[] { _modId });
         }
 
+        public void BroadcastSeasonsOrder(List<string> seasonsOrder)
+        {
+            if (!Context.IsMainPlayer)
+            {
+                return;
+            }
+
+            _helper.Multiplayer.SendMessage(new SeasonsOrderMessage(seasonsOrder), MESSAGE_TYPE_SEASONS_ORDER, modIDs: new[] { _modId });
+        }
+
         public void BroadcastItemReceived(ReceivedItem receivedItem)
         {
             if (!Context.IsMainPlayer)
@@ -268,6 +282,12 @@ namespace StardewArchipelago.Networking
                         break;
                     case MESSAGE_TYPE_FORCE_SLEEP:
                         HandleForceSleep();
+                        break;
+                    case MESSAGE_TYPE_SEASONS_ORDER:
+                        if (!Context.IsMainPlayer)
+                        {
+                            FarmhandSeasonsOrderReceived?.Invoke(e.ReadAs<SeasonsOrderMessage>().SeasonsOrder);
+                        }
                         break;
                     case MESSAGE_TYPE_HOST_LOCATION_CHECKED:
                         HandleHostLocationChecked(e.ReadAs<LocationCheckedMessage>());
