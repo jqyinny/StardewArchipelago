@@ -84,6 +84,20 @@ namespace StardewArchipelago.Items
             return false;
         }
 
+        // A farmhand catching up on items the host received before it joined (ModEntry.OnFarmhandSlotDataReceived)
+        // must skip items whose effect was shared and already happened: traps (already fired, possibly long ago),
+        // Money resource packs (the shared team wallet already got that money), and Golden Walnuts (shared
+        // netWorldState counter, already incremented once by the host).
+        public bool ShouldSkipInFarmhandCatchUp(ReceivedItem receivedItem)
+        {
+            if (GoldenWalnutStacks.ContainsKey(receivedItem.ItemName) || _trapManager.IsTrap(receivedItem.ItemName))
+            {
+                return true;
+            }
+
+            return TryParseResourcePack(receivedItem.ItemName, out var stardewItemName, out _) && stardewItemName == "Money" && !Game1.player.team.useSeparateWallets.Value;
+        }
+
         public LetterAttachment ProcessItemAsLetter(ReceivedItem receivedItem)
         {
             var itemIsResourcePack = TryParseResourcePack(receivedItem.ItemName, out var stardewItemName, out var resourcePackAmount);

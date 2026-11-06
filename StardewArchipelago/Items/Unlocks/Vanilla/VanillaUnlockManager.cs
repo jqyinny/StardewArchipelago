@@ -323,7 +323,17 @@ namespace StardewArchipelago.Items.Unlocks.Vanilla
 
         private LetterInformationAttachment SendHealthBonusLetter(ReceivedItem receivedItem)
         {
-            Game1.player.maxHealth += 10;
+            // This runs whenever the item is turned into a letter - not only once. A farmhand replays every
+            // past item on each join (ModEntry.OnFarmhandSlotDataReceived), so without a guard each session
+            // added another +10 per Health Bonus. Flag per item (unique id) on this farmer, so each bonus
+            // applies exactly once per player. Existing saves are unaffected: the host only ever calls this
+            // for newly received items, so old bonuses are never revisited there.
+            var appliedFlag = $"apHealthBonusApplied_{receivedItem.UniqueId}";
+            if (!Game1.player.mailReceived.Contains(appliedFlag))
+            {
+                Game1.player.maxHealth += 10;
+                Game1.player.mailReceived.Add(appliedFlag);
+            }
             return new LetterInformationAttachment(receivedItem);
         }
 

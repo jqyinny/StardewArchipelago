@@ -71,6 +71,8 @@ namespace StardewArchipelago
         private ModMessaging _modMessaging;
         private ItemParser _farmhandItemParser;
         private Mailman _farmhandMail;
+        // See OnFarmhandSlotDataReceived: farmhand setup must run once per session, not once per snapshot.
+        private bool _farmhandInitialized;
         private AdvancedOptionsManager _advancedOptionsManager;
         private Mailman _mail;
         private ChatForwarder _chatForwarder;
@@ -163,6 +165,7 @@ namespace StardewArchipelago
                 State.APConnectionInfo = null;
             }
             State = new ArchipelagoStateDto();
+            _farmhandInitialized = false;
 
             _harmony.UnpatchAll(ModManifest.UniqueID);
             _locationsPatcher?.CleanEvents();
@@ -393,6 +396,20 @@ namespace StardewArchipelago
                 return;
             }
 
+            // The host re-sends the snapshot whenever it (re)connects to AP (OnClickRetry ->
+            // InitializeAfterConnection -> BroadcastHostConnected), not just when this farmhand joins. The
+            // synced data (item counts, checked locations, scouts, SlotData) is already refreshed by
+            // ModMessaging.HandleSlotDataSnapshot before this event fires; everything below is one-time setup
+            // (Harmony patches, farmhand-local objects holding this State, the catch-up item replay). Running
+            // it again would install every patch a second time (stacking effects like the friendship
+            // multiplier) and replay all past items again. Reset in ResetArchipelago (return to title).
+            if (_farmhandInitialized)
+            {
+                _logger.LogInfo("Host re-sent its Archipelago snapshot; synced data refreshed, farmhand setup already done.");
+                return;
+            }
+            _farmhandInitialized = true;
+
             try
             {
             // Previously this method read the farmhand's own (never-populated) State field directly -
@@ -442,6 +459,12 @@ namespace StardewArchipelago
             _farmhandMail.SendToday();
             foreach (var historicalItem in state.ItemsReceived ?? new List<ReceivedItem>())
             {
+                // Traps, shared-wallet Money packs and Golden Walnuts already had their (shared) effect.
+                if (_farmhandItemParser.ShouldSkipInFarmhandCatchUp(historicalItem))
+                {
+                    continue;
+                }
+
                 var historicalAttachment = _farmhandItemParser.ProcessItemAsLetter(historicalItem);
                 historicalAttachment.SendToPlayer(_farmhandMail);
             }
