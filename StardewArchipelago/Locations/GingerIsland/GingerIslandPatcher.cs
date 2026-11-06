@@ -74,9 +74,17 @@ namespace StardewArchipelago.Locations.GingerIsland
 
         private void ReplaceParrotsWithChecks()
         {
-            foreach (var parrotReplacer in _parrotReplacers)
+            ParrotUpgradePerchArchipelago.Initialize(_archipelago);
+
+            // parrotUpgradePerches is a network-synced list owned by the host: farmhands receive the host's
+            // perches (including their AP location names) with the location data. A farmhand rewriting its
+            // own copy would just fight the host's - so only the host replaces them.
+            if (Context.IsMainPlayer)
             {
-                parrotReplacer.ReplaceParrots();
+                foreach (var parrotReplacer in _parrotReplacers)
+                {
+                    parrotReplacer.ReplaceParrots();
+                }
             }
 
             _harmony.Patch(
