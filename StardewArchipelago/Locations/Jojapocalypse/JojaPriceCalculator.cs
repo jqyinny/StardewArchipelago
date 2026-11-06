@@ -20,7 +20,7 @@ namespace StardewArchipelago.Locations.Jojapocalypse
             _logger = logger;
             _archipelago = archipelago;
             _locationChecker = locationChecker;
-            _totalLocationsInSlot = _locationChecker.GetAllLocations().Count();
+            _totalLocationsInSlot = _locationChecker.GetAllLocationsSafe().Count();
             _currentPriceMultiplier = 1.0;
         }
 

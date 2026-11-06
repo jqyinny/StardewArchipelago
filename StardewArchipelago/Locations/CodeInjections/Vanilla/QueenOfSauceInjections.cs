@@ -186,7 +186,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             List<int> missingRerunRecipes;
             if (_archipelago.SlotData.Chefsanity.HasFlag(Chefsanity.QueenOfSauce))
             {
-                missingRerunRecipes = allRerunRecipes.Where(x => _locationChecker.IsLocationNotChecked($"{GetRecipeName(cookingRecipes, x)}{Suffix.CHEFSANITY}")).ToList();
+                missingRerunRecipes = allRerunRecipes.Where(x => _locationChecker.IsLocationNotCheckedSafe($"{GetRecipeName(cookingRecipes, x)}{Suffix.CHEFSANITY}")).ToList();
             }
             else
             {

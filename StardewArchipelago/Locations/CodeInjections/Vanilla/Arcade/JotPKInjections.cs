@@ -565,27 +565,27 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Arcade
 
         private static int GetBootsItemToOffer()
         {
-            var missingBoots1 = _locationChecker.IsLocationNotChecked(JOTPK_BOOTS_1);
-            var missingBoots2 = _locationChecker.IsLocationNotChecked(JOTPK_BOOTS_2);
+            var missingBoots1 = _locationChecker.IsLocationNotCheckedSafe(JOTPK_BOOTS_1);
+            var missingBoots2 = _locationChecker.IsLocationNotCheckedSafe(JOTPK_BOOTS_2);
             var bootsItemOffered = missingBoots1 ? BOOTS_1 : missingBoots2 ? BOOTS_2 : EXTRA_LIFE;
             return bootsItemOffered;
         }
 
         private static int GetGunItemToOffer()
         {
-            var missingGun1 = _locationChecker.IsLocationNotChecked(JOTPK_GUN_1);
-            var missingGun2 = _locationChecker.IsLocationNotChecked(JOTPK_GUN_2);
-            var missingGun3 = _locationChecker.IsLocationNotChecked(JOTPK_GUN_3);
-            var missingSuperGun = _locationChecker.IsLocationNotChecked(JOTPK_SUPER_GUN);
+            var missingGun1 = _locationChecker.IsLocationNotCheckedSafe(JOTPK_GUN_1);
+            var missingGun2 = _locationChecker.IsLocationNotCheckedSafe(JOTPK_GUN_2);
+            var missingGun3 = _locationChecker.IsLocationNotCheckedSafe(JOTPK_GUN_3);
+            var missingSuperGun = _locationChecker.IsLocationNotCheckedSafe(JOTPK_SUPER_GUN);
             var gunItemOffered = missingGun1 ? GUN_1 : missingGun2 ? GUN_2 : missingGun3 ? GUN_3 : missingSuperGun ? SUPER_GUN : SHERIFF_BADGE;
             return gunItemOffered;
         }
 
         private static int GetAmmoItemToOffer()
         {
-            var missingAmmo1 = _locationChecker.IsLocationNotChecked(JOTPK_AMMO_1);
-            var missingAmmo2 = _locationChecker.IsLocationNotChecked(JOTPK_AMMO_2);
-            var missingAmmo3 = _locationChecker.IsLocationNotChecked(JOTPK_AMMO_3);
+            var missingAmmo1 = _locationChecker.IsLocationNotCheckedSafe(JOTPK_AMMO_1);
+            var missingAmmo2 = _locationChecker.IsLocationNotCheckedSafe(JOTPK_AMMO_2);
+            var missingAmmo3 = _locationChecker.IsLocationNotCheckedSafe(JOTPK_AMMO_3);
             var ammoItemOffered = missingAmmo1 ? AMMO_1 : missingAmmo2 ? AMMO_2 : missingAmmo3 ? AMMO_3 : SHERIFF_BADGE;
             return ammoItemOffered;
         }

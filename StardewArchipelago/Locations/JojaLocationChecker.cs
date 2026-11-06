@@ -45,7 +45,7 @@ namespace StardewArchipelago.Locations
         public double GetPercentCheckedLocationsByJoja()
         {
             var countByJoja = _locationsCheckedByJoja.Count;
-            var totalLocations = _locationChecker.GetAllLocations().Count();
+            var totalLocations = _locationChecker.GetAllLocationsSafe().Count();
             return (double)countByJoja / totalLocations;
         }
 
@@ -71,7 +71,7 @@ namespace StardewArchipelago.Locations
         public string GetTodayRandomOfferLocation()
         {
             var random = Utility.CreateDaySaveRandom();
-            var missing = _locationChecker.GetAllMissingLocationNames().ToArray();
+            var missing = _locationChecker.GetAllMissingLocationNamesSafe().ToArray();
             if (!missing.Any())
             {
                 return string.Empty;

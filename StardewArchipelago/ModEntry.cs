@@ -577,7 +577,7 @@ namespace StardewArchipelago
             // Keeps GetReceivedItemCountSafe/HasReceivedItemSafe current for this farmhand (see
             // StardewArchipelagoClient) - recorded before processing so any of the logic below that
             // queries this same item's count already sees it, matching how a live session would.
-            _archipelago.RecordFarmhandReceivedItem(receivedItem.ItemName);
+            _archipelago.RecordFarmhandReceivedItem(receivedItem);
             // Refreshes PlayerBuffInjections' cached bonus counts (see the call in
             // OnFarmhandSlotDataReceived for why this is needed at all) so a newly-received buff item
             // takes effect immediately instead of only at the next (host-only) day start.

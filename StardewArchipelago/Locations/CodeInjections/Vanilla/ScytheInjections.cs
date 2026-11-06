@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using System;
 using StardewValley;
 using xTile.Dimensions;
@@ -37,7 +38,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 if (actionName == "GoldenScythe")
                 {
                     __result = true;
-                    if (_locationChecker.IsLocationNotChecked(GRIM_REAPER_STATUE))
+                    if (_locationChecker.IsLocationNotCheckedSafe(GRIM_REAPER_STATUE))
                     {
                         Game1.playSound("parry");
                         __instance.setMapTile(29, 4, 245, "Front", "mine");

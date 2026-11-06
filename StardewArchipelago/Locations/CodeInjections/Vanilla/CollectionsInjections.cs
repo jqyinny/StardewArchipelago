@@ -64,7 +64,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         {
             var itemId = shippableItem.ItemId;
             // var drawShadow = Game1.player.basicShipped.ContainsKey(itemId);
-            var drawShadow = _locationChecker.IsLocationChecked(GetShipsanityLocationName(shippableItem));
+            var drawShadow = _locationChecker.IsLocationCheckedSafe(GetShipsanityLocationName(shippableItem));
             var flag = false;
             var startXOffset = collectionsPage.xPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearSideBorder;
             var startYOffset = collectionsPage.yPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder - 16;

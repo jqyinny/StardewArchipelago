@@ -83,7 +83,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                     return;
                 }
 
-                var hasCompletedQuest = player.hasOrWillReceiveMail("birdieQuestFinished") || _locationChecker.IsLocationChecked("Quest: The Pirate's Wife");
+                var hasCompletedQuest = player.hasOrWillReceiveMail("birdieQuestFinished") || _locationChecker.IsLocationCheckedSafe("Quest: The Pirate's Wife");
                 var needsToCompleteQuest = !_archipelago.SlotData.ExcludeGingerIsland;
 
                 if (hasCompletedQuest)

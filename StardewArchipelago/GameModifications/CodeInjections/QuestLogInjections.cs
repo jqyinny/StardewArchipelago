@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using System;
 using KaitoKid.ArchipelagoUtilities.Net;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
@@ -47,7 +48,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
         {
             try
             {
-                if (itemId == "102" || _locationChecker.IsLocationChecked(ARCHAEOLOGY_QUEST_NAME) || __instance.hasQuest(ARCHAEOLOGY_QUEST_ID))
+                if (itemId == "102" || _locationChecker.IsLocationCheckedSafe(ARCHAEOLOGY_QUEST_NAME) || __instance.hasQuest(ARCHAEOLOGY_QUEST_ID))
                 {
                     return;
                 }

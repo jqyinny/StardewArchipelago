@@ -250,7 +250,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Relationship
                 {
                     textureName = ArchipelagoTextures.BLACK;
                 }
-                else if (_locationChecker.IsLocationChecked(apLocation) || !_archipelago.LocationExistsSafe(apLocation))
+                else if (_locationChecker.IsLocationCheckedSafe(apLocation) || !_archipelago.LocationExistsSafe(apLocation))
                 {
                     textureName = ArchipelagoTextures.WHITE;
                 }

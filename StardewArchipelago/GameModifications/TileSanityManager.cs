@@ -135,10 +135,10 @@ public class TileSanityManager
     public bool HasLocationLeft(string tileName)
     {
         Debug.Assert(_archipelago.LocationExistsSafe(tileName));
-        if (_locationChecker.IsLocationChecked(tileName))
+        if (_locationChecker.IsLocationCheckedSafe(tileName))
         {
             var luckyName = tileName + " (lucky)";
-            if (!_archipelago.LocationExistsSafe(luckyName) || _locationChecker.IsLocationChecked(luckyName))
+            if (!_archipelago.LocationExistsSafe(luckyName) || _locationChecker.IsLocationCheckedSafe(luckyName))
                 return false;
         }
         return true;
@@ -221,7 +221,7 @@ public class TileSanityManager
         x = (int)f1;
         y = (int)f2;
         var apLocation = GetTileName(x, y, Game1.player);
-        var walkable = _archipelago.GetLocationId(apLocation) > -1 ? "walkable" : "not walkable";
+        var walkable = _archipelago.LocationExistsSafe(apLocation) ? "walkable" : "not walkable";
         Game1.chatBox?.addMessage(
             $"You are currently pointing at {GetTileName(x, y, Game1.player)} ({walkable})",
             Color.Gold);

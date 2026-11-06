@@ -214,7 +214,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             try
             {
                 var skills = new[] { Skill.Farming, Skill.Foraging, Skill.Fishing, Skill.Mining, Skill.Combat };
-                __result = skills.All(skill => _locationChecker.IsLocationChecked($"{skill} {MASTERY}"));
+                __result = skills.All(skill => _locationChecker.IsLocationCheckedSafe($"{skill} {MASTERY}"));
                 return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
             }
             catch (Exception ex)

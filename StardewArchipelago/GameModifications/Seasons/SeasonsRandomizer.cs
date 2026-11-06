@@ -54,7 +54,7 @@ namespace StardewArchipelago.GameModifications.Seasons
                 return ValidSeasons.ToList();
             }
 
-            var receivedSeasons = _archipelago.GetAllReceivedItems().Select(x => x.ItemName).Where(x => ValidSeasons.Contains(x)).ToList();
+            var receivedSeasons = _archipelago.GetAllReceivedItemsSafe().Select(x => x.ItemName).Where(x => ValidSeasons.Contains(x)).ToList();
             return receivedSeasons;
         }
 

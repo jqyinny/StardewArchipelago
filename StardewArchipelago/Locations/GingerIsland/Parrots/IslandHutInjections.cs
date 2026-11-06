@@ -50,7 +50,7 @@ namespace StardewArchipelago.Locations.GingerIsland.Parrots
 
         private static bool IsLeoParrotBefriended()
         {
-            return _locationChecker.IsLocationChecked(AP_LEO_PARROT);
+            return _locationChecker.IsLocationCheckedSafe(AP_LEO_PARROT);
         }
     }
 }

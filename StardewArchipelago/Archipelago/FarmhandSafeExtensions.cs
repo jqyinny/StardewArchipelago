@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using KaitoKid.ArchipelagoUtilities.Net;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
 using StardewArchipelago.Locations;
@@ -46,6 +48,48 @@ namespace StardewArchipelago.Archipelago
             return locationChecker is StardewLocationChecker stardewLocationChecker
                 ? stardewLocationChecker.LocationExistsSafe(locationName)
                 : locationChecker.LocationExists(locationName);
+        }
+
+        public static bool IsLocationCheckedSafe(this LocationChecker locationChecker, string locationName)
+        {
+            return locationChecker is StardewLocationChecker stardewLocationChecker
+                ? stardewLocationChecker.IsLocationCheckedSafe(locationName)
+                : locationChecker.IsLocationChecked(locationName);
+        }
+
+        public static bool IsLocationNotCheckedSafe(this LocationChecker locationChecker, string locationName)
+        {
+            return locationChecker is StardewLocationChecker stardewLocationChecker
+                ? stardewLocationChecker.IsLocationNotCheckedSafe(locationName)
+                : locationChecker.IsLocationNotChecked(locationName);
+        }
+
+        public static IEnumerable<string> GetAllLocationsSafe(this LocationChecker locationChecker)
+        {
+            return locationChecker is StardewLocationChecker stardewLocationChecker
+                ? stardewLocationChecker.GetAllLocationsSafe()
+                : locationChecker.GetAllLocations();
+        }
+
+        public static IEnumerable<string> GetAllLocationsNotCheckedSafe(this LocationChecker locationChecker)
+        {
+            return locationChecker is StardewLocationChecker stardewLocationChecker
+                ? stardewLocationChecker.GetAllLocationsNotCheckedSafe()
+                : locationChecker.GetAllLocationsNotChecked();
+        }
+
+        public static IEnumerable<string> GetAllMissingLocationNamesSafe(this LocationChecker locationChecker)
+        {
+            return locationChecker is StardewLocationChecker stardewLocationChecker
+                ? stardewLocationChecker.GetAllMissingLocationNamesSafe()
+                : locationChecker.GetAllMissingLocationNames();
+        }
+
+        public static List<ReceivedItem> GetAllReceivedItemsSafe(this ArchipelagoClient archipelago)
+        {
+            return archipelago is StardewArchipelagoClient stardewArchipelago
+                ? stardewArchipelago.GetAllReceivedItemsSafe()
+                : archipelago.GetAllReceivedItems().ToList();
         }
     }
 }

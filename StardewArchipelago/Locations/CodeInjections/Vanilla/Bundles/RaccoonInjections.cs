@@ -100,7 +100,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
                 }
 
-                if (_locationChecker.IsLocationChecked(GIANT_STUMP))
+                if (_locationChecker.IsLocationCheckedSafe(GIANT_STUMP))
                 {
                     __result = true;
                     return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
@@ -233,7 +233,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
 
         private static int GetCurrentRaccoonBundleNumber()
         {
-            var remainingRacoonBundleNumbers = _locationChecker.GetAllMissingLocationNames()
+            var remainingRacoonBundleNumbers = _locationChecker.GetAllMissingLocationNamesSafe()
                 .Where(x => x.StartsWith(APName.RACCOON_REQUEST_PREFIX))
                 .Select(x => int.Parse(x[APName.RACCOON_REQUEST_PREFIX.Length..]));
             if (remainingRacoonBundleNumbers.Any())

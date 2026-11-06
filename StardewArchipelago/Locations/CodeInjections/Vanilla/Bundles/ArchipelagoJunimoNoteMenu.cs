@@ -383,7 +383,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
                 }
             }
 
-            if (_locationChecker.IsLocationChecked(apLocationToScout))
+            if (_locationChecker.IsLocationCheckedSafe(apLocationToScout))
             {
                 return $"No Reward Remaining";
             }

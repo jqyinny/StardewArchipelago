@@ -112,7 +112,7 @@ namespace StardewArchipelago.Locations.Festival
                 }
 
                 var paintingLocationSoldToday = GetPaintingLocationToday(__instance);
-                if (_locationChecker.IsLocationChecked(paintingLocationSoldToday))
+                if (_locationChecker.IsLocationCheckedSafe(paintingLocationSoldToday))
                 {
                     Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\Locations:BeachNightMarket_PainterSold"));
                     return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
@@ -142,7 +142,7 @@ namespace StardewArchipelago.Locations.Festival
                 __result = true;
                 var paintingLocationSoldToday = GetPaintingLocationToday(__instance);
                 // var paintingMailKey = $"NightMarketYear{Game1.year}Day{nightMarket.getDayOfNightMarket()}_paintingSold";
-                if (_locationChecker.IsLocationChecked(paintingLocationSoldToday))
+                if (_locationChecker.IsLocationCheckedSafe(paintingLocationSoldToday))
                 {
                     Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\Locations:BeachNightMarket_PainterSold"));
                     return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;

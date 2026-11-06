@@ -356,7 +356,7 @@ namespace StardewArchipelago.Registry
                 return;
             }
 
-            foreach (var missingLocation in _locationChecker.GetAllMissingLocationNames())
+            foreach (var missingLocation in _locationChecker.GetAllMissingLocationNamesSafe())
             {
                 _locationChecker.AddCheckedLocation(missingLocation);
             }

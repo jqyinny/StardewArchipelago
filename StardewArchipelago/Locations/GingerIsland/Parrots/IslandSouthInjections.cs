@@ -55,7 +55,7 @@ namespace StardewArchipelago.Locations.GingerIsland.Parrots
 
         private static bool IsResortParrotPurchased()
         {
-            return _locationChecker.IsLocationChecked(AP_RESORT);
+            return _locationChecker.IsLocationCheckedSafe(AP_RESORT);
         }
 
         private static void AddWesternTurtleParrot(IslandLocation __instance)
@@ -75,7 +75,7 @@ namespace StardewArchipelago.Locations.GingerIsland.Parrots
 
         private static bool IsWesternTurtleParrotPurchased()
         {
-            return _locationChecker.IsLocationChecked(AP_WESTERN_TURTLE);
+            return _locationChecker.IsLocationCheckedSafe(AP_WESTERN_TURTLE);
         }
     }
 }

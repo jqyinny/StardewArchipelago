@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using System;
 using KaitoKid.ArchipelagoUtilities.Net;
 using KaitoKid.ArchipelagoUtilities.Net.Constants;
@@ -24,12 +25,12 @@ namespace StardewArchipelago.GameModifications.CodeInjections
             try
             {
                 var allAreasCompleteAccordingToAp =
-                    _locationChecker.IsLocationChecked(CommunityCenterInjections.AP_LOCATION_PANTRY) &&
-                    _locationChecker.IsLocationChecked(CommunityCenterInjections.AP_LOCATION_BOILER_ROOM) &&
-                    _locationChecker.IsLocationChecked(CommunityCenterInjections.AP_LOCATION_BULLETIN_BOARD) &&
-                    _locationChecker.IsLocationChecked(CommunityCenterInjections.AP_LOCATION_CRAFTS_ROOM) &&
-                    _locationChecker.IsLocationChecked(CommunityCenterInjections.AP_LOCATION_FISH_TANK) &&
-                    _locationChecker.IsLocationChecked(CommunityCenterInjections.AP_LOCATION_VAULT);
+                    _locationChecker.IsLocationCheckedSafe(CommunityCenterInjections.AP_LOCATION_PANTRY) &&
+                    _locationChecker.IsLocationCheckedSafe(CommunityCenterInjections.AP_LOCATION_BOILER_ROOM) &&
+                    _locationChecker.IsLocationCheckedSafe(CommunityCenterInjections.AP_LOCATION_BULLETIN_BOARD) &&
+                    _locationChecker.IsLocationCheckedSafe(CommunityCenterInjections.AP_LOCATION_CRAFTS_ROOM) &&
+                    _locationChecker.IsLocationCheckedSafe(CommunityCenterInjections.AP_LOCATION_FISH_TANK) &&
+                    _locationChecker.IsLocationCheckedSafe(CommunityCenterInjections.AP_LOCATION_VAULT);
 
                 var allAreasCompleteLocally =
                     __instance.hasOrWillReceiveMail("apccPantry") &&

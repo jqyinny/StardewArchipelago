@@ -62,7 +62,7 @@ namespace StardewArchipelago.Locations.GingerIsland.Parrots
 
         private static bool IsFarmObeliskParrotPurchased()
         {
-            return _locationChecker.IsLocationChecked(AP_FARM_OBELISK_PARROT);
+            return _locationChecker.IsLocationCheckedSafe(AP_FARM_OBELISK_PARROT);
         }
 
         private static void AddMailboxParrot(IslandLocation islandWest)
@@ -84,7 +84,7 @@ namespace StardewArchipelago.Locations.GingerIsland.Parrots
 
         private static bool IsMailboxParrotPurchased()
         {
-            return _locationChecker.IsLocationChecked(AP_MAILBOX_PARROT);
+            return _locationChecker.IsLocationCheckedSafe(AP_MAILBOX_PARROT);
         }
 
         private static void AddFarmhouseParrot(IslandLocation islandWest)
@@ -105,7 +105,7 @@ namespace StardewArchipelago.Locations.GingerIsland.Parrots
 
         private static bool IsFarmhouseParrotPurchased()
         {
-            return _locationChecker.IsLocationChecked(AP_FARMHOUSE_PARROT);
+            return _locationChecker.IsLocationCheckedSafe(AP_FARMHOUSE_PARROT);
         }
 
         private static void AddParrotExpressParrot(IslandLocation islandWest)
@@ -126,7 +126,7 @@ namespace StardewArchipelago.Locations.GingerIsland.Parrots
 
         private static bool IsParrotExpressParrotPurchased()
         {
-            return _locationChecker.IsLocationChecked(AP_PARROT_EXPRESS_PARROT);
+            return _locationChecker.IsLocationCheckedSafe(AP_PARROT_EXPRESS_PARROT);
         }
     }
 }

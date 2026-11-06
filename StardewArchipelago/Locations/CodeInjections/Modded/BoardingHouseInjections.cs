@@ -111,7 +111,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded
                     return true; //run original logic
                 }
                 var currentChest = abandonedMines[playerLocation];
-                if (__instance.Items.Count <= 0 || _locationChecker.IsLocationChecked(currentChest))
+                if (__instance.Items.Count <= 0 || _locationChecker.IsLocationCheckedSafe(currentChest))
                 {
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
                 }

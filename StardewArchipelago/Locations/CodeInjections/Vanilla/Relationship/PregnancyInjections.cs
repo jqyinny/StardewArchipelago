@@ -70,7 +70,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Relationship
                     return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
                 }
 
-                if (_locationChecker.IsLocationChecked(FIRST_BABY) && _locationChecker.IsLocationChecked(SECOND_BABY) &&
+                if (_locationChecker.IsLocationCheckedSafe(FIRST_BABY) && _locationChecker.IsLocationCheckedSafe(SECOND_BABY) &&
                     _archipelago.GetReceivedItemCountSafe("Cute Baby") + _archipelago.GetReceivedItemCountSafe("Ugly Baby") >= 2 && homeOfFarmer.getChildrenCount() < 2)
                 {
                     __result = true;
@@ -188,7 +188,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Relationship
         {
             try
             {
-                if (_locationChecker.IsLocationChecked(FIRST_BABY) && _locationChecker.IsLocationChecked(SECOND_BABY))
+                if (_locationChecker.IsLocationCheckedSafe(FIRST_BABY) && _locationChecker.IsLocationCheckedSafe(SECOND_BABY))
                 {
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
                 }

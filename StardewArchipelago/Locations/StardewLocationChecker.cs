@@ -48,12 +48,32 @@ namespace StardewArchipelago.Locations
         // equivalents fall back to the client's synced location-name snapshot and its own locally
         // tracked checked-location cache (see StardewArchipelagoClient.GetAllLocationNamesSafe/
         // GetFarmhandCheckedLocationsSafe) instead of the live session.
-        private IEnumerable<string> GetAllLocationsSafe()
+        public IEnumerable<string> GetAllLocationsSafe()
         {
             return _archipelago.GetSession() != null ? GetAllLocations() : _archipelago.GetAllLocationNamesSafe();
         }
 
-        private IEnumerable<string> GetAllLocationsNotCheckedSafe()
+        // Same fallback as GetAllLocationsNotCheckedSafe: on a farmhand, "missing" = in this seed and not
+        // yet checked by anyone (the checked set is kept live by ModMessaging.BroadcastHostLocationChecked).
+        public IEnumerable<string> GetAllMissingLocationNamesSafe()
+        {
+            return _archipelago.GetSession() != null ? GetAllMissingLocationNames() : GetAllLocationsNotCheckedSafe();
+        }
+
+        // Inherited IsLocationChecked/IsLocationNotChecked are non-virtual and only know the base class's
+        // local list, which CoopLocationChecker never fills on a farmhand - so a farmhand couldn't see checks
+        // the host (or another farmhand) already sent.
+        public bool IsLocationCheckedSafe(string locationName)
+        {
+            return _archipelago.GetSession() != null ? IsLocationChecked(locationName) : _archipelago.GetFarmhandCheckedLocationsSafe().Contains(locationName);
+        }
+
+        public bool IsLocationNotCheckedSafe(string locationName)
+        {
+            return _archipelago.GetSession() != null ? IsLocationNotChecked(locationName) : !IsLocationCheckedSafe(locationName);
+        }
+
+        public IEnumerable<string> GetAllLocationsNotCheckedSafe()
         {
             if (_archipelago.GetSession() != null)
             {
@@ -145,7 +165,7 @@ namespace StardewArchipelago.Locations
 
         public IEnumerable<string> GetMissingLocationsByTag(string locationTag)
         {
-            return GetAllMissingLocationNames().Where(x => _archipelago.DataPackageCache.GetLocation(x).LocationTags.Contains(locationTag));
+            return GetAllMissingLocationNamesSafe().Where(x => _archipelago.DataPackageCache.GetLocation(x).LocationTags.Contains(locationTag));
         }
 
         public IEnumerable<string> GetCheckedLocationsByTag(string locationTag)

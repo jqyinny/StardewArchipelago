@@ -100,7 +100,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 }
 
                 __result = true;
-                if (_locationChecker.IsLocationChecked(BEACH_BRIDGE_AP_LOCATION))
+                if (_locationChecker.IsLocationCheckedSafe(BEACH_BRIDGE_AP_LOCATION))
                 {
                     return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
                 }
@@ -161,7 +161,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                     _realBridgeFixed = __instance.bridgeFixed.Value;
                 }
 
-                __instance.bridgeFixed.Value = _locationChecker.IsLocationChecked(BEACH_BRIDGE_AP_LOCATION);
+                __instance.bridgeFixed.Value = _locationChecker.IsLocationCheckedSafe(BEACH_BRIDGE_AP_LOCATION);
                 return MethodPrefix.RUN_ORIGINAL_METHOD;
             }
             catch (Exception ex)
@@ -198,7 +198,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             try
             {
                 var actionFirstWord = action[0];
-                if (Game1.eventUp || actionFirstWord != "legendarySword" || _locationChecker.IsLocationChecked(GALAXY_SWORD_SHRINE_AP_LOCATION))
+                if (Game1.eventUp || actionFirstWord != "legendarySword" || _locationChecker.IsLocationCheckedSafe(GALAXY_SWORD_SHRINE_AP_LOCATION))
                 {
                     return actionFirstWord != "legendarySword"; // run original logic only if it's something other than the shrine
                 }

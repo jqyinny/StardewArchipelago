@@ -37,7 +37,7 @@ namespace StardewArchipelago.Locations.Festival
                 __result = true;
                 var numberOfThisTag = 1;
                 var locationName = string.Format(FestivalLocationNames.TROUT_DERBY_REWARD_PATTERN, numberOfThisTag);
-                while (_archipelago.LocationExistsSafe(locationName) && _locationChecker.IsLocationChecked(locationName))
+                while (_archipelago.LocationExistsSafe(locationName) && _locationChecker.IsLocationCheckedSafe(locationName))
                 {
                     numberOfThisTag++;
                     locationName = string.Format(FestivalLocationNames.TROUT_DERBY_REWARD_PATTERN, numberOfThisTag);

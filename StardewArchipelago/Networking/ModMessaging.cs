@@ -303,6 +303,11 @@ namespace StardewArchipelago.Networking
             {
                 _archipelago.SeedCheckedLocationsFromSnapshot(message.CheckedLocationNames);
             }
+            if (message.State?.ItemsReceived != null)
+            {
+                // Full received items (sender, order) for GetAllReceivedItemsSafe - see StardewArchipelagoClient.
+                _archipelago.SeedReceivedItemsFromSnapshot(message.State.ItemsReceived);
+            }
             if (message.ScoutedLocations != null)
             {
                 _archipelago.SeedScoutedLocationsFromSnapshot(message.ScoutedLocations);

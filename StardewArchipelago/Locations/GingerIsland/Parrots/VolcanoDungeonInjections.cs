@@ -75,7 +75,7 @@ namespace StardewArchipelago.Locations.GingerIsland.Parrots
 
         private static bool IsVolcanoBridgeParrotPurchased()
         {
-            return _locationChecker.IsLocationChecked(AP_VOLCANO_BRIDGE_PARROT);
+            return _locationChecker.IsLocationCheckedSafe(AP_VOLCANO_BRIDGE_PARROT);
         }
 
         private static void AddVolcanoExitShortcutParrot(IslandLocation volcano)
@@ -100,7 +100,7 @@ namespace StardewArchipelago.Locations.GingerIsland.Parrots
 
         private static bool IsVolcanoExitShortcutParrotPurchased()
         {
-            return _locationChecker.IsLocationChecked(AP_VOLCANO_EXIT_SHORTCUT_PARROT);
+            return _locationChecker.IsLocationCheckedSafe(AP_VOLCANO_EXIT_SHORTCUT_PARROT);
         }
     }
 }

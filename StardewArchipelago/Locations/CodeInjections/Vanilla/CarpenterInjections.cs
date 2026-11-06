@@ -153,7 +153,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                     return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
                 }
 
-                var houseUpgradeReceivedFromAP = _archipelago.GetAllReceivedItems()
+                var houseUpgradeReceivedFromAP = _archipelago.GetAllReceivedItemsSafe()
                     .Where(x => x.ItemName == BUILDING_PROGRESSIVE_HOUSE).ToArray();
 
                 if (_archipelago.SlotData.StartWithout.HasFlag(StartWithout.House))

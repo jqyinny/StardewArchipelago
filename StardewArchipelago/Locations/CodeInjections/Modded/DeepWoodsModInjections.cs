@@ -179,7 +179,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded
                 //who.health = who.maxHealth;
                 //who.Stamina = who.MaxStamina;
                 //who.addedLuckLevel.Value = Math.Max(10, who.addedLuckLevel.Value);
-                //if (!_locationChecker.IsLocationChecked(MEET_UNICORN_AP_LOCATION))
+                //if (!_locationChecker.IsLocationCheckedSafe(MEET_UNICORN_AP_LOCATION))
                 //{
                 //    _locationChecker.AddCheckedLocation(MEET_UNICORN_AP_LOCATION);
                 //}
@@ -257,7 +257,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded
                 }
                 var isTrashCanField = _helper.Reflection.GetField<NetBool>(__instance, "isTrashCan");
                 var isTrashCan = isTrashCanField.GetValue();
-                if (_locationChecker.IsLocationNotChecked(isTrashCan.Value ? TREASURE1_AP_LOCATION : TREASURE2_AP_LOCATION))
+                if (_locationChecker.IsLocationNotCheckedSafe(isTrashCan.Value ? TREASURE1_AP_LOCATION : TREASURE2_AP_LOCATION))
                 {
                     _locationChecker.AddCheckedLocation(isTrashCan.Value ? TREASURE1_AP_LOCATION : TREASURE2_AP_LOCATION);
                     Game1.playSound(isTrashCan.Value ? "trashcan" : "openChest");

@@ -124,6 +124,35 @@ namespace StardewArchipelago.Archipelago
             _farmhandReceivedItemCounts[itemName] = _farmhandReceivedItemCounts.GetValueOrDefault(itemName, 0) + 1;
         }
 
+        // GetAllReceivedItems() (inherited) reads the live session too. A few callers need the full items
+        // (sender name, order) rather than counts, so a farmhand also keeps its own copy of the list:
+        // seeded from the host's snapshot (State.ItemsReceived, rebuilt from the item manager per snapshot -
+        // see ModMessaging.BuildFarmhandStateSnapshot) and appended to as new items arrive. Kept separate
+        // from the farmhand's State.ItemsReceived because Mailman removes entries from that one.
+        private List<ReceivedItem> _farmhandReceivedItems;
+
+        public void SeedReceivedItemsFromSnapshot(IEnumerable<ReceivedItem> receivedItems)
+        {
+            _farmhandReceivedItems = new List<ReceivedItem>(receivedItems);
+        }
+
+        public void RecordFarmhandReceivedItem(ReceivedItem receivedItem)
+        {
+            RecordFarmhandReceivedItem(receivedItem.ItemName);
+            _farmhandReceivedItems ??= new List<ReceivedItem>();
+            _farmhandReceivedItems.Add(receivedItem);
+        }
+
+        public List<ReceivedItem> GetAllReceivedItemsSafe()
+        {
+            if (GetSession() != null)
+            {
+                return GetAllReceivedItems().ToList();
+            }
+
+            return _farmhandReceivedItems ?? new List<ReceivedItem>();
+        }
+
         public int GetReceivedItemCountSafe(string itemName)
         {
             if (GetSession() != null)

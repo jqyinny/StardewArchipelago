@@ -37,13 +37,13 @@ public static class WalkSanityInjections
             if (_archipelago.LocationExistsSafe(apLocation))
             {
                 var checkedLocation = false;
-                if (!_locationChecker.IsLocationChecked(apLocation))
+                if (!_locationChecker.IsLocationCheckedSafe(apLocation))
                 {
                     _locationChecker.AddCheckedLocation(apLocation);
                     checkedLocation = true;
                 }
                 var luckyLocation = apLocation + " (lucky)";
-                if (_archipelago.LocationExistsSafe(luckyLocation) && !_locationChecker.IsLocationChecked(luckyLocation))
+                if (_archipelago.LocationExistsSafe(luckyLocation) && !_locationChecker.IsLocationCheckedSafe(luckyLocation))
                 {
                     _locationChecker.AddCheckedLocation(luckyLocation);
                     checkedLocation = true;

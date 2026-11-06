@@ -276,32 +276,32 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded
 
         private static void CheckTotalCheckLocations()
         {
-            if (KnowsAllToilSpells() && _locationChecker.IsLocationNotChecked(ANALYZE_BLINK_AP_LOCATION))
+            if (KnowsAllToilSpells() && _locationChecker.IsLocationNotCheckedSafe(ANALYZE_BLINK_AP_LOCATION))
             {
                 _locationChecker.AddCheckedLocation(ANALYZE_BLINK_AP_LOCATION);
             }
 
-            if (KnowsAllEldrichSpells() && _locationChecker.IsLocationNotChecked(ANALYZE_SPIRIT_AP_LOCATION))
+            if (KnowsAllEldrichSpells() && _locationChecker.IsLocationNotCheckedSafe(ANALYZE_SPIRIT_AP_LOCATION))
             {
                 _locationChecker.AddCheckedLocation(ANALYZE_SPIRIT_AP_LOCATION);
             }
 
-            if (KnowsAllElementalSpells() && _locationChecker.IsLocationNotChecked(ANALYZE_TELEPORT_AP_LOCATION))
+            if (KnowsAllElementalSpells() && _locationChecker.IsLocationNotCheckedSafe(ANALYZE_TELEPORT_AP_LOCATION))
             {
                 _locationChecker.AddCheckedLocation(ANALYZE_TELEPORT_AP_LOCATION);
             }
 
-            if (KnowsAllLifeSpells() && _locationChecker.IsLocationNotChecked(ANALYZE_BUFF_AP_LOCATION))
+            if (KnowsAllLifeSpells() && _locationChecker.IsLocationNotCheckedSafe(ANALYZE_BUFF_AP_LOCATION))
             {
                 _locationChecker.AddCheckedLocation(ANALYZE_BUFF_AP_LOCATION);
             }
 
-            if (KnowsAllNatureSpells() && _locationChecker.IsLocationNotChecked(ANALYZE_PHOTOSYNTHESIS_AP_LOCATION))
+            if (KnowsAllNatureSpells() && _locationChecker.IsLocationNotCheckedSafe(ANALYZE_PHOTOSYNTHESIS_AP_LOCATION))
             {
                 _locationChecker.AddCheckedLocation(ANALYZE_PHOTOSYNTHESIS_AP_LOCATION);
             }
 
-            if (KnowsAllSpellsButRewind() && _locationChecker.IsLocationNotChecked(ANALYZE_REWIND_AP_LOCATION))
+            if (KnowsAllSpellsButRewind() && _locationChecker.IsLocationNotCheckedSafe(ANALYZE_REWIND_AP_LOCATION))
             {
                 _locationChecker.AddCheckedLocation(ANALYZE_REWIND_AP_LOCATION);
             }
@@ -309,9 +309,9 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded
 
         private static bool KnowsAllToilSpells()
         {
-            if (_locationChecker.IsLocationChecked(ANALYZE_TILL_AP_LOCATION)
-                && _locationChecker.IsLocationChecked(ANALYZE_CLEARDEBRIS_AP_LOCATION)
-                && _locationChecker.IsLocationChecked(ANALYZE_WATER_AP_LOCATION))
+            if (_locationChecker.IsLocationCheckedSafe(ANALYZE_TILL_AP_LOCATION)
+                && _locationChecker.IsLocationCheckedSafe(ANALYZE_CLEARDEBRIS_AP_LOCATION)
+                && _locationChecker.IsLocationCheckedSafe(ANALYZE_WATER_AP_LOCATION))
             {
                 return true;
             }
@@ -321,9 +321,9 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded
 
         private static bool KnowsAllEldrichSpells()
         {
-            if (_locationChecker.IsLocationChecked(ANALYZE_METEOR_AP_LOCATION)
-                && _locationChecker.IsLocationChecked(ANALYZE_BLOODMANA_AP_LOCATION)
-                && _locationChecker.IsLocationChecked(ANALYZE_LUCKSTEAL_AP_LOCATION))
+            if (_locationChecker.IsLocationCheckedSafe(ANALYZE_METEOR_AP_LOCATION)
+                && _locationChecker.IsLocationCheckedSafe(ANALYZE_BLOODMANA_AP_LOCATION)
+                && _locationChecker.IsLocationCheckedSafe(ANALYZE_LUCKSTEAL_AP_LOCATION))
             {
                 return true;
             }
@@ -333,9 +333,9 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded
 
         private static bool KnowsAllElementalSpells()
         {
-            if (_locationChecker.IsLocationChecked(ANALYZE_FIREBALL_AP_LOCATION)
-                && _locationChecker.IsLocationChecked(ANALYZE_FROSTBOLT_AP_LOCATION)
-                && _locationChecker.IsLocationChecked(ANALYZE_DESCEND_AP_LOCATION))
+            if (_locationChecker.IsLocationCheckedSafe(ANALYZE_FIREBALL_AP_LOCATION)
+                && _locationChecker.IsLocationCheckedSafe(ANALYZE_FROSTBOLT_AP_LOCATION)
+                && _locationChecker.IsLocationCheckedSafe(ANALYZE_DESCEND_AP_LOCATION))
             {
                 return true;
             }
@@ -345,9 +345,9 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded
 
         private static bool KnowsAllLifeSpells()
         {
-            if (_locationChecker.IsLocationChecked(ANALYZE_EVAC_AP_LOCATION)
-                && _locationChecker.IsLocationChecked(ANALYZE_HEAL_AP_LOCATION)
-                && _locationChecker.IsLocationChecked(ANALYZE_HASTE_AP_LOCATION))
+            if (_locationChecker.IsLocationCheckedSafe(ANALYZE_EVAC_AP_LOCATION)
+                && _locationChecker.IsLocationCheckedSafe(ANALYZE_HEAL_AP_LOCATION)
+                && _locationChecker.IsLocationCheckedSafe(ANALYZE_HASTE_AP_LOCATION))
             {
                 return true;
             }
@@ -357,9 +357,9 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded
 
         private static bool KnowsAllNatureSpells()
         {
-            if (_locationChecker.IsLocationChecked(ANALYZE_TENDRILS_AP_LOCATION)
-                && _locationChecker.IsLocationChecked(ANALYZE_SHOCKWAVE_AP_LOCATION)
-                && _locationChecker.IsLocationChecked(ANALYZE_LANTERN_AP_LOCATION))
+            if (_locationChecker.IsLocationCheckedSafe(ANALYZE_TENDRILS_AP_LOCATION)
+                && _locationChecker.IsLocationCheckedSafe(ANALYZE_SHOCKWAVE_AP_LOCATION)
+                && _locationChecker.IsLocationCheckedSafe(ANALYZE_LANTERN_AP_LOCATION))
             {
                 return true;
             }

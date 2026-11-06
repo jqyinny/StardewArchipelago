@@ -76,7 +76,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
                 }
 
                 var itemName = __result.Name;
-                if (_archipelago.GetAllReceivedItems().Any(x => x.ItemName.Contains(itemName)))
+                if (_archipelago.GetAllReceivedItemsSafe().Any(x => x.ItemName.Contains(itemName)))
                 {
                     _depth = 0;
                     return;

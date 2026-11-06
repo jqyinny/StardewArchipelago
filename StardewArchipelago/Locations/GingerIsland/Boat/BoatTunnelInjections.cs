@@ -159,7 +159,7 @@ namespace StardewArchipelago.Locations.GingerIsland.Boat
 
         private static void InteractWithTicketMachine(BoatTunnel __instance, Farmer player)
         {
-            var ticketMachineFixed = _locationChecker.IsLocationChecked(AP_TICKET_MACHINE);
+            var ticketMachineFixed = _locationChecker.IsLocationCheckedSafe(AP_TICKET_MACHINE);
             if (ticketMachineFixed && !Game1.MasterPlayer.hasOrWillReceiveMail(MAIL_FIXED_BOAT_TICKET_MACHINE))
             {
                 Game1.addMailForTomorrow(MAIL_FIXED_BOAT_TICKET_MACHINE, true, true);
@@ -211,7 +211,7 @@ namespace StardewArchipelago.Locations.GingerIsland.Boat
 
         private static void InteractWithHull(BoatTunnel __instance, Farmer player)
         {
-            var hullFixed = _locationChecker.IsLocationChecked(AP_BOAT_HULL);
+            var hullFixed = _locationChecker.IsLocationCheckedSafe(AP_BOAT_HULL);
             if (hullFixed)
             {
                 if (!Game1.MasterPlayer.hasOrWillReceiveMail(MAIL_FIXED_BOAT_HULL))
@@ -234,7 +234,7 @@ namespace StardewArchipelago.Locations.GingerIsland.Boat
 
         private static void InteractWithAnchor(BoatTunnel __instance, Farmer player)
         {
-            var anchorFixed = _locationChecker.IsLocationChecked(AP_BOAT_ANCHOR);
+            var anchorFixed = _locationChecker.IsLocationCheckedSafe(AP_BOAT_ANCHOR);
             if (anchorFixed)
             {
                 if (!Game1.MasterPlayer.hasOrWillReceiveMail(MAIL_FIXED_BOAT_ANCHOR))
@@ -265,9 +265,9 @@ namespace StardewArchipelago.Locations.GingerIsland.Boat
                     return;
                 }
 
-                var ticketMachineFixed = _locationChecker.IsLocationChecked(AP_TICKET_MACHINE);
-                var hullFixed = _locationChecker.IsLocationChecked(AP_BOAT_HULL);
-                var anchorFixed = _locationChecker.IsLocationChecked(AP_BOAT_ANCHOR);
+                var ticketMachineFixed = _locationChecker.IsLocationCheckedSafe(AP_TICKET_MACHINE);
+                var hullFixed = _locationChecker.IsLocationCheckedSafe(AP_BOAT_HULL);
+                var anchorFixed = _locationChecker.IsLocationCheckedSafe(AP_BOAT_ANCHOR);
 
                 if (ticketMachineFixed && hullFixed && anchorFixed)
                 {

@@ -58,7 +58,7 @@ namespace StardewArchipelago.Locations.GingerIsland.Parrots
 
         private static bool IsBridgeParrotPurchased()
         {
-            return _locationChecker.IsLocationChecked(AP_BRIDGE_PARROT);
+            return _locationChecker.IsLocationCheckedSafe(AP_BRIDGE_PARROT);
         }
 
         private static void AddIslandTraderParrot(IslandLocation islandNorth)
@@ -76,7 +76,7 @@ namespace StardewArchipelago.Locations.GingerIsland.Parrots
 
         private static bool IsTraderParrotPurchased()
         {
-            return _locationChecker.IsLocationChecked(AP_TRADER_PARROT);
+            return _locationChecker.IsLocationCheckedSafe(AP_TRADER_PARROT);
         }
 
         // public override void explosionAt(float x, float y)
