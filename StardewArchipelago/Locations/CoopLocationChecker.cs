@@ -7,21 +7,28 @@ using StardewModdingAPI;
 
 namespace StardewArchipelago.Locations
 {
-    // Pilot for farmhand-reported location checks (Craftsanity only, for now - see NOTES.md
-    // "Design concerns - farmhand location checks"). The ~115 Harmony-patched callers all depend
-    // on the abstract LocationChecker base type, so this is a drop-in replacement for
-    // StardewLocationChecker: on the host it behaves identically; on a farmhand it forwards the
-    // check to the host over ModMessaging instead of talking to the AP server directly, since
-    // only the host's StardewArchipelagoClient is ever actually connected.
+    // The location checker used on every process in co-op (host and farmhands). All Harmony-patched
+    // check callers depend on the LocationChecker base type, so this is a drop-in replacement for
+    // StardewLocationChecker:
+    // - On the host it sends checks to the AP server exactly like StardewLocationChecker, and also
+    //   tells farmhands about each newly recorded check (ModMessaging.BroadcastHostLocationChecked) so
+    //   their checked-location cache stays live after the join snapshot.
+    // - On a farmhand (no AP connection) it records the check locally and forwards it to the host over
+    //   ModMessaging, which sends it to the server.
     public class CoopLocationChecker : StardewLocationChecker
     {
-        private readonly StardewArchipelagoClient _archipelago;
         private readonly ModMessaging _modMessaging;
+
+        // Host-side: every check this checker has recorded or already knew about at construction. Used to
+        // broadcast each check to farmhands once. A local set instead of asking the library's
+        // GetAllLocationsAlreadyChecked() each time, since some patches call AddCheckedLocation very often
+        // (friendsanity re-sends hearts 1..N on every friendship change).
+        private readonly HashSet<string> _knownCheckedLocations;
 
         public CoopLocationChecker(ILogger logger, StardewArchipelagoClient archipelago, List<string> locationsAlreadyChecked, ModMessaging modMessaging) : base(logger, archipelago, locationsAlreadyChecked)
         {
-            _archipelago = archipelago;
             _modMessaging = modMessaging;
+            _knownCheckedLocations = new HashSet<string>(locationsAlreadyChecked ?? new List<string>());
         }
 
         public override void AddCheckedLocation(string locationName)
@@ -41,9 +48,7 @@ namespace StardewArchipelago.Locations
             // base.AddCheckedLocation is skipped here on purpose (it would try to send the check to the
             // AP server, which a farmhand has no live connection to) - but that also means the base
             // class's own local _checkedLocations never gets this entry. Recording it here instead is
-            // what GetAllLocationsNotCheckedSafe/GetAllLocationsAlreadyCheckedSafe (see
-            // StardewLocationChecker) read back, so the AP symbol disappears for a farmhand too once
-            // they've actually checked something, instead of just never appearing at all.
+            // what the *Safe queries in StardewLocationChecker read back on a farmhand.
             _archipelago.RecordFarmhandCheckedLocation(locationName);
             _modMessaging.BroadcastLocationChecked(locationName);
         }
@@ -68,12 +73,12 @@ namespace StardewArchipelago.Locations
             }
         }
 
-        // Host-side: many patches call AddCheckedLocation repeatedly for the same location (e.g. every
-        // friendship change re-sends hearts 1..N), so only broadcast checks this host hasn't recorded yet,
-        // and only when there's anyone to tell. GetAllLocationsAlreadyChecked is purely local on the host.
+        // Host-side: true only the first time a location is seen (records it), and only worth a broadcast
+        // when there's anyone to tell. Farmhands joining later get the full checked set in their snapshot.
         private bool IsNewCheckToBroadcast(string locationName)
         {
-            return Context.IsMultiplayer && !GetAllLocationsAlreadyChecked().Contains(locationName);
+            var isNew = _knownCheckedLocations.Add(locationName);
+            return isNew && Context.IsMultiplayer;
         }
     }
 }

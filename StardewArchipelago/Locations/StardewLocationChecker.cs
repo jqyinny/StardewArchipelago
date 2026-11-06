@@ -12,7 +12,9 @@ namespace StardewArchipelago.Locations
     {
         public const bool PREVENT_SENDING_CHECKS = false;
 
-        private readonly StardewArchipelagoClient _archipelago;
+        // Deliberately hides the base LocationChecker's field: same instance, but typed as the derived client
+        // so the *Safe methods are reachable. Protected so CoopLocationChecker can share it.
+        protected new readonly StardewArchipelagoClient _archipelago;
         private readonly LocationNameMatcher _locationNameMatcher;
 
         public StardewLocationChecker(ILogger logger, StardewArchipelagoClient archipelago, List<string> locationsAlreadyChecked) : base(logger, archipelago, locationsAlreadyChecked)
@@ -132,10 +134,8 @@ namespace StardewArchipelago.Locations
         // LocationChecker.LocationExists(string) (inherited) is a separate wrapper around the same
         // non-virtual, session-gated StardewArchipelagoClient.LocationExists this file already works
         // around elsewhere (see GetAllLocationsSafe above) - same bug, reached through the location
-        // checker instead of the client directly. Several callers use _locationChecker.LocationExists(...)
-        // rather than _archipelago.LocationExistsSafe(...) (SpecialOrderInjections, CollectionsInjections,
-        // QueenOfSauceInjections, ArchipelagoJunimoNoteMenu, TileUI) - this is the farmhand-safe
-        // equivalent for that call shape.
+        // checker instead of the client directly. This is the farmhand-safe equivalent for callers that
+        // hold a location checker; use it (never the inherited LocationExists).
         public bool LocationExistsSafe(string locationName)
         {
             return _archipelago.LocationExistsSafe(locationName);

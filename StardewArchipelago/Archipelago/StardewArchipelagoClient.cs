@@ -105,10 +105,10 @@ namespace StardewArchipelago.Archipelago
 
         // GetReceivedItemCount/HasReceivedItem (inherited, non-virtual) read from the live
         // ArchipelagoSession, which is null on a farmhand (never actually connected - see
-        // SeedSlotDataFromSnapshot above). Every one of the ~160 call sites across the mod that ask
-        // "how many of X have I received" would silently get 0/false there instead of the real answer -
-        // this is a farmhand-safe alternative, backed by a local snapshot+live-update cache instead of
-        // a live connection. Seeded once from the host's full GetAllReceivedItemNamesAndCounts() (see
+        // SeedSlotDataFromSnapshot above), so they silently return 0/false there. Every call site in the
+        // mod uses these farmhand-safe *Safe variants instead (see also FarmhandSafeExtensions for callers
+        // holding the base ArchipelagoClient type) - don't add new raw calls. Backed by a local
+        // snapshot+live-update cache instead of a live connection. Seeded once from the host's full GetAllReceivedItemNamesAndCounts() (see
         // ModMessaging's SlotDataSnapshotMessage), then kept current as new items arrive via
         // RecordFarmhandReceivedItem (see ModEntry.OnFarmhandItemReceived).
         private Dictionary<string, int> _farmhandReceivedItemCounts;
