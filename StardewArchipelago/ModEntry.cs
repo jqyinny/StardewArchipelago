@@ -74,6 +74,7 @@ namespace StardewArchipelago
         private Mailman _farmhandMail;
         // See OnFarmhandSlotDataReceived: farmhand setup must run once per session, not once per snapshot.
         private bool _farmhandInitialized;
+        private MailPatcher _farmhandMailPatcherForBackpacks;
         private AdvancedOptionsManager _advancedOptionsManager;
         private Mailman _mail;
         private ChatForwarder _chatForwarder;
@@ -546,6 +547,7 @@ namespace StardewArchipelago
             var farmhandLetterActions = new LetterActions(_logger, _helper, _farmhandMail, _archipelago, farmhandWeaponsManager, _farmhandItemParser.TrapManager, farmhandTrapExecutor.BabyBirther, farmhandItemManager);
             var farmhandMailPatcher = new MailPatcher(_logger, _harmony, _archipelago, farmhandLocationChecker, State, farmhandLetterActions);
             farmhandMailPatcher.PatchMailBoxForApItems();
+            _farmhandMailPatcherForBackpacks = farmhandMailPatcher;
 
             // Same bug class again - RandomizedLogicPatcher is the "world configuration" patcher
             // (entrance randomization, shops, mines, community center, etc.), only ever constructed and
@@ -554,6 +556,8 @@ namespace StardewArchipelago
             // randomized entrance would just get the vanilla, unrandomized destination.
             var farmhandLogicPatcher = new RandomizedLogicPatcher(_logger, _helper, Config, _harmony, _archipelago, farmhandLocationChecker, farmhandItemManager, farmhandEntranceManager, farmhandSeedShopStockModifier, farmhandNameSimplifier, farmhandFriends, State, new BundleReader());
             farmhandLogicPatcher.PatchAllGameLogic();
+            // After the catch-up replay above, so this player's backpack letters are already in the mailbox.
+            ApplyFarmhandStartWithoutBackpack();
 
             // And again - ItemPatcher.PatchApItems, only ever installed by the host.
             var farmhandItemPatcher = new ItemPatcher(_logger, _helper, _harmony, _archipelago);
@@ -660,6 +664,52 @@ namespace StardewArchipelago
             catch (Exception ex)
             {
                 _logger.LogError($"Failed to store this farmhand's Archipelago skill/friendship progress: {ex}");
+            }
+        }
+
+        private const string FARMHAND_START_WITHOUT_BACKPACK_MAIL_KEY = "apFarmhandStartWithoutBackpackApplied";
+        private const int VANILLA_STARTING_BACKPACK_SLOTS = 12;
+
+        // start_without Backpack, farmhand side, once per farmer. The host's version
+        // (StartingResources.RemoveStartingBackpack) only runs on the host on Day 0: it sets MaxItems to 0, and
+        // the pre-given starting Progressive Backpack letter(s) then add BackpackSize each
+        // (MailPatcher.ReceiveFirstFewBackpacks auto-opens them at day start until >= 6 slots). A farmhand
+        // never got that, so it kept vanilla's 12 slots and every backpack letter added on top of 12.
+        // Removing the vanilla baseline (MaxItems - 12) is correct regardless of how many backpack letters
+        // this farmer already opened; then auto-open like the host does.
+        private void ApplyFarmhandStartWithoutBackpack()
+        {
+            try
+            {
+                var slotData = _archipelago.SlotData;
+                if (!slotData.StartWithout.HasFlag(StartWithout.Backpack) || slotData.BackpackProgression == BackpackProgression.Vanilla ||
+                    Game1.player.mailReceived.Contains(FARMHAND_START_WITHOUT_BACKPACK_MAIL_KEY))
+                {
+                    return;
+                }
+
+                var player = Game1.player;
+                var oldMaxItems = player.MaxItems;
+                player.MaxItems = Math.Max(0, oldMaxItems - VANILLA_STARTING_BACKPACK_SLOTS);
+                player.mailReceived.Add(FARMHAND_START_WITHOUT_BACKPACK_MAIL_KEY);
+                _farmhandMailPatcherForBackpacks?.ReceiveFirstFewBackpacks();
+
+                // Anything now beyond the backpack is dropped at the player's feet rather than deleted.
+                for (var i = player.Items.Count - 1; i >= player.MaxItems; i--)
+                {
+                    var item = player.Items[i];
+                    if (item != null)
+                    {
+                        Game1.createItemDebris(item, player.getStandingPosition(), player.FacingDirection);
+                    }
+                    player.Items.RemoveAt(i);
+                }
+
+                _logger.LogInfo($"start_without Backpack: farmhand backpack {oldMaxItems} -> {player.MaxItems} slots.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to apply start_without Backpack for this farmhand: {ex}");
             }
         }
 
