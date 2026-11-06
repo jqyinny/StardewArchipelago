@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Newtonsoft.Json;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
 using KaitoKid.ArchipelagoUtilities.Net.Client.ConnectionResults;
 using KaitoKid.Utilities.Interfaces;
@@ -413,6 +414,11 @@ namespace StardewArchipelago
             }
             _farmhandInitialized = true;
 
+            // Must run before any patch below is installed: the friendship getter prefix writes its result
+            // back into the saved Friendship.points, so with empty AP points it would wipe hearts above the
+            // last shuffled heart on the very first read.
+            RestoreFarmhandProgress();
+
             try
             {
             // Previously this method read the farmhand's own (never-populated) State field directly -
@@ -590,6 +596,70 @@ namespace StardewArchipelago
                 // the farmhand-local objects above isn't missed.
                 _logger.LogError($"OnFarmhandSlotDataReceived: threw while building farmhand-local objects. Error: {ex}");
                 throw;
+            }
+        }
+
+        // A farmhand's AP skill experience and AP friendship points live in SkillInjections/FriendshipInjections
+        // statics, which the host saves to its own save data (OnSaving) - a farmhand never had anywhere to
+        // persist its own, so partial progress toward the next skill/heart check reset every session. Stored
+        // on the farmhand's own Farmer.modData instead: that's synced to the host and written into the host's
+        // save as part of the farmhand's Farmer, and read back here when the farmhand joins again.
+        private const string FARMHAND_AP_EXPERIENCE_KEY = "StardewArchipelago/ApExperience";
+        private const string FARMHAND_AP_FRIENDSHIP_KEY = "StardewArchipelago/ApFriendshipPoints";
+
+        private void RestoreFarmhandProgress()
+        {
+            try
+            {
+                var modData = Game1.player.modData;
+                if (modData.TryGetValue(FARMHAND_AP_EXPERIENCE_KEY, out var experienceJson))
+                {
+                    SkillInjections.SetArchipelagoExperience(JsonConvert.DeserializeObject<Dictionary<int, int>>(experienceJson));
+                }
+                else
+                {
+                    SkillInjections.ResetSkillExperience();
+                }
+
+                if (modData.TryGetValue(FARMHAND_AP_FRIENDSHIP_KEY, out var friendshipJson))
+                {
+                    FriendshipInjections.SetArchipelagoFriendshipPoints(JsonConvert.DeserializeObject<Dictionary<string, int>>(friendshipJson));
+                }
+                else
+                {
+                    // No stored AP points yet (first join with this version): start from this farmer's current
+                    // raw friendship points (patches aren't installed yet, so this is the saved value) rather
+                    // than 0, so already-earned hearts above the shuffled ones aren't wiped one last time.
+                    var seeded = new Dictionary<string, int>();
+                    foreach (var (npcName, friendship) in Game1.player.friendshipData.Pairs)
+                    {
+                        seeded[npcName] = friendship.Points;
+                    }
+                    FriendshipInjections.SetArchipelagoFriendshipPoints(seeded);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to restore this farmhand's Archipelago skill/friendship progress: {ex}");
+            }
+        }
+
+        // Called at DayEnding (before the host serializes the save), farmhand only.
+        private void SaveFarmhandProgress()
+        {
+            if (Context.IsMainPlayer || !_farmhandInitialized)
+            {
+                return;
+            }
+
+            try
+            {
+                Game1.player.modData[FARMHAND_AP_EXPERIENCE_KEY] = JsonConvert.SerializeObject(SkillInjections.GetArchipelagoExperience());
+                Game1.player.modData[FARMHAND_AP_FRIENDSHIP_KEY] = JsonConvert.SerializeObject(FriendshipInjections.GetArchipelagoFriendshipPoints());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to store this farmhand's Archipelago skill/friendship progress: {ex}");
             }
         }
 
@@ -807,6 +877,7 @@ namespace StardewArchipelago
 
         private void OnDayEnding(object sender, DayEndingEventArgs e)
         {
+            SaveFarmhandProgress();
             _giftHandler.ReceiveAllGiftsTomorrow();
             _villagerEvents.CheckJunaHearts(_archipelago);
             _shippingBehaviors?.CheckShipsanityLocationsBeforeSleep();
