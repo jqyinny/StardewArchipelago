@@ -39,8 +39,13 @@ namespace StardewArchipelago.Locations.InGameLocations
 
         public ObtainableArchipelagoLocation()
         {
+            // Expected in co-op: when one player creates an AP location item (e.g. a farmhand shaking a
+            // walnutsanity bush), Netcode recreates it on the other player's machine through this constructor.
+            // That copy only gets the synced Item fields (ItemId/Name), not the texture/description, so keep it
+            // inert: generic description, and drawInMenu skips drawing without a texture instead of throwing.
+            _description = ScoutedLocation.GenericItemName();
             var locationName = string.IsNullOrWhiteSpace(LocationName) ? "Unknown Location" : LocationName;
-            ModEntry.Instance.Logger.LogError($"The game attempted to use the parameterless constructor in {nameof(ObtainableArchipelagoLocation)} ({locationName}), potentially as part of a serialization process");
+            ModEntry.Instance.Logger.LogDebug($"Created a placeholder {nameof(ObtainableArchipelagoLocation)} ({locationName}) via the parameterless constructor (synced from another player, or serialization).");
         }
 
         public ObtainableArchipelagoLocation(string locationName, LogHandler logger, IModHelper modHelper, ILocationChecker locationChecker, StardewArchipelagoClient archipelago, Hint[] myActiveHints, bool allowScouting) : this(locationName, locationName, logger, modHelper, locationChecker, archipelago, myActiveHints, allowScouting)
@@ -110,6 +115,11 @@ namespace StardewArchipelago.Locations.InGameLocations
         public override void drawInMenu(SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth,
             StackDrawType drawStackNumber, Color color, bool drawShadow)
         {
+            if (_archipelagoTexture == null)
+            {
+                return; // placeholder copy from the parameterless constructor (see there)
+            }
+
             var position = location + new Vector2(16f, 16f);
             var sourceRectangle = new Rectangle(0, 0, 48, 48);
             var transparentColor = color * transparency;
