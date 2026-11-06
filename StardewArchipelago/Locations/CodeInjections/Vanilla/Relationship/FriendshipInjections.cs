@@ -272,14 +272,38 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Relationship
 
         private static int GetBoundedToCurrentRelationState(int friendshipPoints, string npcName)
         {
-            var npc = Game1.getCharacterFromName(npcName);
-            return Math.Max(0, Math.Min(friendshipPoints, (Utility.GetMaximumHeartsForCharacter(npc) + 1) * POINTS_PER_HEART - 1));
+            return Math.Max(0, Math.Min(friendshipPoints, (GetMaximumHeartsWithRelationState(npcName) + 1) * POINTS_PER_HEART - 1));
         }
 
         private static int GetMaximumHeartsWithRelationState(string npcName)
         {
             var npc = Game1.getCharacterFromName(npcName);
-            return Utility.GetMaximumHeartsForCharacter(npc);
+            if (npc != null)
+            {
+                return Utility.GetMaximumHeartsForCharacter(npc);
+            }
+
+            // A farmhand only has NPC objects for locations it currently has loaded, so this is null whenever
+            // the NPC is somewhere else (e.g. Maru not home when P2 walks into Robin's house). Vanilla's
+            // GetMaximumHeartsForCharacter(null) is 0, which capped the farmhand's displayed friendship to under
+            // one heart until the NPC was nearby again. Same rules as vanilla, from data instead of the object.
+            var maxHearts = 10;
+            if (Game1.characterData.TryGetValue(npcName, out var characterData) && characterData.CanBeRomanced)
+            {
+                maxHearts = 8;
+            }
+            if (Game1.player.friendshipData.TryGetValue(npcName, out var friendship))
+            {
+                if (friendship.IsMarried())
+                {
+                    maxHearts = 14;
+                }
+                else if (friendship.IsDating())
+                {
+                    maxHearts = 10;
+                }
+            }
+            return maxHearts;
         }
 
         public static bool DayUpdate_ArchipelagoPoints_Prefix(Pet __instance, int dayOfMonth)
