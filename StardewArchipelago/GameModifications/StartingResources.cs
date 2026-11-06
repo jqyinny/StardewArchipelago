@@ -53,9 +53,16 @@ namespace StardewArchipelago.GameModifications
             // their own Iridium Band, placed by the host next to the host's starter kit (see below).
             GiveQuickStartIridiumBandsToFarmhands();
 
-            RemoveHouse();
-            RemoveShippingBin();
-            RemovePetBowls();
+            // These demolish shared Farm buildings, so only the host decides. A farmhand's process also runs
+            // this method on join, and with no AP session its HasReceivedItem was always false - so every
+            // farmhand joining demolished the shared farmhouse (and bin/bowl) even though the host had
+            // received the starting Progressive House / Shipping Bin / Pet Bowl.
+            if (Context.IsMainPlayer)
+            {
+                RemoveHouse();
+                RemoveShippingBin();
+                RemovePetBowls();
+            }
             SendGilTelephoneLetter();
             GrantStartingQuest();
         }
@@ -275,7 +282,7 @@ namespace StardewArchipelago.GameModifications
 
         private void RemoveHouse()
         {
-            if (!_archipelago.SlotData.BuildingProgression.HasFlag(BuildingProgression.Progressive) || _archipelago.HasReceivedItem(CarpenterInjections.BUILDING_PROGRESSIVE_HOUSE))
+            if (!_archipelago.SlotData.BuildingProgression.HasFlag(BuildingProgression.Progressive) || _archipelago.HasReceivedItemSafe(CarpenterInjections.BUILDING_PROGRESSIVE_HOUSE))
             {
                 return;
             }
@@ -291,7 +298,7 @@ namespace StardewArchipelago.GameModifications
 
         private void RemoveShippingBin()
         {
-            if (!_archipelago.SlotData.BuildingProgression.HasFlag(BuildingProgression.Progressive) || _archipelago.HasReceivedItem("Shipping Bin"))
+            if (!_archipelago.SlotData.BuildingProgression.HasFlag(BuildingProgression.Progressive) || _archipelago.HasReceivedItemSafe("Shipping Bin"))
             {
                 return;
             }
@@ -307,7 +314,7 @@ namespace StardewArchipelago.GameModifications
 
         private void RemovePetBowls()
         {
-            if (!_archipelago.SlotData.BuildingProgression.HasFlag(BuildingProgression.Progressive) || _archipelago.HasReceivedItem("Pet Bowl"))
+            if (!_archipelago.SlotData.BuildingProgression.HasFlag(BuildingProgression.Progressive) || _archipelago.HasReceivedItemSafe("Pet Bowl"))
             {
                 return;
             }

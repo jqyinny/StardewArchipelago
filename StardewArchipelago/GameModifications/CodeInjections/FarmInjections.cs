@@ -232,7 +232,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
         private static void ConstructStarterHouse(Farm farm)
         {
             var item = CarpenterInjections.BUILDING_PROGRESSIVE_HOUSE;
-            if (!_archipelago.HasReceivedItem(item))
+            if (!_archipelago.HasReceivedItemSafe(item))
             {
                 return;
             }
@@ -243,7 +243,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
         private static void ConstructStarterShippingBin(Farm farm)
         {
             var blueprint = "Shipping Bin";
-            if (!_archipelago.HasReceivedItem(blueprint))
+            if (!_archipelago.HasReceivedItemSafe(blueprint))
             {
                 return;
             }
@@ -282,7 +282,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
         private static void ConstructStarterPetBowl(Farm farm)
         {
             var blueprint = "Pet Bowl";
-            if (!_archipelago.HasReceivedItem(blueprint))
+            if (!_archipelago.HasReceivedItemSafe(blueprint))
             {
                 return;
             }
