@@ -142,6 +142,7 @@ namespace StardewArchipelago
             _archipelago = new StardewArchipelagoClient(_logger, _helper, ModManifest, _harmony, OnItemReceived, new SmapiJsonLoader(_helper), _testerFeatures);
             _modMessaging = new ModMessaging(_logger, _helper, ModManifest, _testerFeatures, _archipelago, ModManifest.UniqueID);
             _archipelago.SetModMessaging(_modMessaging);
+            DeathManager.SetModMessaging(_modMessaging);
             _modMessaging.FarmhandSlotDataReceived += OnFarmhandSlotDataReceived;
             _modMessaging.FarmhandItemReceived += OnFarmhandItemReceived;
             _modMessaging.FarmhandForceSleep += MultiSleepManager.TrySleepNowForFarmhand;
@@ -617,6 +618,14 @@ namespace StardewArchipelago
             // into them, so skipping this construction crashes even when the feature itself is off.
             var farmhandJojapocalypseManager = new JojapocalypseManager(_logger, _helper, Config, _harmony, _archipelago, farmhandLocationChecker, farmhandJojaLocationChecker, farmhandItemManager, farmhandNameSimplifier);
             farmhandJojapocalypseManager.PatchAllJojaLogic();
+
+            // Death link / shared co-op death: the host installs these hooks when it connects to AP
+            // (StardewArchipelagoClient.InitializeDeathLink), which a farmhand never does - so a farmhand's
+            // deaths were never reported. On a farmhand, DeathManager forwards them to the host instead.
+            if (_archipelago.SlotData.DeathLink)
+            {
+                new DeathManager(_logger, _helper, _harmony, _archipelago).HookIntoDeathlinkEvents();
+            }
             _farmhandCleanups.Add(farmhandJojapocalypseManager.CleanAllJojaLogic);
             }
             catch (Exception ex)
@@ -880,6 +889,7 @@ namespace StardewArchipelago
         private void OnDayStarted(object sender, DayStartedEventArgs e)
         {
             SeasonsRandomizer.CorrectFarmhandSeasonIfNeeded();
+            DeathManager.ResetDeathLinkFlag();
             DoArchipelagoNewDayProcesses();
 
             if (MultiSleepManager.TryDoMultiSleepOnDayStarted())

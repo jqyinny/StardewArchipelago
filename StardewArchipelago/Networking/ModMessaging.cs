@@ -28,6 +28,8 @@ namespace StardewArchipelago.Networking
         private const string MESSAGE_TYPE_FORCE_SLEEP = "ForceSleep";
         private const string MESSAGE_TYPE_HOST_LOCATION_CHECKED = "HostLocationChecked";
         private const string MESSAGE_TYPE_SEASONS_ORDER = "SeasonsOrder";
+        private const string MESSAGE_TYPE_FARMHAND_DIED = "FarmhandDied";
+        private const string MESSAGE_TYPE_COOP_DEATH = "CoopDeath";
 
         private readonly ILogger _logger;
         private readonly IModHelper _helper;
@@ -84,6 +86,12 @@ namespace StardewArchipelago.Networking
 
         // Fires on a farmhand when the host picks a new season (see SeasonsRandomizer.SeasonsOrderChanged).
         public event Action<List<string>> FarmhandSeasonsOrderReceived;
+
+        // Shared co-op death (see DeathManager). Host side: a farmhand died (sender id, message).
+        public event Action<long, CoopDeathMessage> HostFarmhandDied;
+
+        // Farmhand side: the host says this player must die (another player died, or an AP death link).
+        public event Action<CoopDeathMessage> FarmhandCoopDeath;
 
         public ModMessaging(ILogger logger, IModHelper helper, IManifest manifest, TesterFeatures testerFeatures, StardewArchipelagoClient archipelago, string modId)
         {
@@ -187,6 +195,36 @@ namespace StardewArchipelago.Networking
             _helper.Multiplayer.SendMessage(new LocationCheckedMessage(locationName), MESSAGE_TYPE_HOST_LOCATION_CHECKED, modIDs: new[] { _modId });
         }
 
+        public void SendFarmhandDied(string playerName, string cause)
+        {
+            if (Context.IsMainPlayer)
+            {
+                return;
+            }
+
+            _helper.Multiplayer.SendMessage(new CoopDeathMessage(playerName, cause), MESSAGE_TYPE_FARMHAND_DIED, modIDs: new[] { _modId }, playerIDs: new[] { Game1.MasterPlayer.UniqueMultiplayerID });
+        }
+
+        // Host -> every online farmhand except `exceptPlayerId` (the one who died, if any).
+        public void BroadcastCoopDeath(string playerName, string cause, long? exceptPlayerId = null)
+        {
+            if (!Context.IsMainPlayer)
+            {
+                return;
+            }
+
+            var targets = Game1.getOnlineFarmers()
+                .Where(x => x != null && x.UniqueMultiplayerID != Game1.player.UniqueMultiplayerID && x.UniqueMultiplayerID != exceptPlayerId)
+                .Select(x => x.UniqueMultiplayerID)
+                .ToArray();
+            if (!targets.Any())
+            {
+                return;
+            }
+
+            _helper.Multiplayer.SendMessage(new CoopDeathMessage(playerName, cause), MESSAGE_TYPE_COOP_DEATH, modIDs: new[] { _modId }, playerIDs: targets);
+        }
+
         public void BroadcastSeasonsOrder(List<string> seasonsOrder)
         {
             if (!Context.IsMainPlayer)
@@ -282,6 +320,18 @@ namespace StardewArchipelago.Networking
                         break;
                     case MESSAGE_TYPE_FORCE_SLEEP:
                         HandleForceSleep();
+                        break;
+                    case MESSAGE_TYPE_FARMHAND_DIED:
+                        if (Context.IsMainPlayer)
+                        {
+                            HostFarmhandDied?.Invoke(e.FromPlayerID, e.ReadAs<CoopDeathMessage>());
+                        }
+                        break;
+                    case MESSAGE_TYPE_COOP_DEATH:
+                        if (!Context.IsMainPlayer)
+                        {
+                            FarmhandCoopDeath?.Invoke(e.ReadAs<CoopDeathMessage>());
+                        }
                         break;
                     case MESSAGE_TYPE_SEASONS_ORDER:
                         if (!Context.IsMainPlayer)
