@@ -774,6 +774,8 @@ namespace StardewArchipelago
 
             _hintHelper.GiveHintTip(_archipelago.GetSession());
             NoHouseInjections.BeHomelessIfNeeded();
+            // A farmhand can join (and create their character) mid-session, after PatchAllGameLogic already ran.
+            _logicPatcher?.GiveQuickStartIridiumBandsToFarmhands();
         }
 
         private void OnDayEnding(object sender, DayEndingEventArgs e)

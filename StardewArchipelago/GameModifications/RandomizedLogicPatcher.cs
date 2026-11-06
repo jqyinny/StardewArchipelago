@@ -123,6 +123,12 @@ namespace StardewArchipelago.GameModifications
             GatewayGazetteInjections.Initialize(logger, modHelper, archipelago, entranceManager, state);
         }
 
+        // Host-only; see StartingResources.GiveQuickStartIridiumBandsToFarmhands.
+        public void GiveQuickStartIridiumBandsToFarmhands()
+        {
+            _startingResources.GiveQuickStartIridiumBandsToFarmhands();
+        }
+
         public void PatchAllGameLogic()
         {
             PatchPickUpLocation();

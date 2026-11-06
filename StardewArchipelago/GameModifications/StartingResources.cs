@@ -49,13 +49,9 @@ namespace StardewArchipelago.GameModifications
             // GivePlayerQuickStart above only ever targets the shared "FarmHouse" by name, so it must
             // stay host-only (above) - a farmhand's own GivePlayerStartingResources call (this whole
             // method also runs on a farmhand's process, see ModEntry.OnFarmhandSlotDataReceived) would
-            // otherwise dump a second full starter kit into the host's house. This covers the actual
-            // per-player need instead: whichever player is running right now gets an Iridium Band in
-            // their OWN cabin specifically (skipped entirely for the host, whose home is "FarmHouse").
-            // Unlike the Day-0-only block above, this isn't day-gated, since a farmhand can join - and
-            // get their cabin - on any day; it's idempotent via a mail flag so a farmhand reconnecting
-            // later doesn't get a second band.
-            GiveQuickStartIridiumBandToMyOwnCabin();
+            // otherwise dump a second full starter kit into the host's house. Farmhands still each get
+            // their own Iridium Band, placed by the host next to the host's starter kit (see below).
+            GiveQuickStartIridiumBandsToFarmhands();
 
             RemoveHouse();
             RemoveShippingBin();
@@ -124,27 +120,50 @@ namespace StardewArchipelago.GameModifications
 #endif
         }
 
-        private const string QUICK_START_CABIN_BAND_MAIL_KEY = "apQuickStartIridiumBandGiven";
+        // Host-side, one flag per farmhand (keyed by their multiplayer ID). Stored on the host's own
+        // Farmer so only the host's process ever reads/writes it. Deliberately a different key from the
+        // old per-cabin "apQuickStartIridiumBandGiven" flag (set on the farmhand's Farmer).
+        private const string QUICK_START_FARMHAND_BAND_MAIL_KEY_PREFIX = "apQuickStartIridiumBandGivenTo_";
 
-        // Runs per-player (see the call site in GivePlayerStartingResources) rather than host-only
-        // sweeping every cabin, so it works regardless of whether a farmhand's cabin existed yet on Day
-        // 0 - including one built well after the host already finished their own Day-0 setup.
-        private void GiveQuickStartIridiumBandToMyOwnCabin()
+        // Host-only: every farmhand who has actually joined gets one Iridium Band in a gift box at the same
+        // spot as the host's own quick-start kit (GetGiftboxPlacement - inside the main FarmHouse, or outside
+        // its door with StartWithout.House). This used to be placed in the farmhand's own cabin from the
+        // farmhand's process, but a cabin isn't reachable early on (e.g. start_without Buildings), and a
+        // farmhand writing objects into a shared location isn't guaranteed to sync - the host owns these.
+        // Not day-gated, since a farmhand can join on any day; called both here (once per session) and from
+        // ModEntry.DoArchipelagoDayStartedProcesses (so a farmhand who joins mid-session gets it next morning).
+        public void GiveQuickStartIridiumBandsToFarmhands()
         {
-            if (!_archipelago.SlotData.QuickStart || Game1.player.hasOrWillReceiveMail(QUICK_START_CABIN_BAND_MAIL_KEY))
+            if (!Context.IsMainPlayer || !_archipelago.SlotData.QuickStart)
             {
                 return;
             }
 
-            if (Utility.getHomeOfFarmer(Game1.player) is not FarmHouse home || home.NameOrUniqueName == "FarmHouse")
+            if (Game1.getLocationFromName("FarmHouse") is not FarmHouse farmhouse)
             {
                 return;
             }
 
-            var bedSpot = home.GetPlayerBedSpot();
-            var iridiumBand = _stardewItemManager.GetItemByName("Iridium Band").PrepareForGivingToFarmer();
-            CreateGiftBoxItemInEmptySpot(home, Utility.PointToVector2(bedSpot), iridiumBand);
-            Game1.player.mailReceived.Add(QUICK_START_CABIN_BAND_MAIL_KEY);
+            foreach (var farmhand in Game1.getAllFarmhands())
+            {
+                // Every cabin has a placeholder Farmer until someone claims it; only give to real players.
+                if (farmhand == null || !farmhand.isCustomized.Value || string.IsNullOrWhiteSpace(farmhand.Name))
+                {
+                    continue;
+                }
+
+                var mailKey = $"{QUICK_START_FARMHAND_BAND_MAIL_KEY_PREFIX}{farmhand.UniqueMultiplayerID}";
+                if (Game1.player.mailReceived.Contains(mailKey))
+                {
+                    continue;
+                }
+
+                var (location, originalTile) = GetGiftboxPlacement(farmhouse);
+                var iridiumBand = _stardewItemManager.GetItemByName("Iridium Band").PrepareForGivingToFarmer();
+                CreateGiftBoxItemInEmptySpot(location, originalTile, iridiumBand);
+                Game1.player.mailReceived.Add(mailKey);
+                _logger.LogInfo($"Placed a quick-start Iridium Band for farmhand {farmhand.Name} next to the starter kit.");
+            }
         }
 
         private (GameLocation, Vector2) GetGiftboxPlacement(FarmHouse farmhouse)
