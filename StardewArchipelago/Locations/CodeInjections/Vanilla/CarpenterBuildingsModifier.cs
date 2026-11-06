@@ -131,6 +131,13 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         {
             foreach (var buildingName in buildingsData.Keys.ToArray())
             {
+                // Idempotent: never re-process our own "Free X" entries or add one twice (the edit can run
+                // more than once, e.g. stacked handlers on a farmhand that rejoined in the same session).
+                if (buildingName.StartsWith("Free ") || buildingsData.ContainsKey($"Free {buildingName}"))
+                {
+                    continue;
+                }
+
                 var buildingData = buildingsData[buildingName];
 
                 if (!_archipelago.SlotData.BuildingProgression.HasFlag(BuildingProgression.Progressive) && !buildingData.MagicalConstruction)

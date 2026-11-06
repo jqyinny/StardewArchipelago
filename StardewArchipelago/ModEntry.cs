@@ -75,6 +75,11 @@ namespace StardewArchipelago
         // See OnFarmhandSlotDataReceived: farmhand setup must run once per session, not once per snapshot.
         private bool _farmhandInitialized;
         private MailPatcher _farmhandMailPatcherForBackpacks;
+        // Event unsubscriptions for the farmhand-side objects built in OnFarmhandSlotDataReceived (the
+        // host's equivalents are cleaned in ResetArchipelago via their fields). Without this, a farmhand
+        // returning to title and rejoining in the same game session kept the old asset-edit handlers and
+        // added a second set, so every Data/* edit (building prices, shops, recipes, bundles...) ran twice.
+        private readonly List<Action> _farmhandCleanups = new();
         private AdvancedOptionsManager _advancedOptionsManager;
         private Mailman _mail;
         private ChatForwarder _chatForwarder;
@@ -171,6 +176,18 @@ namespace StardewArchipelago
             }
             State = new ArchipelagoStateDto();
             _farmhandInitialized = false;
+            foreach (var cleanup in _farmhandCleanups)
+            {
+                try
+                {
+                    cleanup();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Failed to clean up a farmhand-side handler: {ex}");
+                }
+            }
+            _farmhandCleanups.Clear();
 
             _harmony.UnpatchAll(ModManifest.UniqueID);
             _locationsPatcher?.CleanEvents();
@@ -496,6 +513,7 @@ namespace StardewArchipelago
             var farmhandJojaLocationChecker = new JojaLocationChecker(_archipelago, farmhandLocationChecker, new List<string>());
             var farmhandWeaponsManager = new WeaponsManager(_archipelago, farmhandItemManager, _archipelago.SlotData.Mods);
             var farmhandBundlesManager = new BundlesManager(_logger, _helper, _archipelago, farmhandItemManager);
+            _farmhandCleanups.Add(farmhandBundlesManager.CleanEvents);
             var farmhandBank = new BankHandler(_archipelago);
             var farmhandNameSimplifier = new NameSimplifier();
             var farmhandFriends = new Friends();
@@ -538,6 +556,7 @@ namespace StardewArchipelago
             // for this process.
             var farmhandLocationPatcher = new LocationPatcher(_logger, _helper, Config, _harmony, _archipelago, State, farmhandLocationChecker, farmhandJojaLocationChecker, farmhandItemManager, farmhandWeaponsManager, farmhandBundlesManager, farmhandSeedShopStockModifier, farmhandFriends, _farmhandItemParser.TrapManager, farmhandBank, farmhandNameSimplifier, _giftHandler.Sender, farmhandShippingBehaviors, _testerFeatures);
             farmhandLocationPatcher.ReplaceAllLocationsRewardsWithChecks();
+            _farmhandCleanups.Add(farmhandLocationPatcher.CleanEvents);
 
             // Same bug class as LocationPatcher above: a farmhand could already receive a mailed AP
             // letter (Mailman writes the text directly, no patch needed for that), but nothing ever
@@ -556,6 +575,7 @@ namespace StardewArchipelago
             // randomized entrance would just get the vanilla, unrandomized destination.
             var farmhandLogicPatcher = new RandomizedLogicPatcher(_logger, _helper, Config, _harmony, _archipelago, farmhandLocationChecker, farmhandItemManager, farmhandEntranceManager, farmhandSeedShopStockModifier, farmhandNameSimplifier, farmhandFriends, State, new BundleReader());
             farmhandLogicPatcher.PatchAllGameLogic();
+            _farmhandCleanups.Add(farmhandLogicPatcher.CleanEvents);
             // After the catch-up replay above, so this player's backpack letters are already in the mailbox.
             ApplyFarmhandStartWithoutBackpack();
 
@@ -592,6 +612,7 @@ namespace StardewArchipelago
             // into them, so skipping this construction crashes even when the feature itself is off.
             var farmhandJojapocalypseManager = new JojapocalypseManager(_logger, _helper, Config, _harmony, _archipelago, farmhandLocationChecker, farmhandJojaLocationChecker, farmhandItemManager, farmhandNameSimplifier);
             farmhandJojapocalypseManager.PatchAllJojaLogic();
+            _farmhandCleanups.Add(farmhandJojapocalypseManager.CleanAllJojaLogic);
             }
             catch (Exception ex)
             {
