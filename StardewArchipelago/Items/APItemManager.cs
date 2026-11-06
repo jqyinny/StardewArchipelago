@@ -35,7 +35,10 @@ namespace StardewArchipelago.Items
             // the item does (below, unchanged); farmhands just replay that same decision locally.
             _modMessaging.BroadcastItemReceived(receivedItem);
 
-            if (immediatelyIfPossible)
+            // Golden Walnuts always go through the shared-counter path (host increments
+            // netWorldState once), even in the non-immediate day-start batch - as a letter they'd
+            // become per-player walnut objects instead of the shared count every player sees.
+            if (immediatelyIfPossible || _itemParser.IsGoldenWalnutItem(receivedItem))
             {
                 if (_itemParser.TrySendItemImmediately(receivedItem))
                 {

@@ -54,6 +54,11 @@ namespace StardewArchipelago.Items
             ["5 Golden Walnuts"] = 5,
         };
 
+        public bool IsGoldenWalnutItem(ReceivedItem receivedItem)
+        {
+            return GoldenWalnutStacks.ContainsKey(receivedItem.ItemName);
+        }
+
         public bool TrySendItemImmediately(ReceivedItem receivedItem)
         {
 #if TILESANITY
