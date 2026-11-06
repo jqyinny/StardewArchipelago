@@ -171,12 +171,13 @@ namespace StardewArchipelago.Locations.InGameLocations
                 throw new ArgumentException($"Could not create {nameof(ObtainableArchipelagoLocation)} because there was no provided location name");
             }
 
-            if (locationChecker.IsLocationMissing(locationName))
+            if (locationChecker.IsLocationMissingSafe(locationName))
             {
                 var currentTime = GetUniqueTimeIdentifier();
                 if (currentTime != _lastTimeUpdatedActiveHints || _activeHints == null)
                 {
-                    _activeHints = archipelago.GetMyActiveHints();
+                    // Hints live on the AP server; a farmhand has no session, so it shows the check without hint info.
+                    _activeHints = archipelago.GetSession() != null ? archipelago.GetMyActiveHints() : Array.Empty<Hint>();
                     _lastTimeUpdatedActiveHints = currentTime;
                 }
                 var item = new ObtainableArchipelagoLocation(locationName.Trim(), logger, modHelper, locationChecker, archipelago, _activeHints, true);

@@ -60,7 +60,7 @@ namespace StardewArchipelago.Locations.ShopStockModifiers
 
                 var simplifiedName = _nameSimplifier.GetSimplifiedName(stardewItem.Name, stardewItem.GetQualifiedId());
                 var location = $"{simplifiedName}{Suffix.CHEFSANITY}";
-                if (!CraftingRecipe.cookingRecipes.ContainsKey(simplifiedName) || !_archipelago.LocationExists(location))
+                if (!CraftingRecipe.cookingRecipes.ContainsKey(simplifiedName) || !_archipelago.LocationExistsSafe(location))
                 {
                     continue;
                 }
@@ -84,7 +84,7 @@ namespace StardewArchipelago.Locations.ShopStockModifiers
 
                 var stardewItem = _stardewItemManager.GetItemByQualifiedId(item.ItemId) ?? _stardewItemManager.GetItemByQualifiedId(QualifiedItemIds.QualifiedObjectId(item.ItemId));
                 var location = $"{stardewItem.Name}{Suffix.CHEFSANITY}";
-                if (!_archipelago.LocationExists(location))
+                if (!_archipelago.LocationExistsSafe(location))
                 {
                     continue;
                 }

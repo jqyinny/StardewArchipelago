@@ -66,7 +66,9 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             _archipelago = archipelago;
             _locationChecker = locationChecker;
             _priceCalculator = new BackpackPriceCalculator();
-            _backpackLocationsInOrder = GetAllBackpackLocationsInOrder();
+            // Built lazily on first use (see GetBackpackLocationsInOrder): on a farmhand, Initialize can run
+            // before the host's location-name snapshot is applied, which would freeze an empty list forever.
+            _backpackLocationsInOrder = null;
             var biggerBackpackModEntryType = AccessTools.TypeByName("BiggerBackpack.ModEntry");
             if (biggerBackpackModEntryType != null)
             {
@@ -76,16 +78,36 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
         private static string[] GetAllBackpackLocationsInOrder()
         {
-            var backpackLocations = _locationChecker.GetAllLocations().Where(location => BACKPACK_LOCATION_NAMES.Any(packName => location.Contains(packName)));
+            // GetAllLocationNamesSafe instead of LocationChecker.GetAllLocations(), which is session-gated
+            // and returns nothing on a farmhand (so a farmhand could never buy a backpack).
+            var backpackLocations = _archipelago.GetAllLocationNamesSafe().Where(location => BACKPACK_LOCATION_NAMES.Any(packName => location.Contains(packName)));
             var sortedLocations = backpackLocations
                 .OrderBy(GetTier)
                 .ThenBy(GetNumberWithinTier);
             return sortedLocations.ToArray();
         }
 
+        private static string[] GetBackpackLocationsInOrder()
+        {
+            if (_backpackLocationsInOrder == null || _backpackLocationsInOrder.Length == 0)
+            {
+                _backpackLocationsInOrder = GetAllBackpackLocationsInOrder();
+            }
+
+            return _backpackLocationsInOrder;
+        }
+
+        private static bool IsBackpackLocationMissing(string location)
+        {
+            // Farmhand-safe: sees backpacks the other player already bought (see IsLocationMissingSafe).
+            return _locationChecker is StardewLocationChecker stardewLocationChecker
+                ? stardewLocationChecker.IsLocationMissingSafe(location)
+                : _locationChecker.IsLocationMissing(location);
+        }
+
         private static string GetNextBackpackLocation()
         {
-            return _backpackLocationsInOrder.FirstOrDefault(x => _locationChecker.IsLocationMissing(x));
+            return GetBackpackLocationsInOrder().FirstOrDefault(IsBackpackLocationMissing);
         }
 
         private static bool CanBuyNextBackpack()
@@ -96,7 +118,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 return false;
             }
 
-            var indexNextBackpack = Array.IndexOf(_backpackLocationsInOrder, nextBackpack);
+            var indexNextBackpack = Array.IndexOf(GetBackpackLocationsInOrder(), nextBackpack);
             return _archipelago.GetReceivedItemCountSafe(PROGRESSIVE_BACKPACK) >= indexNextBackpack;
         }
 

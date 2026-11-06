@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using System;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
 using StardewModdingAPI;
@@ -12,10 +13,10 @@ namespace StardewArchipelago.Locations.Festival
     {
         private static ILogger _logger;
         private static IModHelper _modHelper;
-        private static ArchipelagoClient _archipelago;
+        private static StardewArchipelagoClient _archipelago;
         private static LocationChecker _locationChecker;
 
-        public static void Initialize(ILogger logger, IModHelper modHelper, ArchipelagoClient archipelago, LocationChecker locationChecker)
+        public static void Initialize(ILogger logger, IModHelper modHelper, StardewArchipelagoClient archipelago, LocationChecker locationChecker)
         {
             _logger = logger;
             _modHelper = modHelper;
@@ -36,7 +37,7 @@ namespace StardewArchipelago.Locations.Festival
                 __result = true;
                 var numberOfThisTag = 1;
                 var locationName = string.Format(FestivalLocationNames.TROUT_DERBY_REWARD_PATTERN, numberOfThisTag);
-                while (_archipelago.LocationExists(locationName) && _locationChecker.IsLocationChecked(locationName))
+                while (_archipelago.LocationExistsSafe(locationName) && _locationChecker.IsLocationChecked(locationName))
                 {
                     numberOfThisTag++;
                     locationName = string.Format(FestivalLocationNames.TROUT_DERBY_REWARD_PATTERN, numberOfThisTag);

@@ -121,6 +121,23 @@ namespace StardewArchipelago.Locations
             return _archipelago.LocationExistsSafe(locationName);
         }
 
+        // Farmhand-safe "exists in this seed and hasn't been checked yet by anyone". On the host this is
+        // exactly the inherited IsLocationMissing. On a farmhand the inherited version only knows about
+        // the base class's local _checkedLocations list, which CoopLocationChecker never fills there, so
+        // it can't see checks the host (or another farmhand) already sent. The farmhand's synced
+        // checked-location cache (seeded at join, then kept live by the host's
+        // ModMessaging.BroadcastHostLocationChecked) is what makes a shop check bought by one player
+        // disappear for every player.
+        public bool IsLocationMissingSafe(string locationName)
+        {
+            if (_archipelago.GetSession() != null)
+            {
+                return IsLocationMissing(locationName);
+            }
+
+            return _archipelago.LocationExistsSafe(locationName) && !_archipelago.GetFarmhandCheckedLocationsSafe().Contains(locationName);
+        }
+
         public IEnumerable<string> GetLocationsByTag(string locationTag)
         {
             return GetAllLocationsSafe().Where(x => _archipelago.DataPackageCache.GetLocation(x).LocationTags.Contains(locationTag));

@@ -102,7 +102,7 @@ namespace StardewArchipelago.Locations.ShopStockModifiers
         /// <returns>true if this should be a check, false if not</returns>
         private bool IsItemKnownAsACheck(ShopItemData item, out string locationName, out string itemName)
         {
-            if (_archipelago.LocationExists(item.ObjectInternalName) || _archipelago.LocationExists(item.ItemId))
+            if (_archipelago.LocationExistsSafe(item.ObjectInternalName) || _archipelago.LocationExistsSafe(item.ItemId))
             {
                 locationName = item.ObjectInternalName;
                 itemName = item.ObjectInternalName;
@@ -121,7 +121,7 @@ namespace StardewArchipelago.Locations.ShopStockModifiers
             {
                 var stardewItem = _stardewItemManager.GetItemByQualifiedId(item.ItemId) ?? _stardewItemManager.GetItemByQualifiedId(QualifiedItemIds.QualifiedObjectId(item.ItemId));
                 var location = $"{stardewItem.Name}{Suffix.RECIPE}";
-                if (_archipelago.LocationExists(location))
+                if (_archipelago.LocationExistsSafe(location))
                 {
                     locationName = location;
                     itemName = $"{location} (not purchaseable)";
@@ -135,7 +135,7 @@ namespace StardewArchipelago.Locations.ShopStockModifiers
             if (QualifiedItemIds.IsBigCraftable(item.ItemId) && bigCraftablesData.ContainsKey(unqualifiedItemId))
             {
                 var bigCraftableData = bigCraftablesData[unqualifiedItemId];
-                if (_archipelago.LocationExists(bigCraftableData.Name))
+                if (_archipelago.LocationExistsSafe(bigCraftableData.Name))
                 {
                     locationName = bigCraftableData.Name;
                     itemName = bigCraftableData.Name;
@@ -155,7 +155,7 @@ namespace StardewArchipelago.Locations.ShopStockModifiers
             if (QualifiedItemIds.IsObject(item.ItemId) && objectsData.ContainsKey(unqualifiedItemId))
             {
                 var objectData = objectsData[unqualifiedItemId];
-                if (_archipelago.LocationExists(objectData.Name))
+                if (_archipelago.LocationExistsSafe(objectData.Name))
                 {
                     locationName = objectData.Name;
                     itemName = objectData.Name;
@@ -185,7 +185,7 @@ namespace StardewArchipelago.Locations.ShopStockModifiers
             {
                 var hatData = hatsData[unqualifiedItemId];
                 var hatName = hatData.Split('/')[0];
-                if (_archipelago.LocationExists(hatName))
+                if (_archipelago.LocationExistsSafe(hatName))
                 {
                     locationName = hatName;
                     itemName = hatName;
@@ -200,7 +200,7 @@ namespace StardewArchipelago.Locations.ShopStockModifiers
             {
                 var furnitureData = furnituresData[unqualifiedItemId];
                 var furnitureName = furnitureData.Split('/')[0];
-                if (_archipelago.LocationExists(furnitureName))
+                if (_archipelago.LocationExistsSafe(furnitureName))
                 {
                     locationName = furnitureName;
                     itemName = furnitureName;

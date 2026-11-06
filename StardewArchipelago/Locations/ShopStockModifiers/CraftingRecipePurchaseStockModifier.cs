@@ -61,7 +61,7 @@ namespace StardewArchipelago.Locations.ShopStockModifiers
                 }
 
                 var location = $"{stardewItem.Name}{Suffix.CRAFTSANITY}";
-                if (!_archipelago.LocationExists(location))
+                if (!_archipelago.LocationExistsSafe(location))
                 {
                     if (shopId == "QiGemShop")
                     {

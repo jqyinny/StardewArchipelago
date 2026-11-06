@@ -26,6 +26,7 @@ namespace StardewArchipelago.Networking
         private const string MESSAGE_TYPE_ITEM_RECEIVED = "ItemReceived";
         private const string MESSAGE_TYPE_CHAT_MESSAGE = "ChatMessage";
         private const string MESSAGE_TYPE_FORCE_SLEEP = "ForceSleep";
+        private const string MESSAGE_TYPE_HOST_LOCATION_CHECKED = "HostLocationChecked";
 
         private readonly ILogger _logger;
         private readonly IModHelper _helper;
@@ -152,6 +153,22 @@ namespace StardewArchipelago.Networking
             _helper.Multiplayer.SendMessage(new LocationCheckedMessage(locationName), MESSAGE_TYPE_LOCATION_CHECKED, modIDs: new[] { _modId });
         }
 
+        // The other direction of BroadcastLocationChecked: the host tells every farmhand about each
+        // check it records (its own, or one a farmhand forwarded), so every farmhand's checked-location
+        // cache stays live after the one-time join snapshot. This is what lets a shop check bought by
+        // one player disappear for everyone (see StardewLocationChecker.IsLocationMissingSafe).
+        // Called from CoopLocationChecker's host branch, the single path every check goes through.
+        public void BroadcastHostLocationChecked(string locationName)
+        {
+            if (!Context.IsMainPlayer)
+            {
+                _logger.LogWarning("BroadcastHostLocationChecked was called by a farmhand; only the host should send this message.");
+                return;
+            }
+
+            _helper.Multiplayer.SendMessage(new LocationCheckedMessage(locationName), MESSAGE_TYPE_HOST_LOCATION_CHECKED, modIDs: new[] { _modId });
+        }
+
         public void BroadcastItemReceived(ReceivedItem receivedItem)
         {
             if (!Context.IsMainPlayer)
@@ -236,6 +253,9 @@ namespace StardewArchipelago.Networking
                     case MESSAGE_TYPE_FORCE_SLEEP:
                         HandleForceSleep();
                         break;
+                    case MESSAGE_TYPE_HOST_LOCATION_CHECKED:
+                        HandleHostLocationChecked(e.ReadAs<LocationCheckedMessage>());
+                        break;
                 }
             }
             catch (Exception ex)
@@ -278,6 +298,16 @@ namespace StardewArchipelago.Networking
             }
 
             _hostLocationChecker.AddCheckedLocation(message.LocationName);
+        }
+
+        private void HandleHostLocationChecked(LocationCheckedMessage message)
+        {
+            if (Context.IsMainPlayer)
+            {
+                return;
+            }
+
+            _archipelago.RecordFarmhandCheckedLocation(message.LocationName);
         }
 
         private void HandleItemReceived(ItemReceivedMessage message)

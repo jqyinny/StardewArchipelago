@@ -64,7 +64,7 @@ namespace StardewArchipelago.Locations.ShopStockModifiers
         private void CreateEquivalentArchipelagoLocation(ShopData fishShopData, ShopItemData item, ToolData toolData)
         {
             var location = $"Purchase {toolData.Name}";
-            if (_archipelago.LocationExists(location))
+            if (_archipelago.LocationExistsSafe(location))
             {
                 fishShopData.Items.Insert(fishShopData.Items.IndexOf(item), CreateArchipelagoLocation(item, location));
             }
