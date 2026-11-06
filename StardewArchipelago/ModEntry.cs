@@ -892,6 +892,9 @@ namespace StardewArchipelago
 
         private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
+            // Farmhand: retry a host-requested multi-day-sleep bedtime until it's safe (see MultiSleepManager).
+            MultiSleepManager.TryProcessPendingFarmhandSleep();
+
             // Split-screen quirk: _archipelago is one shared object for the whole process (ModEntry is a
             // per-process singleton, not per-screen), so _archipelago.IsConnected reads true from EITHER
             // screen's context once the host connects - it's not a reliable "am I the host" signal there.

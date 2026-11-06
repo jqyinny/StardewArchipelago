@@ -72,18 +72,29 @@ namespace StardewArchipelago.GameModifications.MultiSleep
             // their bed.
             if (Context.IsMainPlayer)
             {
+                _logger?.LogInfo($"Continuing multi-day sleep ({Game1.Date}); asking farmhands to go to bed.");
                 _modMessaging?.BroadcastForceSleep();
             }
             _currentMultiSleep.KeepSleeping();
             return true;
         }
 
+        // Farmhand: a pending "go to sleep" request from the host, retried every tick until it's safe.
+        private static bool _farmhandSleepPending;
+        private static int _farmhandSleepPendingTicks;
+        private const int FARMHAND_SLEEP_LOG_EVERY_TICKS = 300; // ~5s at 60 ticks/s
+
         // Called on a farmhand's process when the host broadcasts that it's continuing a multi-day
         // sleep (see ModMessaging.FarmhandForceSleep/BroadcastForceSleep). Deliberately does nothing
         // but the farmhand's own ordinary "go to sleep" - the actual day-advance (Game1.newDaySync
-        // etc.) stays entirely host-driven. If it's not safe to sleep right now (mid-event, already
-        // mid-transition, passed out), this silently skips rather than forcing through a bad state -
-        // the farmhand may lag a day behind rather than the game breaking.
+        // etc.) stays entirely host-driven.
+        //
+        // The host sends this the moment its own day starts, which is often while the farmhand is still
+        // finishing its own new-day transition (Game1.newDay, fade-in, end-of-night menus) - exactly the
+        // "not safe right now" states. This used to silently drop the request in that case, but vanilla
+        // won't end the day until every player sleeps, so the host then waited at the new-day sync forever
+        // (a freeze with nothing in either log). Now the request is kept and retried each tick
+        // (TryProcessPendingFarmhandSleep) until it's safe.
         public static void TrySleepNowForFarmhand()
         {
             if (Context.IsMainPlayer)
@@ -91,18 +102,77 @@ namespace StardewArchipelago.GameModifications.MultiSleep
                 return;
             }
 
-            if (Game1.eventUp || Game1.newDay || !Game1.shouldTimePass() || Game1.player.passedOut)
+            _logger?.LogInfo("Host is continuing a multi-day sleep; this farmhand will go to bed as soon as it safely can.");
+            _farmhandSleepPending = true;
+            _farmhandSleepPendingTicks = 0;
+            TryProcessPendingFarmhandSleep();
+        }
+
+        // Farmhand, every update tick (ModEntry.OnUpdateTicked).
+        public static void TryProcessPendingFarmhandSleep()
+        {
+            if (!_farmhandSleepPending || Context.IsMainPlayer)
             {
+                return;
+            }
+
+            _farmhandSleepPendingTicks++;
+            var blockedReason = GetFarmhandSleepBlockedReason();
+            if (blockedReason != null)
+            {
+                if (_farmhandSleepPendingTicks % FARMHAND_SLEEP_LOG_EVERY_TICKS == 0)
+                {
+                    _logger?.LogInfo($"Still waiting to put this farmhand to bed for the host's multi-day sleep: {blockedReason}.");
+                }
+                return;
+            }
+
+            _farmhandSleepPending = false;
+            if (Game1.player.isInBed.Value && Game1.player.timeWentToBed.Value > 0)
+            {
+                // Already asleep / readied for bed (e.g. the player went to bed manually).
+                _logger?.LogInfo("Farmhand is already in bed for the host's multi-day sleep.");
                 return;
             }
 
             if (Utility.getHomeOfFarmer(Game1.player) is not FarmHouse home)
             {
+                _logger?.LogWarning("Host is multi-day sleeping, but this farmhand has no home to sleep in - sleep in a bed manually.");
                 return;
             }
 
+            _logger?.LogInfo($"Putting this farmhand to bed for the host's multi-day sleep (after {_farmhandSleepPendingTicks} ticks).");
             var startSleepMethod = _modHelper.Reflection.GetMethod(home, "startSleep");
             startSleepMethod.Invoke();
+        }
+
+        private static string GetFarmhandSleepBlockedReason()
+        {
+            if (!Context.IsWorldReady)
+            {
+                return "world not ready";
+            }
+            if (Game1.newDay)
+            {
+                return "still finishing the new day";
+            }
+            if (Game1.eventUp)
+            {
+                return "an event is playing";
+            }
+            if (Game1.player.passedOut)
+            {
+                return "passed out";
+            }
+            if (Game1.activeClickableMenu != null)
+            {
+                return $"a menu is open ({Game1.activeClickableMenu.GetType().Name})";
+            }
+            if (!Game1.shouldTimePass())
+            {
+                return "game is paused";
+            }
+            return null;
         }
 
         public void InjectMultiSleepOption(SlotData slotData)
