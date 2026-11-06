@@ -362,7 +362,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.MonsterSlayer
 
 
             var apLocation = $"{MONSTER_ERADICATION_AP_PREFIX}{goalName}";
-            if (_archipelago.GetLocationId(apLocation) > -1)
+            if (_archipelago.LocationExistsSafe(apLocation))
             {
                 _locationChecker.AddCheckedLocation(apLocation);
             }

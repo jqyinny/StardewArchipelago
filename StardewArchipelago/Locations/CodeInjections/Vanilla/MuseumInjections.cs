@@ -139,7 +139,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             for (var i = 1; i <= numberDonated; i++)
             {
                 var apLocation = string.Format(apLocationTemplate, MUSEUMSANITY_PREFIX, i);
-                if (_archipelago.GetLocationId(apLocation) > -1)
+                if (_archipelago.LocationExistsSafe(apLocation))
                 {
                     _locationChecker.AddCheckedLocation(apLocation);
                 }
@@ -165,7 +165,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             if (requiredItems.All(museumItems.Contains))
             {
                 var apLocation = $"{MUSEUMSANITY_PREFIX} {apSubLocation}";
-                if (_archipelago.GetLocationId(apLocation) > -1)
+                if (_archipelago.LocationExistsSafe(apLocation))
                 {
                     _locationChecker.AddCheckedLocation(apLocation);
                 }
@@ -184,7 +184,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 var donatedItem = _itemManager.GetObjectById(museumItemId);
                 var donatedItemName = donatedItem.Name;
                 var apLocation = $"{MUSEUMSANITY_PREFIX} {donatedItemName}";
-                if (_archipelago.GetLocationId(apLocation) > -1)
+                if (_archipelago.LocationExistsSafe(apLocation))
                 {
                     _locationChecker.AddCheckedLocation(apLocation);
                 }

@@ -93,7 +93,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             var fish = _itemManager.GetItemByQualifiedId(itemId);
             var fishName = fish.Name;
             var apLocation = $"{FISHSANITY_PREFIX}{fishName}";
-            if (_archipelago.GetLocationId(apLocation) > -1)
+            if (_archipelago.LocationExistsSafe(apLocation))
             {
                 _locationChecker.AddCheckedLocation(apLocation);
             }
@@ -297,7 +297,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 if (itemCaught != null && _modHelper.ModRegistry.IsLoaded(ModUniqueIds.UniqueIds[ModNames.AUTOMATE]))
                 {
                     var apLocation = $"{FISHSANITY_PREFIX}{itemCaught.Name}";
-                    if (_archipelago.GetLocationId(apLocation) > -1)
+                    if (_archipelago.LocationExistsSafe(apLocation))
                     {
                         _locationChecker.AddCheckedLocation(apLocation);
                     }

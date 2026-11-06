@@ -98,7 +98,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                     continue;
                 }
                 var apLocation = $"{SHIPSANITY_PREFIX}{name}";
-                if (_archipelago.GetLocationId(apLocation) > -1)
+                if (_archipelago.LocationExistsSafe(apLocation))
                 {
                     _locationChecker.AddCheckedLocation(apLocation);
                 }
@@ -124,7 +124,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         //    if (sveMappedItems.Contains(name))
         //    {
         //        var apLocation = $"{SHIPSANITY_PREFIX}{name}";
-        //        if (_archipelago.GetLocationId(apLocation) > -1)
+        //        if (_archipelago.LocationExistsSafe(apLocation))
         //        {
         //            _logger.LogWarning($"Bugfix caught this for the beta async.  If this isn't that game, let the developers know there's a bug!");
         //            _locationChecker.AddCheckedLocation(apLocation);

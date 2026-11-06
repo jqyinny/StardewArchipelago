@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using System;
 using System.Collections.Generic;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
@@ -13,11 +14,11 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         public const string COOKING_LOCATION_PREFIX = "Cook ";
 
         private static ILogger _logger;
-        private static ArchipelagoClient _archipelago;
+        private static StardewArchipelagoClient _archipelago;
         private static LocationChecker _locationChecker;
         private static StardewItemManager _itemManager;
 
-        public static void Initialize(ILogger logger, ArchipelagoClient archipelago, LocationChecker locationChecker, StardewItemManager itemManager)
+        public static void Initialize(ILogger logger, StardewArchipelagoClient archipelago, LocationChecker locationChecker, StardewItemManager itemManager)
         {
             _logger = logger;
             _archipelago = archipelago;
@@ -43,7 +44,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                     cookedItemName = _renamedItems[itemId];
                 }
                 var apLocation = $"{COOKING_LOCATION_PREFIX}{cookedItemName}";
-                if (_archipelago.GetLocationId(apLocation) > -1)
+                if (_archipelago.LocationExistsSafe(apLocation))
                 {
                     _locationChecker.AddCheckedLocation(apLocation);
                     return;
