@@ -3,7 +3,9 @@ using KaitoKid.Utilities.Interfaces;
 using Microsoft.Xna.Framework;
 using StardewArchipelago.Archipelago;
 using StardewArchipelago.Archipelago.SlotData.SlotEnums;
+using StardewArchipelago.Constants.Vanilla;
 using StardewArchipelago.Extensions;
+using StardewArchipelago.Items.Unlocks.Vanilla;
 using StardewArchipelago.GameModifications.CodeInjections;
 using StardewArchipelago.Locations;
 using StardewArchipelago.Locations.CodeInjections.Vanilla;
@@ -44,6 +46,13 @@ namespace StardewArchipelago.GameModifications
                 GivePlayerQuickStart();
                 RemoveStartingTools();
                 RemoveStartingBackpack();
+            }
+
+            // The block above is host-only and Day-0-only, so a farmhand (who creates their character later)
+            // always kept vanilla's starting tools even with start_without Tools.
+            if (!Context.IsMainPlayer)
+            {
+                RemoveFarmhandStartingTools();
             }
 
             // GivePlayerQuickStart above only ever targets the shared "FarmHouse" by name, so it must
@@ -196,6 +205,46 @@ namespace StardewArchipelago.GameModifications
             }
 
             Game1.player.Items.Clear();
+        }
+
+        private const string FARMHAND_STARTING_TOOLS_REMOVED_MAIL_KEY = "apFarmhandStartingToolsRemoved";
+
+        // Farmhand counterpart of RemoveStartingTools, once per farmer (flag). Not a blanket Items.Clear()
+        // like the host's Day-0 version, since a farmhand can join on any day: only removes vanilla starter
+        // tools that are still base level AND whose Progressive item hasn't been received yet - i.e. tools
+        // this player shouldn't have at all. This matters beyond appearance: a Progressive tool letter
+        // upgrades whatever tool of that type already exists (LetterActions.ReceiveProgressiveTool), so a
+        // kept vanilla axe would turn the first Progressive Axe into a copper axe instead of a basic one.
+        private void RemoveFarmhandStartingTools()
+        {
+            if (!_archipelago.SlotData.StartWithout.HasFlag(StartWithout.Tools) || Game1.player.mailReceived.Contains(FARMHAND_STARTING_TOOLS_REMOVED_MAIL_KEY))
+            {
+                return;
+            }
+
+            var items = Game1.player.Items;
+            for (var i = 0; i < items.Count; i++)
+            {
+                var progressiveItemName = items[i] switch
+                {
+                    StardewValley.Tools.Axe { UpgradeLevel: 0 } => ToolUnlockManager.PROGRESSIVE_AXE,
+                    StardewValley.Tools.Pickaxe { UpgradeLevel: 0 } => ToolUnlockManager.PROGRESSIVE_PICKAXE,
+                    StardewValley.Tools.Hoe { UpgradeLevel: 0 } => $"{ToolUnlockManager.PROGRESSIVE_TOOL_AP_PREFIX}Hoe",
+                    StardewValley.Tools.WateringCan { UpgradeLevel: 0 } => $"{ToolUnlockManager.PROGRESSIVE_TOOL_AP_PREFIX}Watering Can",
+                    StardewValley.Tools.MeleeWeapon weapon when weapon.QualifiedItemId == QualifiedItemIds.SCYTHE => ToolUnlockManager.PROGRESSIVE_SCYTHE,
+                    _ => null,
+                };
+
+                if (progressiveItemName == null || _archipelago.HasReceivedItemSafe(progressiveItemName))
+                {
+                    continue;
+                }
+
+                _logger.LogInfo($"start_without Tools: removing farmhand's starting {items[i].Name}.");
+                items[i] = null;
+            }
+
+            Game1.player.mailReceived.Add(FARMHAND_STARTING_TOOLS_REMOVED_MAIL_KEY);
         }
 
         private void RemoveStartingBackpack()
