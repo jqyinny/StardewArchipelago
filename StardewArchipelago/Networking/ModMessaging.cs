@@ -45,6 +45,7 @@ namespace StardewArchipelago.Networking
         private Dictionary<string, int> _lastKnownReceivedItemCounts;
         private HashSet<string> _lastKnownLocationNames;
         private HashSet<string> _lastKnownCheckedLocationNames;
+        private Dictionary<string, ScoutedLocationDto> _lastKnownScoutedLocations;
 
         // Only meaningful on the host: the real, connected checker that should actually receive a
         // farmhand's reported checks. Set via SetHostLocationChecker once InitializeAfterConnection
@@ -138,8 +139,21 @@ namespace StardewArchipelago.Networking
             // StardewArchipelagoClient) - this is what makes GetAllLocationsNotCheckedSafe (behind the
             // crafting-recipe AP symbol, among others) correct for a farmhand instead of just empty.
             _lastKnownCheckedLocationNames = _hostLocationChecker?.GetAllLocationsAlreadyChecked()?.ToHashSet();
+            // What each not-yet-checked location holds, so farmhand shops can show the real item sprite
+            // (farmhands can't scout). Scouted once here, without hints; blocking, but only at connect time.
+            _lastKnownScoutedLocations = _archipelago.GetScoutSnapshotForFarmhands(GetUncheckedLocationNames());
             _helper.Multiplayer.SendMessage(new HostConnectedMessage(slotName), MESSAGE_TYPE_HOST_CONNECTED, modIDs: new[] { _modId });
-            _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(slotName, slotDataFields, _lastKnownState, _lastKnownReceivedItemCounts, _lastKnownLocationNames, _lastKnownCheckedLocationNames), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId });
+            _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(slotName, slotDataFields, _lastKnownState, _lastKnownReceivedItemCounts, _lastKnownLocationNames, _lastKnownCheckedLocationNames, _lastKnownScoutedLocations), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId });
+        }
+
+        private IEnumerable<string> GetUncheckedLocationNames()
+        {
+            if (_lastKnownLocationNames == null)
+            {
+                return null;
+            }
+
+            return _lastKnownCheckedLocationNames == null ? _lastKnownLocationNames : _lastKnownLocationNames.Except(_lastKnownCheckedLocationNames);
         }
 
         public void BroadcastLocationChecked(string locationName)
@@ -220,8 +234,10 @@ namespace StardewArchipelago.Networking
             _lastKnownReceivedItemCounts = _archipelago.GetAllReceivedItemNamesAndCounts();
             _lastKnownLocationNames = _archipelago.GetAllLocationNamesForSync();
             _lastKnownCheckedLocationNames = _hostLocationChecker?.GetAllLocationsAlreadyChecked()?.ToHashSet();
+            // Reuses the host's one-time scout cache (see GetScoutSnapshotForFarmhands) - no re-scouting per peer.
+            _lastKnownScoutedLocations = _archipelago.GetScoutSnapshotForFarmhands(GetUncheckedLocationNames());
             _helper.Multiplayer.SendMessage(new HostConnectedMessage(_lastKnownSlotName), MESSAGE_TYPE_HOST_CONNECTED, modIDs: new[] { _modId }, playerIDs: new[] { e.Peer.PlayerID });
-            _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(_lastKnownSlotName, _lastKnownSlotDataFields, _lastKnownState, _lastKnownReceivedItemCounts, _lastKnownLocationNames, _lastKnownCheckedLocationNames), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId }, playerIDs: new[] { e.Peer.PlayerID });
+            _helper.Multiplayer.SendMessage(new SlotDataSnapshotMessage(_lastKnownSlotName, _lastKnownSlotDataFields, _lastKnownState, _lastKnownReceivedItemCounts, _lastKnownLocationNames, _lastKnownCheckedLocationNames, _lastKnownScoutedLocations), MESSAGE_TYPE_SLOT_DATA_SNAPSHOT, modIDs: new[] { _modId }, playerIDs: new[] { e.Peer.PlayerID });
         }
 
         private void OnModMessageReceived(object sender, ModMessageReceivedEventArgs e)
@@ -286,6 +302,10 @@ namespace StardewArchipelago.Networking
             if (message.CheckedLocationNames != null)
             {
                 _archipelago.SeedCheckedLocationsFromSnapshot(message.CheckedLocationNames);
+            }
+            if (message.ScoutedLocations != null)
+            {
+                _archipelago.SeedScoutedLocationsFromSnapshot(message.ScoutedLocations);
             }
             FarmhandSlotDataReceived?.Invoke(message.State);
         }

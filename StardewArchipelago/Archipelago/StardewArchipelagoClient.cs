@@ -198,6 +198,58 @@ namespace StardewArchipelago.Archipelago
             _farmhandCheckedLocations = new HashSet<string>(checkedLocationNames);
         }
 
+        // Scouting needs a live session, so a farmhand can't do it (shops would show only the generic AP
+        // symbol). Instead the host scouts every not-yet-checked location once, WITHOUT creating hints,
+        // anonymizes the player names (a farmhand has no Players list), and ships the result in the
+        // snapshot. ScoutStardewLocation(s) read from this cache when there is no session.
+        private Dictionary<string, ScoutedLocation> _farmhandScoutedLocations;
+        private Dictionary<string, ScoutedLocationDto> _hostScoutSnapshot;
+
+        public void SeedScoutedLocationsFromSnapshot(Dictionary<string, ScoutedLocationDto> scouts)
+        {
+            _farmhandScoutedLocations = scouts.ToDictionary(x => x.Key, x => new ScoutedLocation(x.Value.LocationName, x.Value.ItemName, x.Value.PlayerName, x.Value.GameName,
+                x.Value.LocationId, x.Value.ItemId, x.Value.PlayerId, x.Value.ClassificationFlags));
+        }
+
+        // Host only. Scouted results never change for a location, so this scouts once (one bulk,
+        // synchronous request) and every later call - e.g. for each joining peer - reuses the cache.
+        public Dictionary<string, ScoutedLocationDto> GetScoutSnapshotForFarmhands(IEnumerable<string> uncheckedLocationNames)
+        {
+            if (_hostScoutSnapshot != null)
+            {
+                return _hostScoutSnapshot;
+            }
+
+            var session = GetSession();
+            if (session == null || uncheckedLocationNames == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                var anonymize = ModEntry.Instance.Config.AnonymizeNamesInChat;
+                var scouted = ScoutManyLocations(uncheckedLocationNames.ToArray(), false);
+                _hostScoutSnapshot = scouted.Where(x => x.Value != null).ToDictionary(x => x.Key, x => new ScoutedLocationDto
+                {
+                    LocationName = x.Value.LocationName,
+                    ItemName = x.Value.ItemName,
+                    PlayerName = anonymize ? x.Value.PlayerName.AnonymizePlayerNames(session.Players) : x.Value.PlayerName,
+                    GameName = x.Value.GameName,
+                    LocationId = x.Value.LocationId,
+                    ItemId = x.Value.ItemId,
+                    PlayerId = x.Value.PlayerId,
+                    ClassificationFlags = x.Value.ClassificationFlags,
+                });
+                return _hostScoutSnapshot;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Could not scout locations for the farmhand snapshot; sending none. Error: {ex}");
+                return null;
+            }
+        }
+
         public void RecordFarmhandCheckedLocation(string locationName)
         {
             _farmhandCheckedLocations ??= new HashSet<string>();
@@ -512,6 +564,12 @@ namespace StardewArchipelago.Archipelago
                 return null;
             }
 
+            if (GetSession() == null)
+            {
+                // Farmhand: answer purely from the host's snapshot, never hint or touch the network.
+                return _farmhandScoutedLocations != null && _farmhandScoutedLocations.TryGetValue(locationName, out var farmhandScout) ? farmhandScout : null;
+            }
+
             var scoutBehavior = ShouldHint(createAsHint);
             ScoutedLocation scoutedLocation;
             if (scoutBehavior == ScoutingPreference.HintEverything)
@@ -547,6 +605,21 @@ namespace StardewArchipelago.Archipelago
 
         public Dictionary<string, ScoutedLocation> ScoutStardewLocations(IEnumerable<string> locationNames, bool createAsHint = false)
         {
+            if (GetSession() == null)
+            {
+                // Farmhand: answer purely from the host's snapshot, never hint or touch the network.
+                var cached = new Dictionary<string, ScoutedLocation>();
+                foreach (var locationName in locationNames)
+                {
+                    if (_farmhandScoutedLocations != null && _farmhandScoutedLocations.TryGetValue(locationName, out var farmhandScout))
+                    {
+                        cached[locationName] = farmhandScout;
+                    }
+                }
+
+                return cached;
+            }
+
             var scoutBehavior = ShouldHint(createAsHint);
             Dictionary<string, ScoutedLocation> scoutedLocations;
             if (scoutBehavior == ScoutingPreference.HintEverything)

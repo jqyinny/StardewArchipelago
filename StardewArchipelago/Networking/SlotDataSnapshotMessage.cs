@@ -12,12 +12,15 @@ namespace StardewArchipelago.Networking
         public HashSet<string> LocationNames { get; set; }
         public HashSet<string> CheckedLocationNames { get; set; }
 
+        public Dictionary<string, ScoutedLocationDto> ScoutedLocations { get; set; }
+
         public SlotDataSnapshotMessage()
         {
         }
 
-        public SlotDataSnapshotMessage(string slotName, Dictionary<string, object> slotDataFields, ArchipelagoStateDto state, Dictionary<string, int> receivedItemCounts, HashSet<string> locationNames, HashSet<string> checkedLocationNames)
+        public SlotDataSnapshotMessage(string slotName, Dictionary<string, object> slotDataFields, ArchipelagoStateDto state, Dictionary<string, int> receivedItemCounts, HashSet<string> locationNames, HashSet<string> checkedLocationNames, Dictionary<string, ScoutedLocationDto> scoutedLocations)
         {
+            ScoutedLocations = scoutedLocations;
             SlotName = slotName;
             SlotDataFields = slotDataFields;
             State = state;
