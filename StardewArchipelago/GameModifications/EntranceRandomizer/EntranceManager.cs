@@ -302,9 +302,10 @@ namespace StardewArchipelago.GameModifications.EntranceRandomizer
 
             _checkedEntrancesToday.Add(desiredWarpKey);
 
+            var locationDestinationNameWithPosition = locationDestinationName; // TryGetClosestWarpPointTo strips "|x|y"
             if (!locationOriginName.TryGetClosestWarpPointTo(ref locationDestinationName, _equivalentAreas, out var locationOrigin, out var warpPoint))
             {
-                if (TryFindWarpFromDestinationSide(locationOriginName, locationDestinationName, out warpRequest))
+                if (TryFindWarpFromDestinationSide(locationOriginName, locationDestinationNameWithPosition, out warpRequest))
                 {
                     _logger.LogDebug($"Built warp for {desiredWarpKey} from {locationDestinationName}'s side (origin has no usable warps here).");
                     generatedWarps[desiredWarpKey] = warpRequest;
@@ -333,10 +334,12 @@ namespace StardewArchipelago.GameModifications.EntranceRandomizer
         // IslandNorth" fell back to vanilla. The destination is a normal location with its own warp back to
         // the origin, so land the player on the open tile next to that warp, facing away from it - where the
         // origin's exit would have put them.
-        private bool TryFindWarpFromDestinationSide(string locationOriginName, string locationDestinationName, out WarpRequest warpRequest)
+        private bool TryFindWarpFromDestinationSide(string locationOriginName, string locationDestinationNameWithPosition, out WarpRequest warpRequest)
         {
             warpRequest = null;
             var originTrueName = locationOriginName.Split("|")[0];
+            var destinationParts = locationDestinationNameWithPosition.Split("|");
+            var locationDestinationName = destinationParts[0];
             var destination = Game1.getLocationFromName(locationDestinationName);
             if (destination?.Map == null)
             {
@@ -349,7 +352,14 @@ namespace StardewArchipelago.GameModifications.EntranceRandomizer
                 return false;
             }
 
+            // A destination can have several doors back to the same origin (Island North has the volcano's main
+            // entrance and its river exit); the key's "|x|y" says which one, so use the nearest to it.
             var warpBack = warpsBackToOrigin.First();
+            if (destinationParts.Length >= 3 && int.TryParse(destinationParts[1], out var hintX) && int.TryParse(destinationParts[2], out var hintY))
+            {
+                var hint = new Point(hintX, hintY);
+                warpBack = warpsBackToOrigin.OrderBy(x => x.GetTotalDistance(hint)).First();
+            }
             var neighbors = new[] { new Point(0, 1), new Point(0, -1), new Point(1, 0), new Point(-1, 0) };
             foreach (var offset in neighbors)
             {
