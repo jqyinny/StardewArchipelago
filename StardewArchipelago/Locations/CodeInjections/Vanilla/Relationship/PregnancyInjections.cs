@@ -64,14 +64,14 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Relationship
                     return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
                 }
 
-                if (_locationChecker.IsLocationMissing(FIRST_BABY) || _locationChecker.IsLocationMissing(SECOND_BABY))
+                if (_locationChecker.IsLocationMissingSafe(FIRST_BABY) || _locationChecker.IsLocationMissingSafe(SECOND_BABY))
                 {
                     __result = true;
                     return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
                 }
 
                 if (_locationChecker.IsLocationChecked(FIRST_BABY) && _locationChecker.IsLocationChecked(SECOND_BABY) &&
-                    _archipelago.GetReceivedItemCount("Cute Baby") + _archipelago.GetReceivedItemCount("Ugly Baby") >= 2 && homeOfFarmer.getChildrenCount() < 2)
+                    _archipelago.GetReceivedItemCountSafe("Cute Baby") + _archipelago.GetReceivedItemCountSafe("Ugly Baby") >= 2 && homeOfFarmer.getChildrenCount() < 2)
                 {
                     __result = true;
                     return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
@@ -109,7 +109,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Relationship
                 var question = PickBabyQuestionBasedOnGenders(spouse);
 
                 var babyName = "Baby";
-                if (_locationChecker.IsLocationMissing(FIRST_BABY))
+                if (_locationChecker.IsLocationMissingSafe(FIRST_BABY))
                 {
                     var scoutedItem = _archipelago.ScoutStardewLocation(FIRST_BABY);
                     if (scoutedItem != null)
@@ -117,7 +117,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Relationship
                         babyName = scoutedItem.ItemName;
                     }
                 }
-                else if (_locationChecker.IsLocationMissing(SECOND_BABY))
+                else if (_locationChecker.IsLocationMissingSafe(SECOND_BABY))
                 {
                     var scoutedItem = _archipelago.ScoutStardewLocation(SECOND_BABY);
                     if (scoutedItem != null)
@@ -211,7 +211,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Relationship
                 var chosenDialogue = dialogueOptions[Game1.random.Next(0, dialogueOptions.Length)];
 
 
-                var locationBeingChecked = _locationChecker.IsLocationMissing(FIRST_BABY) ? FIRST_BABY : SECOND_BABY;
+                var locationBeingChecked = _locationChecker.IsLocationMissingSafe(FIRST_BABY) ? FIRST_BABY : SECOND_BABY;
                 var scoutedItem = _archipelago.ScoutStardewLocation(locationBeingChecked);
                 var scoutedItemName = scoutedItem?.ItemName ?? "a surprise";
                 var marriageDialogue = new MarriageDialogueReference("Data\\ExtraDialogue", chosenDialogue, true, scoutedItemName);

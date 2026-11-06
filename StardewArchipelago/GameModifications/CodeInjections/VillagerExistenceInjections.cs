@@ -422,7 +422,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
             }
 
             var petArrival = GetArrivalItem("Pet");
-            var hasArrival = _archipelago.HasReceivedItem(petArrival);
+            var hasArrival = _archipelago.HasReceivedItemSafe(petArrival);
             if (!hasArrival)
             {
                 return false;
@@ -492,7 +492,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
 
             alreadyExists = Game1.getCharacterFromName(villagerId) != null;
             var arrivalItem = GetArrivalItem(villagerId);
-            var hasArrival = _archipelago.HasReceivedItem(arrivalItem);
+            var hasArrival = _archipelago.HasReceivedItemSafe(arrivalItem);
             return hasArrival;
         }
 

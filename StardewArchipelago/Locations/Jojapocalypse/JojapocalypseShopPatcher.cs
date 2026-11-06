@@ -276,7 +276,7 @@ namespace StardewArchipelago.Locations.Jojapocalypse
         private static Dictionary<StardewArchipelagoLocation, ISalable> CreateJojapocalypseItems(double priceMultiplier, IEnumerable<string> locationTagFilters)
         {
             var locations = _archipelago.DataPackageCache.GetAllLocations().ToArray();
-            var locationsMissing = locations.Where(x => _locationChecker.IsLocationMissing(x.Name)).ToArray();
+            var locationsMissing = locations.Where(x => _locationChecker.IsLocationMissingSafe(x.Name)).ToArray();
             var locationsFiltered = locationsMissing.Where(x => locationTagFilters.All(x.LocationTags.Contains)).ToArray();
             var locationsCanPurchaseNow = locationsFiltered.Where(_jojaFiltering.CanPurchaseJojapocalypseLocation).ToArray();
             var locationsInOrder = locationsCanPurchaseNow.OrderBy(x => x.Name).ToArray();

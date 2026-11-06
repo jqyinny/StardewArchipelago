@@ -77,7 +77,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         {
             try
             {
-                __result = _archipelago.HasReceivedItem(VanillaUnlockManager.SPECIAL_ORDER_BOARD_AP_NAME);
+                __result = _archipelago.HasReceivedItemSafe(VanillaUnlockManager.SPECIAL_ORDER_BOARD_AP_NAME);
                 return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;;
             }
             catch (Exception ex)
@@ -111,7 +111,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
             // Remove vanilla rewards if the player has not received the check.
             // We will keep vanilla rewards for repeated orders
-            var checkMissing = _locationChecker.IsLocationMissing(specialOrderName);
+            var checkMissing = _locationChecker.IsLocationMissingSafe(specialOrderName);
             var shouldHaveVanillaRewards = IgnoredModdedStrings.SpecialOrders.Contains(specialOrderName);
             if (shouldHaveVanillaRewards)
             {
@@ -385,7 +385,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
         private static bool FishingRodFilter(KeyValuePair<string, SpecialOrderData> order)
         {
-            return !_archipelago.SlotData.ToolProgression.HasFlag(ToolProgression.Progressive) || !order.Key.StartsWith("Demetrius") || _archipelago.HasReceivedItem("Progressive Fishing Rod");
+            return !_archipelago.SlotData.ToolProgression.HasFlag(ToolProgression.Progressive) || !order.Key.StartsWith("Demetrius") || _archipelago.HasReceivedItemSafe("Progressive Fishing Rod");
         }
 
         private static bool ArcadeMachineFilter(KeyValuePair<string, SpecialOrderData> order)
@@ -413,7 +413,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
         private static bool HasUnlockedIslandAccess()
         {
-            return _archipelago.HasReceivedItem("Island Obelisk") || _archipelago.HasReceivedItem("Boat Repair");
+            return _archipelago.HasReceivedItemSafe("Island Obelisk") || _archipelago.HasReceivedItemSafe("Boat Repair");
         }
 
         private static bool IsIslandTag(string requiredTag)
@@ -469,7 +469,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         private static bool StillNeedsToCompleteOrder(Dictionary<string, SpecialOrder> specialOrders, string key)
         {
             var orderName = specialOrders[key].GetName();
-            if (_locationChecker.LocationExistsSafe(orderName) && _locationChecker.IsLocationMissing(orderName))
+            if (_locationChecker.LocationExistsSafe(orderName) && _locationChecker.IsLocationMissingSafe(orderName))
             {
                 return true;
             }

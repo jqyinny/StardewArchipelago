@@ -497,7 +497,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
                     }
 
                     var flag = action.Length < 5;
-                    if (!_archipelago.HasReceivedItem(APItem.MENS_LOCKER_KEY))
+                    if (!_archipelago.HasReceivedItemSafe(APItem.MENS_LOCKER_KEY))
                     {
                         if (who.IsLocalPlayer)
                         {
@@ -527,7 +527,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
                     }
 
                     var flag = action.Length < 5;
-                    if (!_archipelago.HasReceivedItem(APItem.WOMENS_LOCKER_KEY))
+                    if (!_archipelago.HasReceivedItemSafe(APItem.WOMENS_LOCKER_KEY))
                     {
                         if (who.IsLocalPlayer)
                         {

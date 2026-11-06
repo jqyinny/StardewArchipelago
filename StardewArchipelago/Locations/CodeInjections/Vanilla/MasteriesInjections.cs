@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using System;
 using System.Linq;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
@@ -122,7 +123,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         private static void PerformActionMasteryRoom()
         {
             const string masteryOfTheFiveWays = "Mastery Of The Five Ways";
-            if (_archipelago.HasReceivedItem(masteryOfTheFiveWays))
+            if (_archipelago.HasReceivedItemSafe(masteryOfTheFiveWays))
             {
                 Game1.playSound("doorClose");
                 Game1.warpFarmer("MasteryCave", 7, 11, 0);
@@ -140,7 +141,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
         private static void PerformActionMasteryCaveSkill(Skill skill)
         {
-            if (_locationChecker.IsLocationMissing($"{skill} {MASTERY}"))
+            if (_locationChecker.IsLocationMissingSafe($"{skill} {MASTERY}"))
             {
                 var masteryMenu = new MasteryTrackerMenu((int)skill);
                 InitializeClaimButton(masteryMenu);

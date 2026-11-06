@@ -44,7 +44,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
                 var statue = "Statue of Endless Fortune";
                 var question = $"Psst... I have a '{statue}' for sale... only 1,000,000g. What do you say?";
-                if (_locationChecker.IsLocationMissing(STATUE_LOCATION))
+                if (_locationChecker.IsLocationMissingSafe(STATUE_LOCATION))
                 {
                     var scout = _archipelago.ScoutStardewLocation(STATUE_LOCATION, false);
                     if (scout != null)
@@ -54,7 +54,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 }
 
                 var responses = new List<Response>();
-                if (_locationChecker.IsLocationMissing(STATUE_LOCATION) || _archipelago.HasReceivedItem(statue))
+                if (_locationChecker.IsLocationMissingSafe(STATUE_LOCATION) || _archipelago.HasReceivedItemSafe(statue))
                 {
                     responses.Add(new Response("I'll", Game1.content.LoadString("Strings\\Locations:Club_ClubSeller_Yes")));
                 }
@@ -83,7 +83,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
                 }
 
-                if (questionAndAnswer == "ClubSeller_No" && _locationChecker.IsLocationMissing(STATUE_LOCATION))
+                if (questionAndAnswer == "ClubSeller_No" && _locationChecker.IsLocationMissingSafe(STATUE_LOCATION))
                 {
                     _archipelago.ScoutStardewLocation(STATUE_LOCATION, true);
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
@@ -104,14 +104,14 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
                 Game1.exitActiveMenu();
                 Game1.player.forceCanMove();
-                if (_locationChecker.IsLocationMissing(STATUE_LOCATION))
+                if (_locationChecker.IsLocationMissingSafe(STATUE_LOCATION))
                 {
                     Game1.player.Money -= 1000000;
                     _locationChecker.AddCheckedLocation(STATUE_LOCATION);
                     return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
                 }
 
-                if (_archipelago.HasReceivedItem("Statue Of Endless Fortune"))
+                if (_archipelago.HasReceivedItemSafe("Statue Of Endless Fortune"))
                 {
                     Game1.player.Money -= 1000000;
                     Game1.player.addItemByMenuIfNecessaryElseHoldUp(ItemRegistry.Create("(BC)127"));

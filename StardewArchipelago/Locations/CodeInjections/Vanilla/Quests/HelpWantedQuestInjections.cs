@@ -1178,7 +1178,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Quests
             try
             {
                 if (!_archipelago.SlotData.ToolProgression.HasFlag(ToolProgression.Progressive) ||
-                    _archipelago.HasReceivedItem(ToolUnlockManager.PROGRESSIVE_FISHING_ROD))
+                    _archipelago.HasReceivedItemSafe(ToolUnlockManager.PROGRESSIVE_FISHING_ROD))
                 {
                     return;
                 }

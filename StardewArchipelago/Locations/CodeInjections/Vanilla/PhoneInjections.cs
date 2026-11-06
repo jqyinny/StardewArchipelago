@@ -160,7 +160,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             }
 
             var arrivalItem = VillagerExistenceInjections.GetArrivalItem(npc);
-            if (_archipelago.HasReceivedItem(arrivalItem))
+            if (_archipelago.HasReceivedItemSafe(arrivalItem))
             {
                 return;
             }

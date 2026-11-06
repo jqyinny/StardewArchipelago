@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
 using StardewArchipelago.Constants;
 using StardewArchipelago.Locations.Jojapocalypse;
@@ -173,7 +174,7 @@ namespace StardewArchipelago.GameModifications.EntranceRandomizer
                     return true;
                 }
 
-                var numberOfTheaters = _archipelago.GetReceivedItemCount(APItem.MOVIE_THEATER);
+                var numberOfTheaters = _archipelago.GetReceivedItemCountSafe(APItem.MOVIE_THEATER);
 
                 if (numberOfTheaters >= 2)
                 {
@@ -204,7 +205,7 @@ namespace StardewArchipelago.GameModifications.EntranceRandomizer
                     return true;
                 }
 
-                var numberOfTheaters = _archipelago.GetReceivedItemCount(APItem.MOVIE_THEATER);
+                var numberOfTheaters = _archipelago.GetReceivedItemCountSafe(APItem.MOVIE_THEATER);
 
                 if (numberOfTheaters >= 2)
                 {

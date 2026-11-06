@@ -69,14 +69,14 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             }
 
             var locationName = $"Find Trash Catalogue";
-            if (_locationChecker.IsLocationMissing(locationName))
+            if (_locationChecker.IsLocationMissingSafe(locationName))
             {
                 var itemId = IDProvider.CreateApLocationItemId(locationName);
                 var locationItem = ItemRegistry.Create(itemId);
                 return locationItem;
             }
 
-            if (_archipelago.HasReceivedItem("Trash Catalogue"))
+            if (_archipelago.HasReceivedItemSafe("Trash Catalogue"))
             {
                 return item;
             }

@@ -69,7 +69,7 @@ namespace StardewArchipelago.Locations.Festival
                 var sourceRectangle = new Microsoft.Xna.Framework.Rectangle?(new Microsoft.Xna.Framework.Rectangle(144 + (day - 1 + (month - 1) % 3 * 3) * 28, 201, 28, 13));
                 var paintingLocationSoldToday = GetPaintingLocationToday(__instance);
                 // var paintingMailKey = $"NightMarketYear{Game1.year}Day{nightMarket.getDayOfNightMarket()}_paintingSold";
-                if (_locationChecker.IsLocationMissing(paintingLocationSoldToday))
+                if (_locationChecker.IsLocationMissingSafe(paintingLocationSoldToday))
                 {
                     var scoutedPainting = _archipelago.ScoutStardewLocation(paintingLocationSoldToday, false);
 

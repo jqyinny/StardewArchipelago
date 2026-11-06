@@ -66,9 +66,9 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded
                 playerLuck = Math.Min(playerLuck, 7);
                 var totalSkill = Game1.player.MiningLevel + Game1.player.ForagingLevel + Game1.player.FishingLevel + Game1.player.FarmingLevel + Game1.player.CombatLevel;
                 totalSkill = Math.Min(totalSkill, 40);
-                var hasPendantElders = _archipelago.HasReceivedItem(PENDANT_ELDERS_ITEM);
-                var hasPendantDepths = _archipelago.HasReceivedItem(PENDANT_DEPTHS_ITEM);
-                var hasPendantCommunity = _archipelago.HasReceivedItem(PENDANT_COMMUNITY_ITEM);
+                var hasPendantElders = _archipelago.HasReceivedItemSafe(PENDANT_ELDERS_ITEM);
+                var hasPendantDepths = _archipelago.HasReceivedItemSafe(PENDANT_DEPTHS_ITEM);
+                var hasPendantCommunity = _archipelago.HasReceivedItemSafe(PENDANT_COMMUNITY_ITEM);
 
                 if (Game1.player.LuckLevel >= 7
                     && totalSkill >= 40
@@ -138,12 +138,12 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded
 
                 _locationChecker.AddCheckedLocation(string.Format(WOODS_DEPTH_LOCATION, levelIndexedAt1));
 
-                if (_archipelago.GetReceivedItemCount(WOODS_OBELISK_SIGILS) >= 10 && lowestLevelReachedField.GetValue() >= 100)
+                if (_archipelago.GetReceivedItemCountSafe(WOODS_OBELISK_SIGILS) >= 10 && lowestLevelReachedField.GetValue() >= 100)
                 {
                     return; //let the player gain these floors on their own since they've "collected" the floors already
                 }
 
-                lowestLevelReachedField.SetValue(10 * _archipelago.GetReceivedItemCount(WOODS_OBELISK_SIGILS));
+                lowestLevelReachedField.SetValue(10 * _archipelago.GetReceivedItemCountSafe(WOODS_OBELISK_SIGILS));
                 return;
             }
             catch (Exception ex)
@@ -336,7 +336,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded
                 throw new Exception($"{nameof(PerformUseAction_HealingFountainLocation_Prefix)} is not ready for 1.6");
                 //__result = true;
 
-                //if (_locationChecker.IsLocationMissing(FOUNTAIN_DRINK_LOCATION))
+                //if (_locationChecker.IsLocationMissingSafe(FOUNTAIN_DRINK_LOCATION))
                 //{
                 //    var apMessage = "You drink the water... it tastes like a stale Burger King Meal...?";
                 //    _locationChecker.AddCheckedLocation(FOUNTAIN_DRINK_LOCATION);

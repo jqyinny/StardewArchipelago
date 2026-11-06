@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using Archipelago.MultiClient.Net.Enums;
 using KaitoKid.ArchipelagoUtilities.Net;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
@@ -82,7 +83,7 @@ namespace StardewArchipelago.Locations.Secrets
                     return;
                 }
 
-                if (_locationChecker.IsLocationMissing(SecretsLocationNames.SOMETHING_FOR_SANTA))
+                if (_locationChecker.IsLocationMissingSafe(SecretsLocationNames.SOMETHING_FOR_SANTA))
                 {
                     _locationChecker.AddCheckedLocation(SecretsLocationNames.SOMETHING_FOR_SANTA);
                     __instance.heldObject.Value = ItemRegistry.Create<Object>("(O)MysteryBox");
@@ -321,7 +322,7 @@ namespace StardewArchipelago.Locations.Secrets
                 }
 
                 _locationChecker.AddCheckedLocation(SecretsLocationNames.SUMMON_BONE_SERPENT);
-                if (_archipelago.HasReceivedItem("Far Away Stone"))
+                if (_archipelago.HasReceivedItemSafe("Far Away Stone"))
                 {
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
                 }
@@ -351,7 +352,7 @@ namespace StardewArchipelago.Locations.Secrets
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
                 }
 
-                if (_archipelago.GetReceivedItemCount("Progressive Weapon") >= 2 || _archipelago.GetReceivedItemCount("Progressive Sword") >= 2)
+                if (_archipelago.GetReceivedItemCountSafe("Progressive Weapon") >= 2 || _archipelago.GetReceivedItemCountSafe("Progressive Sword") >= 2)
                 {
                     Game1.player.addItemByMenuIfNecessary(ItemRegistry.Create(QualifiedItemIds.MEOWMERE));
                 }

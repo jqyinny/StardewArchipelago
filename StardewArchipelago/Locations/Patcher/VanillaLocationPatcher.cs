@@ -262,7 +262,7 @@ namespace StardewArchipelago.Locations.Patcher
                 prefix: new HarmonyMethod(typeof(TentKitInjections), nameof(TentKitInjections.ApplyWakeUpPosition_AllowWakingUpInCC_Prefix))
             );
 
-            if (_locationChecker.IsLocationMissing("Error Bundle"))
+            if (_locationChecker.IsLocationMissingSafe("Error Bundle"))
             {
                 var monitorType = AccessTools.TypeByName("StardewModdingAPI.Framework.Monitor");
                 _harmony.Patch(

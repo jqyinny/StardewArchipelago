@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using KaitoKid.ArchipelagoUtilities.Net.Client;
 using KaitoKid.ArchipelagoUtilities.Net.Constants;
 using StardewArchipelago.Constants;
@@ -51,7 +52,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
 
         private static bool MakeMapModificationsJojaRoutePrefix(Town town)
         {
-            var numberReceivedTheaters = _archipelago.GetReceivedItemCount(APItem.MOVIE_THEATER);
+            var numberReceivedTheaters = _archipelago.GetReceivedItemCountSafe(APItem.MOVIE_THEATER);
             if (numberReceivedTheaters <= 0)
             {
                 _hasSeenCcCeremonyCutscene = Utility.HasAnyPlayerSeenEvent(EventIds.COMMUNITY_CENTER_COMPLETE);
@@ -91,14 +92,14 @@ namespace StardewArchipelago.GameModifications.CodeInjections
 
         private static bool MakeMapModificationCCRoutePrefix(Town town)
         {
-            if (_archipelago.GetReceivedItemCount(APItem.MOVIE_THEATER) >= 2)
+            if (_archipelago.GetReceivedItemCountSafe(APItem.MOVIE_THEATER) >= 2)
             {
                 var rectangle = new Rectangle(84, 41, 27, 15);
                 town.ApplyMapOverride("Town-Theater", rectangle, rectangle);
                 return MethodPrefix.RUN_ORIGINAL_METHOD;
             }
 
-            if (_archipelago.GetReceivedItemCount(APItem.MOVIE_THEATER) >= 1)
+            if (_archipelago.GetReceivedItemCountSafe(APItem.MOVIE_THEATER) >= 1)
             {
                 // private void showDestroyedJoja()
                 var showDestroyedJojaMethod = _modHelper.Reflection.GetMethod(town, "showDestroyedJoja");

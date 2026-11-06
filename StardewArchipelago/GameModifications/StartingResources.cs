@@ -340,7 +340,7 @@ namespace StardewArchipelago.GameModifications
 
         public void GrantStartingQuest()
         {
-            if (!_locationChecker.IsLocationMissing("Quest: Getting Started"))
+            if (!_locationChecker.IsLocationMissingSafe("Quest: Getting Started"))
             {
                 return;
             }

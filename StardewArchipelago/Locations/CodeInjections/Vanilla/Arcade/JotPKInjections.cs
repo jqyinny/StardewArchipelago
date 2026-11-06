@@ -287,7 +287,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Arcade
                 }
 
                 var easyMode = _archipelago.SlotData.JotPKLocations == JourneyOfThePrairieKing.VictoryEasy;
-                var receivedDropRate = _archipelago.HasReceivedItem(JOTPK_DROP_RATE);
+                var receivedDropRate = _archipelago.HasReceivedItemSafe(JOTPK_DROP_RATE);
                 var increasedDropRate = easyMode || receivedDropRate;
 
                 var moneyDropChance = increasedDropRate ? 0.1 : 0.05;
@@ -529,7 +529,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Arcade
                 }
 
                 var easyMode = _archipelago.SlotData.JotPKLocations == JourneyOfThePrairieKing.VictoryEasy;
-                var extraLives = easyMode ? 2 : _archipelago.GetReceivedItemCount(JOTPK_EXTRA_LIFE);
+                var extraLives = easyMode ? 2 : _archipelago.GetReceivedItemCountSafe(JOTPK_EXTRA_LIFE);
                 extraLives = Math.Max(0, Math.Min(2, extraLives));
                 __instance.lives += extraLives;
             }
@@ -543,13 +543,13 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Arcade
         {
             var easyMode = _archipelago.SlotData.JotPKLocations == JourneyOfThePrairieKing.VictoryEasy;
 
-            _bootsLevel = easyMode ? 1 : _archipelago.GetReceivedItemCount(JOTPK_PROGRESSIVE_BOOTS);
+            _bootsLevel = easyMode ? 1 : _archipelago.GetReceivedItemCountSafe(JOTPK_PROGRESSIVE_BOOTS);
             _bootsLevel = Math.Max(0, Math.Min(2, _bootsLevel));
 
-            _gunLevel = easyMode ? 1 : _archipelago.GetReceivedItemCount(JOTPK_PROGRESSIVE_GUN);
+            _gunLevel = easyMode ? 1 : _archipelago.GetReceivedItemCountSafe(JOTPK_PROGRESSIVE_GUN);
             _gunLevel = Math.Max(0, Math.Min(4, _gunLevel));
 
-            _ammoLevel = easyMode ? 1 : _archipelago.GetReceivedItemCount(JOTPK_PROGRESSIVE_AMMO);
+            _ammoLevel = easyMode ? 1 : _archipelago.GetReceivedItemCountSafe(JOTPK_PROGRESSIVE_AMMO);
             _ammoLevel = Math.Max(0, Math.Min(3, _ammoLevel));
 
             __instance.runSpeedLevel = _bootsLevel;

@@ -16,7 +16,7 @@ namespace StardewArchipelago.Archipelago.SlotData.SlotEnums
 
         public Dictionary<string, string> GetRemainingHelpWanteds(LocationChecker locationChecker)
         {
-            return HelpWantedQuests.Where(x => locationChecker.IsLocationMissing(x.Key)).ToDictionary(x => x.Key, x => x.Value);
+            return HelpWantedQuests.Where(x => locationChecker.IsLocationMissingSafe(x.Key)).ToDictionary(x => x.Key, x => x.Value);
         }
 
         internal QuestLocations(int value, Dictionary<string, string> helpWanteds)

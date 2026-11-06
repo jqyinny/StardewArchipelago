@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using System;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
 using StardewArchipelago.Constants.Vanilla;
@@ -50,7 +51,7 @@ namespace StardewArchipelago.Locations.Festival
                     __instance.performOpenChest();
                 }
 
-                if (_archipelago.HasReceivedItem("Golden Pumpkin"))
+                if (_archipelago.HasReceivedItemSafe("Golden Pumpkin"))
                 {
                     __instance.Items[0] = ItemRegistry.Create(QualifiedItemIds.GOLDEN_PUMPKIN);
                 }

@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using System;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
 using KaitoKid.ArchipelagoUtilities.Net.Constants;
@@ -21,7 +22,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
         {
             try
             {
-                __result = _archipelago.HasReceivedItem("Wizard Invitation");
+                __result = _archipelago.HasReceivedItemSafe("Wizard Invitation");
                 return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
             }
             catch (Exception ex)

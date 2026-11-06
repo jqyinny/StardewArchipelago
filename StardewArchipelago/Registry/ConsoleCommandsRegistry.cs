@@ -480,13 +480,13 @@ namespace StardewArchipelago.Registry
             }
 
             var locationName = arg2[0];
-            if (!_archipelago.LocationExists(locationName))
+            if (!_archipelago.LocationExistsSafe(locationName))
             {
                 _logger.Log($"Location '{locationName}' does not exist in this multiworld", LogLevel.Info);
                 return;
             }
 
-            if (!_locationChecker.IsLocationMissing(locationName))
+            if (!_locationChecker.IsLocationMissingSafe(locationName))
             {
                 _logger.Log($"Location '{locationName}' is already checked!", LogLevel.Info);
                 return;

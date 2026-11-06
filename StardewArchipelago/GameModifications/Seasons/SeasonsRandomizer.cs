@@ -45,7 +45,7 @@ namespace StardewArchipelago.GameModifications.Seasons
         {
             if (_archipelago.SlotData.SeasonRandomization == SeasonRandomization.Progressive)
             {
-                var progressiveSeasonsNumber = _archipelago.GetReceivedItemCount(PROGRESSIVE_SEASON);
+                var progressiveSeasonsNumber = _archipelago.GetReceivedItemCountSafe(PROGRESSIVE_SEASON);
                 return ValidSeasons.Take(progressiveSeasonsNumber + 1).ToList();
             }
 

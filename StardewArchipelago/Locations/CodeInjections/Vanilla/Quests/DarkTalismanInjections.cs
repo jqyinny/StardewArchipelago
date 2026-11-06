@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -70,7 +71,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Quests
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
                 }
 
-                if (_locationChecker.IsLocationMissing(DARK_TALISMAN_QUEST) && __instance.CanItemBePlacedHere(new Vector2(31f, 5f)))
+                if (_locationChecker.IsLocationMissingSafe(DARK_TALISMAN_QUEST) && __instance.CanItemBePlacedHere(new Vector2(31f, 5f)))
                 {
                     __instance.overlayObjects.Add(new Vector2(31f, 5f), new Chest(new List<Item>()
                     {
@@ -171,7 +172,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Quests
                 }
 
                 _locationChecker.AddCheckedLocation($"Quest: Magic Ink");
-                who.hasMagicInk = _archipelago.HasReceivedItem(APItem.MAGIC_INK);
+                who.hasMagicInk = _archipelago.HasReceivedItemSafe(APItem.MAGIC_INK);
                 return;
             }
             catch (Exception ex)

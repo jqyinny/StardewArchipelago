@@ -102,7 +102,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             // Farmhand-safe: sees backpacks the other player already bought (see IsLocationMissingSafe).
             return _locationChecker is StardewLocationChecker stardewLocationChecker
                 ? stardewLocationChecker.IsLocationMissingSafe(location)
-                : _locationChecker.IsLocationMissing(location);
+                : _locationChecker.IsLocationMissingSafe(location);
         }
 
         private static string GetNextBackpackLocation()

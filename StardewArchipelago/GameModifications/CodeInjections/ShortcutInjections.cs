@@ -112,7 +112,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
 
         public static void OpenMountainShortcuts(Mountain mountain)
         {
-            if (!_archipelago.HasReceivedItem("Mountain Shortcuts"))
+            if (!_archipelago.HasReceivedItemSafe("Mountain Shortcuts"))
             {
                 return;
             }
@@ -130,7 +130,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
 
         public static void OpenForestShortcuts(Forest forest)
         {
-            if (!_archipelago.HasReceivedItem("Forest To Beach Shortcut"))
+            if (!_archipelago.HasReceivedItemSafe("Forest To Beach Shortcut"))
             {
                 return;
             }
@@ -189,7 +189,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
 
         private static void OpenBeachToForestShortcut(GameLocation beach)
         {
-            if (!_archipelago.HasReceivedItem("Forest To Beach Shortcut"))
+            if (!_archipelago.HasReceivedItemSafe("Forest To Beach Shortcut"))
             {
                 return;
             }
@@ -213,7 +213,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
 
         private static void OpenTidePoolsToTownShortcut(GameLocation beach)
         {
-            if (!_archipelago.HasReceivedItem("Town To Tide Pools Shortcut"))
+            if (!_archipelago.HasReceivedItemSafe("Town To Tide Pools Shortcut"))
             {
                 return;
             }
@@ -230,7 +230,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
 
         public static void OpenBackwoodsShortcuts(GameLocation backwoods)
         {
-            if (!_archipelago.HasReceivedItem("Tunnel To Backwoods Shortcut"))
+            if (!_archipelago.HasReceivedItemSafe("Tunnel To Backwoods Shortcut"))
             {
                 return;
             }
@@ -260,7 +260,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
 
         private static void OpenTownToMountainShortcut(Town town)
         {
-            if (!_archipelago.HasReceivedItem("Mountain Shortcuts"))
+            if (!_archipelago.HasReceivedItemSafe("Mountain Shortcuts"))
             {
                 return;
             }
@@ -277,7 +277,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
 
         private static void OpenJojamartToMountainShortcut(Town town)
         {
-            if (!_archipelago.HasReceivedItem("Mountain Shortcuts"))
+            if (!_archipelago.HasReceivedItemSafe("Mountain Shortcuts"))
             {
                 return;
             }
@@ -299,7 +299,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
 
         private static void OpenTownToTidePoolsShortcut(Town town)
         {
-            if (!_archipelago.HasReceivedItem("Town To Tide Pools Shortcut"))
+            if (!_archipelago.HasReceivedItemSafe("Town To Tide Pools Shortcut"))
             {
                 return;
             }

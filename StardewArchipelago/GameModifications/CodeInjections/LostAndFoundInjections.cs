@@ -45,7 +45,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
                         continue;
                     }
 
-                    var receivedUpgrades = _archipelago.GetReceivedItemCount(apName);
+                    var receivedUpgrades = _archipelago.GetReceivedItemCountSafe(apName);
                     var startedWithout = _archipelago.SlotData.StartWithout.HasFlag(StartWithout.Tools);
 
                     if (startedWithout && receivedUpgrades <= 0)
@@ -111,7 +111,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
                     continue;
                 }
 
-                var receivedUpgrades = _archipelago.GetReceivedItemCount(apName);
+                var receivedUpgrades = _archipelago.GetReceivedItemCountSafe(apName);
                 var startedWithout = _archipelago.SlotData.StartWithout.HasFlag(StartWithout.Tools);
                 if (startedWithout && receivedUpgrades <= 0)
                 {
@@ -180,7 +180,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
                 return true;
             }
 
-            var receivedUpgrades = _archipelago.GetReceivedItemCount(apName);
+            var receivedUpgrades = _archipelago.GetReceivedItemCountSafe(apName);
             var startedWithout = _archipelago.SlotData.StartWithout.HasFlag(StartWithout.Tools) && tool is not Pan;
             if (receivedUpgrades <= 0 || startedWithout && receivedUpgrades <= 1)
             {

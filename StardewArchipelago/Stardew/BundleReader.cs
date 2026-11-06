@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,11 +31,11 @@ namespace StardewArchipelago.Stardew
             var completedBundleNames = GetAllCompletedBundles();
             foreach (var completedBundleName in completedBundleNames)
             {
-                if (locationChecker.IsLocationMissing(completedBundleName + " Bundle"))
+                if (locationChecker.IsLocationMissingSafe(completedBundleName + " Bundle"))
                 {
                     locationChecker.AddCheckedLocation(completedBundleName + " Bundle");
                 }
-                else if (locationChecker.IsLocationMissing(completedBundleName))
+                else if (locationChecker.IsLocationMissingSafe(completedBundleName))
                 {
                     locationChecker.AddCheckedLocation(completedBundleName);
                 }

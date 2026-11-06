@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using KaitoKid.ArchipelagoUtilities.Net.Client;
 using KaitoKid.Utilities.Interfaces;
 using Microsoft.Xna.Framework;
@@ -145,7 +146,7 @@ namespace StardewArchipelago.GameModifications.Tooltips
 
             var dailyQuestCheckName = HelpWantedQuestInjections.GetQuestLocationName(quest);
 
-            if (string.IsNullOrWhiteSpace(dailyQuestCheckName) || !_locationChecker.IsLocationMissing(dailyQuestCheckName))
+            if (string.IsNullOrWhiteSpace(dailyQuestCheckName) || !_locationChecker.IsLocationMissingSafe(dailyQuestCheckName))
             {
                 return;
             }
@@ -197,7 +198,7 @@ namespace StardewArchipelago.GameModifications.Tooltips
             var day = index + 1;
             var dayOfWeek = Days.GetDayOfWeekName(day);
             var merchantDayItem = string.Format(TravelingMerchantInjections.AP_MERCHANT_DAYS, dayOfWeek);
-            if (!_archipelago.HasReceivedItem(merchantDayItem))
+            if (!_archipelago.HasReceivedItemSafe(merchantDayItem))
             {
                 return;
             }
@@ -312,7 +313,7 @@ namespace StardewArchipelago.GameModifications.Tooltips
             var festivalLocations = FestivalLocationNames.LocationsByFestival[festivalIdentifier];
             foreach (var location in festivalLocations)
             {
-                if (_locationChecker.IsLocationMissing(location))
+                if (_locationChecker.IsLocationMissingSafe(location))
                 {
                     yield return location;
                 }
@@ -345,7 +346,7 @@ namespace StardewArchipelago.GameModifications.Tooltips
         {
             var dayOfWeek = Days.GetDayOfWeekName(day);
             var merchantDayItem = string.Format(TravelingMerchantInjections.AP_MERCHANT_DAYS, dayOfWeek);
-            if (!_archipelago.HasReceivedItem(merchantDayItem))
+            if (!_archipelago.HasReceivedItemSafe(merchantDayItem))
             {
                 return Enumerable.Empty<string>();
             }
@@ -380,7 +381,7 @@ namespace StardewArchipelago.GameModifications.Tooltips
                 }
 
 
-                if (_locationChecker.IsLocationMissing(secretName))
+                if (_locationChecker.IsLocationMissingSafe(secretName))
                 {
                     yield return secretName;
                 }

@@ -55,7 +55,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Walnutsanity
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
                 }
 
-                if (!_locationChecker.IsLocationMissing(goldenCoconutLocation))
+                if (!_locationChecker.IsLocationMissingSafe(goldenCoconutLocation))
                 {
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
                 }

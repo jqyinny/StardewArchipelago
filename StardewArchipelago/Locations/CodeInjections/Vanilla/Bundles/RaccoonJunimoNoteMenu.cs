@@ -197,7 +197,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
         private static List<int> GetAvailableRaccoonNumbers(StardewArchipelagoClient archipelago, StardewLocationChecker locationChecker)
         {
             var raccoonNumbers = GetRaccoonNumbersInSlot(locationChecker);
-            var receivedRaccoons = archipelago.GetReceivedItemCount(APItem.PROGRESSIVE_RACCOON);
+            var receivedRaccoons = archipelago.GetReceivedItemCountSafe(APItem.PROGRESSIVE_RACCOON);
             if (!archipelago.SlotData.QuestLocations.StoryQuestsEnabled)
             {
                 receivedRaccoons += 1;
@@ -209,7 +209,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
         public static List<int> GetAvailableMissingRaccoonNumbers(StardewArchipelagoClient archipelago, StardewLocationChecker locationChecker)
         {
             var raccoonNumbers = GetAvailableRaccoonNumbers(archipelago, locationChecker);
-            var missingNumbers = raccoonNumbers.Where(x => locationChecker.IsLocationMissing($"{RACCOON_REQUEST_PREFIX}{x}")).ToList();
+            var missingNumbers = raccoonNumbers.Where(x => locationChecker.IsLocationMissingSafe($"{RACCOON_REQUEST_PREFIX}{x}")).ToList();
             return missingNumbers;
         }
     }

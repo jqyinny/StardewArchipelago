@@ -292,7 +292,7 @@ namespace StardewArchipelago.Items.Mail
                 const float scale = 1f;
                 Utility.drawTinyDigits(numLetters, b, localPosition + new Vector2(64 - Utility.getWidthOfTinyDigitString(numLetters, 3f * scale) + 3f * scale, (float)(64.0 - 18.0 * scale + 1.0)), 3f * scale, 1f, Color.Red);
 
-                if (_archipelago.HasReceivedItem(CarpenterInjections.BUILDING_PROGRESSIVE_HOUSE))
+                if (_archipelago.HasReceivedItemSafe(CarpenterInjections.BUILDING_PROGRESSIVE_HOUSE))
                 {
                     return;
                 }
@@ -394,7 +394,7 @@ namespace StardewArchipelago.Items.Mail
                     return;
                 }
 
-                if (!_archipelago.SlotData.StartWithout.HasFlag(StartWithout.House) || _archipelago.HasReceivedItem(CarpenterInjections.BUILDING_PROGRESSIVE_HOUSE))
+                if (!_archipelago.SlotData.StartWithout.HasFlag(StartWithout.House) || _archipelago.HasReceivedItemSafe(CarpenterInjections.BUILDING_PROGRESSIVE_HOUSE))
                 {
                     return;
                 }

@@ -160,7 +160,7 @@ namespace StardewArchipelago.Locations.Festival
                 hideCactusEvent.Fire(seed);
 
                 Game1.player.freezePause = 100;
-                if (_archipelago.HasReceivedItem(FestivalLocationNames.FREE_CACTIS))
+                if (_archipelago.HasReceivedItemSafe(FestivalLocationNames.FREE_CACTIS))
                 {
                     Game1.player.addItemToInventoryBool(new RandomizedPlantFurniture("FreeCactus", Vector2.Zero, seed));
                     return;
@@ -191,7 +191,7 @@ namespace StardewArchipelago.Locations.Festival
             Item extraPrize = null;
             var adventureGuild = (AdventureGuild)Game1.getLocationFromName("AdventureGuild");
             var gil = adventureGuild.Gil;
-            var isMissing = _locationChecker.IsLocationMissing(FestivalLocationNames.REAL_CALICO_EGG_HUNTER);
+            var isMissing = _locationChecker.IsLocationMissingSafe(FestivalLocationNames.REAL_CALICO_EGG_HUNTER);
             var earnedCheck = false;
             switch (calicoEggRating)
             {
@@ -299,7 +299,7 @@ namespace StardewArchipelago.Locations.Festival
                 Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\1_6_Strings:Scholar_Win"));
                 Game1.afterDialogues += () =>
                 {
-                    if (_locationChecker.IsLocationMissing(FestivalLocationNames.DESERT_SCHOLAR))
+                    if (_locationChecker.IsLocationMissingSafe(FestivalLocationNames.DESERT_SCHOLAR))
                     {
                         _locationChecker.AddCheckedLocation(FestivalLocationNames.DESERT_SCHOLAR);
                     }

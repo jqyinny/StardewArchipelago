@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -159,7 +160,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
                 }
 
-                if (locationName != "JojaMart" || !_archipelago.HasReceivedItem(APItem.MOVIE_THEATER))
+                if (locationName != "JojaMart" || !_archipelago.HasReceivedItemSafe(APItem.MOVIE_THEATER))
                 {
                     // no fallback
                     __result = false;

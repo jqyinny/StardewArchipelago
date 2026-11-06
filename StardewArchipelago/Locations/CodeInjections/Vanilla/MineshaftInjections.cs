@@ -300,7 +300,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 var floor = Convert.ToInt32(button.name);
                 var elevatorLocation = string.Format(ELEVATOR_LOCATION, floor);
                 var treasureLocation = string.Format(TREASURE_LOCATION, floor);
-                var checkRemainingOnThatFloor = _locationChecker.IsLocationMissing(elevatorLocation) || _locationChecker.IsLocationMissing(treasureLocation);
+                var checkRemainingOnThatFloor = _locationChecker.IsLocationMissingSafe(elevatorLocation) || _locationChecker.IsLocationMissingSafe(treasureLocation);
 
                 if (!checkRemainingOnThatFloor)
                 {

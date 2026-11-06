@@ -83,7 +83,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded.SVE
 
         private double BearDiscount()
         {
-            var hasKnowledge = _archipelago.HasReceivedItem("Bear's Knowledge");
+            var hasKnowledge = _archipelago.HasReceivedItemSafe("Bear's Knowledge");
             var knowledgeBuff = hasKnowledge ? KNOWLEDGE_DISCOUNT : 0f;
             var applesHearts = 0;
             if (Game1.player.friendshipData.ContainsKey("Apples"))
@@ -100,7 +100,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded.SVE
             {
                 return 1;
             }
-            var hasKnowledge = _archipelago.HasReceivedItem("Bear Knowledge");
+            var hasKnowledge = _archipelago.HasReceivedItemSafe("Bear Knowledge");
             var knowledgeBuff = hasKnowledge ? 3 : 1;
             var applesHearts = 0;
             if (Game1.player.friendshipData.ContainsKey("Apples"))

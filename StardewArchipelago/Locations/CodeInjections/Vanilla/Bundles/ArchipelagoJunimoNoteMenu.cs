@@ -206,7 +206,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
                 }
 
                 var canAccessMissingBundle = Utility.doesMasterPlayerHaveMailReceivedButNotMailForTomorrow("abandonedJojaMartAccessible");
-                var missingBundleNotDone = _locationChecker.IsLocationMissing("The Missing Bundle");
+                var missingBundleNotDone = _locationChecker.IsLocationMissingSafe("The Missing Bundle");
 
                 if (canAccessMissingBundle && missingBundleNotDone)
                 {
@@ -2442,7 +2442,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
             //var bundleIngredientsArray = ArgUtility.SplitBySpace(bundleInfoArray[2]);
             //var bundle = new ArchipelagoBundle(bundleIndex, bundleInfo, bundleState, Point.Zero, NOTE_TEXTURE_NAME, null);
             var isComplete = BundleRemake.IsBundleComplete(bundleState, bundleInfoArray);
-            if (isComplete && _locationChecker.IsLocationMissing($"{bundleName} Bundle"))
+            if (isComplete && _locationChecker.IsLocationMissingSafe($"{bundleName} Bundle"))
             {
                 _locationChecker.AddCheckedLocation($"{bundleName} Bundle");
             }

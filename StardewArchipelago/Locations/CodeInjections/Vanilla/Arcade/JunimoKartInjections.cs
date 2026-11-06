@@ -131,7 +131,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Arcade
             foreach (var levelFinished in levelsFinishedThisRun.GetValue())
             {
                 var location = JK_LEVEL_LOCATIONS[levelFinished];
-                if (location == JK_VICTORY && _locationChecker.IsLocationMissing(JK_VICTORY))
+                if (location == JK_VICTORY && _locationChecker.IsLocationMissingSafe(JK_VICTORY))
                 {
                     Game1.chatBox?.addMessage("You can now type '!!arcade_release jk' to release all remaining Junimo Kart checks", Color.Green);
                 }
@@ -144,7 +144,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Arcade
             var numberExtraLives = 8;
             if (_archipelago.SlotData.JunimoKartLocations == JunimoKart.FullShuffle)
             {
-                numberExtraLives = _archipelago.GetReceivedItemCount(JK_EXTRA_LIFE);
+                numberExtraLives = _archipelago.GetReceivedItemCountSafe(JK_EXTRA_LIFE);
             }
 
             return numberExtraLives;

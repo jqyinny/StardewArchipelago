@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,7 +73,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
             var flowerCandidates = _flowerSeeds.ToDictionary(x => x, x => _stardewItemManager.GetObjectById(x).PrepareForGivingToFarmer());
             var location = Game1.currentLocation;
             var cropData = DataLoader.Crops(Game1.content);
-            var flowerSeedCandidates = _flowerSeeds.Where(x => SeedCanBePlantedHere(flowerCandidates[x], location, season, cropData) && _archipelago.HasReceivedItem(flowerCandidates[x].Name)).ToArray();
+            var flowerSeedCandidates = _flowerSeeds.Where(x => SeedCanBePlantedHere(flowerCandidates[x], location, season, cropData) && _archipelago.HasReceivedItemSafe(flowerCandidates[x].Name)).ToArray();
 
             if (!flowerSeedCandidates.Any())
             {
@@ -90,7 +91,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
             var cropCandidates = cropData.ToDictionary(x => x.Key, x => _stardewItemManager.GetObjectById(x.Key).PrepareForGivingToFarmer());
             var location = Game1.currentLocation;
             var mixedSeedCandidates = cropData.Where(kvp => !_flowerSeeds.Contains(kvp.Key) &&
-                                                            SeedCanBePlantedHere(cropCandidates[kvp.Key], location, season, cropData) && _archipelago.HasReceivedItem(cropCandidates[kvp.Key].Name))
+                                                            SeedCanBePlantedHere(cropCandidates[kvp.Key], location, season, cropData) && _archipelago.HasReceivedItemSafe(cropCandidates[kvp.Key].Name))
                 .Select(x => x.Key)
                 .ToList();
 

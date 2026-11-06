@@ -108,7 +108,7 @@ namespace StardewArchipelago.Locations.Secrets
                 var needsAll = _archipelago.SlotData.Secretsanity.HasFlag(Secretsanity.Difficult);
                 foreach (var (secretNoteLocation, requiredGifts) in SecretsLocationNames.SECRET_NOTE_GIFT_REQUIREMENTS)
                 {
-                    if (!_locationChecker.IsLocationMissing(secretNoteLocation))
+                    if (!_locationChecker.IsLocationMissingSafe(secretNoteLocation))
                     {
                         continue;
                     }

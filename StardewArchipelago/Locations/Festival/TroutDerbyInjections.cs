@@ -43,7 +43,7 @@ namespace StardewArchipelago.Locations.Festival
                     locationName = string.Format(FestivalLocationNames.TROUT_DERBY_REWARD_PATTERN, numberOfThisTag);
                 }
 
-                if (_locationChecker.IsLocationMissing(locationName))
+                if (_locationChecker.IsLocationMissingSafe(locationName))
                 {
                     Game1.stats.Increment("GoldenTagsTurnedIn");
                     Game1.player.Items.ReduceId("TroutDerbyTag", 1);

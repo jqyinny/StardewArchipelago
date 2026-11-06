@@ -239,7 +239,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                     return;
                 }
 
-                var numberEnzymes = _archipelago.GetReceivedItemCount("Stamina Enzyme");
+                var numberEnzymes = _archipelago.GetReceivedItemCountSafe("Stamina Enzyme");
                 if (numberEnzymes <= 0)
                 {
                     // No enzyme, no stamina!
@@ -312,7 +312,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                     return;
                 }
 
-                var numberEnzymes = _archipelago.GetReceivedItemCount("Health Enzyme");
+                var numberEnzymes = _archipelago.GetReceivedItemCountSafe("Health Enzyme");
                 if (numberEnzymes <= 0)
                 {
                     // No enzyme, no health!
@@ -430,16 +430,16 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             {
                 case BuffIds.SQUID_INK_RAVIOLI:
                     buff = defaultBuff;
-                    return _archipelago.HasReceivedItem("Squid Ink Enzyme");
+                    return _archipelago.HasReceivedItemSafe("Squid Ink Enzyme");
                 case BuffIds.MONSTER_MUSK:
                     buff = defaultBuff;
-                    return _archipelago.HasReceivedItem("Monster Musk Enzyme");
+                    return _archipelago.HasReceivedItemSafe("Monster Musk Enzyme");
                 case BuffIds.OIL_OF_GARLIC:
                     buff = defaultBuff;
-                    return _archipelago.HasReceivedItem("Oil Of Garlic Enzyme");
+                    return _archipelago.HasReceivedItemSafe("Oil Of Garlic Enzyme");
                 case BuffIds.TIPSY:
                     buff = defaultBuff;
-                    return _archipelago.HasReceivedItem("Tipsy Enzyme");
+                    return _archipelago.HasReceivedItemSafe("Tipsy Enzyme");
             }
 
             var maxBuffEffects = GetMaxBuffEffects();
@@ -473,16 +473,16 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
             var newBuffData = new BuffAttributesData();
 
-            newBuffData.Speed = _archipelago.GetReceivedItemCount("Speed Enzyme");
-            newBuffData.LuckLevel = _archipelago.GetReceivedItemCount("Luck Enzyme");
-            newBuffData.FarmingLevel = _archipelago.GetReceivedItemCount("Farming Enzyme");
-            newBuffData.ForagingLevel = _archipelago.GetReceivedItemCount("Foraging Enzyme");
-            newBuffData.FishingLevel = _archipelago.GetReceivedItemCount("Fishing Enzyme");
-            newBuffData.MiningLevel = _archipelago.GetReceivedItemCount("Mining Enzyme");
-            newBuffData.MagneticRadius = _archipelago.GetReceivedItemCount("Magnetism Enzyme") * 32;
-            newBuffData.Defense = _archipelago.GetReceivedItemCount("Defense Enzyme");
-            newBuffData.Attack = _archipelago.GetReceivedItemCount("Attack Enzyme");
-            newBuffData.MaxStamina = _archipelago.GetReceivedItemCount("Max Stamina Enzyme") * 20;
+            newBuffData.Speed = _archipelago.GetReceivedItemCountSafe("Speed Enzyme");
+            newBuffData.LuckLevel = _archipelago.GetReceivedItemCountSafe("Luck Enzyme");
+            newBuffData.FarmingLevel = _archipelago.GetReceivedItemCountSafe("Farming Enzyme");
+            newBuffData.ForagingLevel = _archipelago.GetReceivedItemCountSafe("Foraging Enzyme");
+            newBuffData.FishingLevel = _archipelago.GetReceivedItemCountSafe("Fishing Enzyme");
+            newBuffData.MiningLevel = _archipelago.GetReceivedItemCountSafe("Mining Enzyme");
+            newBuffData.MagneticRadius = _archipelago.GetReceivedItemCountSafe("Magnetism Enzyme") * 32;
+            newBuffData.Defense = _archipelago.GetReceivedItemCountSafe("Defense Enzyme");
+            newBuffData.Attack = _archipelago.GetReceivedItemCountSafe("Attack Enzyme");
+            newBuffData.MaxStamina = _archipelago.GetReceivedItemCountSafe("Max Stamina Enzyme") * 20;
 
             return new BuffEffects(newBuffData);
         }

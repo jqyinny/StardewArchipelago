@@ -215,7 +215,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             foreach (var possibleName in possibleNames)
             {
                 var locationName = $"Read {possibleName}";
-                if (_locationChecker.IsLocationMissing(locationName))
+                if (_locationChecker.IsLocationMissingSafe(locationName))
                 {
                     _locationChecker.AddCheckedLocation(locationName);
                     return;
@@ -327,7 +327,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             if (_archipelago.SlotData.Chefsanity.HasFlag(Chefsanity.QueenOfSauce))
             {
                 var recipeLocation = $"{recipeKey}{Suffix.CHEFSANITY}";
-                if (!_locationChecker.IsLocationMissing(recipeLocation))
+                if (!_locationChecker.IsLocationMissingSafe(recipeLocation))
                 {
                     return 0;
                 }

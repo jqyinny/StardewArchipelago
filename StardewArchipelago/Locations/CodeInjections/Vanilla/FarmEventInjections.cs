@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using KaitoKid.ArchipelagoUtilities.Net;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
 using KaitoKid.Utilities.Interfaces;
@@ -49,7 +50,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             var isConnected = _archipelago.MakeSureConnected();
 
             const string qiPlaneMail = "sawQiPlane";
-            var hasUnlockedQiPlane = _archipelago.HasReceivedItem("Mr Qi's Plane Ride");
+            var hasUnlockedQiPlane = _archipelago.HasReceivedItemSafe("Mr Qi's Plane Ride");
             var hasSeenQiPlaneEvent = Game1.player.mailReceived.Contains(qiPlaneMail);
             if (isConnected && !hasUnlockedQiPlane && hasSeenQiPlaneEvent)
             {
@@ -107,12 +108,12 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
         private static FarmEvent OverwriteCCTheaterEvent(FarmEvent nightEvent)
         {
-            if (Game1.weddingToday || nightEvent != null || !_archipelago.HasReceivedItem(APItem.MOVIE_THEATER))
+            if (Game1.weddingToday || nightEvent != null || !_archipelago.HasReceivedItemSafe(APItem.MOVIE_THEATER))
             {
                 return nightEvent;
             }
 
-            if (_archipelago.GetReceivedItemCount(APItem.MOVIE_THEATER) < 2)
+            if (_archipelago.GetReceivedItemCountSafe(APItem.MOVIE_THEATER) < 2)
             {
                 return nightEvent;
             }
@@ -131,7 +132,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         private static FarmEvent OverwriteJojaTheaterEvent(FarmEvent nightEvent)
         {
 
-            if (Game1.weddingToday || nightEvent != null || !_archipelago.HasReceivedItem(APItem.MOVIE_THEATER))
+            if (Game1.weddingToday || nightEvent != null || !_archipelago.HasReceivedItemSafe(APItem.MOVIE_THEATER))
             {
                 return nightEvent;
             }
@@ -141,7 +142,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 return new WorldChangeEvent(12);
             }
 
-            if (_archipelago.GetReceivedItemCount(APItem.MOVIE_THEATER) < 2)
+            if (_archipelago.GetReceivedItemCountSafe(APItem.MOVIE_THEATER) < 2)
             {
                 return nightEvent;
             }

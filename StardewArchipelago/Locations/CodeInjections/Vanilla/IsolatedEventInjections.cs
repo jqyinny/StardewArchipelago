@@ -136,7 +136,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                     return MethodPrefix.DONT_RUN_ORIGINAL_METHOD;
                 }
 
-                if (_archipelago.HasReceivedItem(VanillaUnlockManager.BEACH_BRIDGE))
+                if (_archipelago.HasReceivedItemSafe(VanillaUnlockManager.BEACH_BRIDGE))
                 {
                     return true;
                 }
@@ -306,7 +306,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                     Game1.createMultipleItemDebris(ItemRegistry.Create("(H)LeprechuanHat"), __instance.TileLocation * 64f + new Vector2(32f), 1);
                 }
 
-                if (_locationChecker.IsLocationMissing(SecretsLocationNames.POT_OF_GOLD))
+                if (_locationChecker.IsLocationMissingSafe(SecretsLocationNames.POT_OF_GOLD))
                 {
                     Game1.playSound("hammer");
                     Game1.playSound("moneyDial");

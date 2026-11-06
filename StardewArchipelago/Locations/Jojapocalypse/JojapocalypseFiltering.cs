@@ -128,7 +128,7 @@ namespace StardewArchipelago.Locations.Jojapocalypse
             for (var j = number - 1; j >= 0; j--)
             {
                 var previousNumberLocation = MergeWords(nameWords, i, j.ToString());
-                if (_locationChecker.IsLocationMissing(previousNumberLocation))
+                if (_locationChecker.IsLocationMissingSafe(previousNumberLocation))
                 {
                     return false;
                 }
@@ -150,7 +150,7 @@ namespace StardewArchipelago.Locations.Jojapocalypse
             foreach (var keyword in keywords)
             {
                 var replacedLocation = MergeWords(nameWords, i, keyword);
-                if (_locationChecker.IsLocationMissing(replacedLocation))
+                if (_locationChecker.IsLocationMissingSafe(replacedLocation))
                 {
                     return false;
                 }
@@ -177,7 +177,7 @@ namespace StardewArchipelago.Locations.Jojapocalypse
             for (var i = 0; i <= 10; i++)
             {
                 var skillLocation = $"Level {i} {skill}";
-                if (_locationChecker.IsLocationMissing(skillLocation))
+                if (_locationChecker.IsLocationMissingSafe(skillLocation))
                 {
                     return false;
                 }
@@ -308,7 +308,7 @@ namespace StardewArchipelago.Locations.Jojapocalypse
                 return true;
             }
 
-            return _archipelago.HasReceivedItem(VanillaUnlockManager.SPECIAL_ORDER_BOARD_AP_NAME);
+            return _archipelago.HasReceivedItemSafe(VanillaUnlockManager.SPECIAL_ORDER_BOARD_AP_NAME);
         }
 
         private bool ValidateQiOrderLocation(StardewArchipelagoLocation location)
@@ -346,7 +346,7 @@ namespace StardewArchipelago.Locations.Jojapocalypse
                 return true;
             }
 
-            return seedNames.Any(x => _archipelago.HasReceivedItem(x));
+            return seedNames.Any(x => _archipelago.HasReceivedItemSafe(x));
         }
 
         private bool ValidateSecretNoteLocation(string locationName)
@@ -356,7 +356,7 @@ namespace StardewArchipelago.Locations.Jojapocalypse
                 return true;
             }
 
-            return _archipelago.HasReceivedItem(APItem.MAGNIFYING_GLASS);
+            return _archipelago.HasReceivedItemSafe(APItem.MAGNIFYING_GLASS);
         }
 
         private bool ValidateCommunityCenterLocation(StardewArchipelagoLocation location)
@@ -395,7 +395,7 @@ namespace StardewArchipelago.Locations.Jojapocalypse
                 var bundleIndex = int.Parse(bundleKey.Split("/").Last());
                 var bundleName = bundleData.Split("/").First();
                 var isComplete = communityCenter.isBundleComplete(bundleIndex);
-                if (!isComplete && _locationChecker.IsLocationMissing($"{bundleName} Bundle"))
+                if (!isComplete && _locationChecker.IsLocationMissingSafe($"{bundleName} Bundle"))
                 {
                     return false;
                 }
@@ -411,7 +411,7 @@ namespace StardewArchipelago.Locations.Jojapocalypse
                 return true;
             }
 
-            return _archipelago.HasReceivedItem(APItem.FOREST_MAGIC);
+            return _archipelago.HasReceivedItemSafe(APItem.FOREST_MAGIC);
         }
 
         private bool ValidateFishsanityLocation(StardewArchipelagoLocation location)
@@ -421,7 +421,7 @@ namespace StardewArchipelago.Locations.Jojapocalypse
                 return true;
             }
 
-            return _archipelago.SlotData.Fishsanity == Fishsanity.None || _archipelago.HasReceivedItem(ToolUnlockManager.PROGRESSIVE_FISHING_ROD);
+            return _archipelago.SlotData.Fishsanity == Fishsanity.None || _archipelago.HasReceivedItemSafe(ToolUnlockManager.PROGRESSIVE_FISHING_ROD);
         }
 
         private bool ValidateShipsanityLocation(StardewArchipelagoLocation location)
@@ -431,7 +431,7 @@ namespace StardewArchipelago.Locations.Jojapocalypse
                 return true;
             }
 
-            return !_archipelago.SlotData.BuildingProgression.HasFlag(BuildingProgression.Progressive) || _archipelago.HasReceivedItem(CarpenterShopStockModifier.BUILDING_SHIPPING_BIN);
+            return !_archipelago.SlotData.BuildingProgression.HasFlag(BuildingProgression.Progressive) || _archipelago.HasReceivedItemSafe(CarpenterShopStockModifier.BUILDING_SHIPPING_BIN);
         }
 
         private bool ValidateCooksanityLocation(StardewArchipelagoLocation location)
@@ -441,7 +441,7 @@ namespace StardewArchipelago.Locations.Jojapocalypse
                 return true;
             }
 
-            if (_archipelago.SlotData.BuildingProgression.HasFlag(BuildingProgression.Progressive) && !_archipelago.HasReceivedItem(CarpenterInjections.BUILDING_PROGRESSIVE_HOUSE))
+            if (_archipelago.SlotData.BuildingProgression.HasFlag(BuildingProgression.Progressive) && !_archipelago.HasReceivedItemSafe(CarpenterInjections.BUILDING_PROGRESSIVE_HOUSE))
             {
                 return false;
             }
@@ -518,7 +518,7 @@ namespace StardewArchipelago.Locations.Jojapocalypse
                 return true;
             }
 
-            return _archipelago.GetReceivedItemCount(APItem.MOVIE_THEATER) >= 2;
+            return _archipelago.GetReceivedItemCountSafe(APItem.MOVIE_THEATER) >= 2;
         }
 
         private string MergeWords(string[] nameWords, int splitIndex, string replacementItem)

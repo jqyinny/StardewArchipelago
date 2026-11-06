@@ -34,7 +34,7 @@ public static class WalkSanityInjections
         if (!_farmerCurrentLocation.Equals(tilePoint))
         {
             var apLocation = TileSanityManager.GetTileName(tilePoint.X, tilePoint.Y, __instance);
-            if (_archipelago.LocationExists(apLocation))
+            if (_archipelago.LocationExistsSafe(apLocation))
             {
                 var checkedLocation = false;
                 if (!_locationChecker.IsLocationChecked(apLocation))
@@ -43,7 +43,7 @@ public static class WalkSanityInjections
                     checkedLocation = true;
                 }
                 var luckyLocation = apLocation + " (lucky)";
-                if (_archipelago.LocationExists(luckyLocation) && !_locationChecker.IsLocationChecked(luckyLocation))
+                if (_archipelago.LocationExistsSafe(luckyLocation) && !_locationChecker.IsLocationChecked(luckyLocation))
                 {
                     _locationChecker.AddCheckedLocation(luckyLocation);
                     checkedLocation = true;
@@ -88,11 +88,11 @@ public static class WalkSanityInjections
         {
             return true;
         }
-        if (!_archipelago.LocationExists(name))
+        if (!_archipelago.LocationExistsSafe(name))
         {
             return true;
         }
-        if (_archipelago.HasReceivedItem(name))
+        if (_archipelago.HasReceivedItemSafe(name))
         {
             return true;
         }

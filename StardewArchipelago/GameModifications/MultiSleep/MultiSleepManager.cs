@@ -218,7 +218,7 @@ namespace StardewArchipelago.GameModifications.MultiSleep
                 possibleResponses.Add(new Response(MultiSleepUntilBehavior.RAIN, "Rain"));
                 possibleResponses.Add(new Response(MultiSleepUntilBehavior.STORM, "Storm"));
             }
-            if (_archipelago.HasReceivedItem("Fortune Teller"))
+            if (_archipelago.HasReceivedItemSafe("Fortune Teller"))
             {
                 possibleResponses.Add(new Response(MultiSleepUntilBehavior.GREAT_LUCK, "Great Luck"));
             }
@@ -231,7 +231,7 @@ namespace StardewArchipelago.GameModifications.MultiSleep
             {
                 possibleResponses.Add(new Response(MultiSleepUntilBehavior.TRAVELING_CART, "Traveling Cart"));
             }
-            if (_archipelago.HasReceivedItem(APItem.BOOKSELLER_DAY))
+            if (_archipelago.HasReceivedItemSafe(APItem.BOOKSELLER_DAY))
             {
                 possibleResponses.Add(new Response(MultiSleepUntilBehavior.BOOKSELLER, "Bookseller"));
             }
@@ -273,7 +273,7 @@ namespace StardewArchipelago.GameModifications.MultiSleep
                     continue;
                 }
 
-                if (characterData.BirthSeason == Game1.season && _archipelago.HasReceivedItem(VillagerExistenceInjections.GetArrivalItem(character)))
+                if (characterData.BirthSeason == Game1.season && _archipelago.HasReceivedItemSafe(VillagerExistenceInjections.GetArrivalItem(character)))
                 {
                     return true;
                 }

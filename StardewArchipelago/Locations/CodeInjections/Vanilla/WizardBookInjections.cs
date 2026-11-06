@@ -84,9 +84,9 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
 
         private static bool PerformActionWizardBook(GameLocation __instance, Farmer who)
         {
-            var hasReceivedAnyBuildings = _wizardBuildings.Any(x => _archipelago.HasReceivedItem(x));
+            var hasReceivedAnyBuildings = _wizardBuildings.Any(x => _archipelago.HasReceivedItemSafe(x));
             var hasMagicInk = who.hasMagicInk;
-            var canPurchaseBlueprints = hasMagicInk && _wizardBuildings.Any(x => _locationChecker.IsLocationMissing($"{x} Blueprint"));
+            var canPurchaseBlueprints = hasMagicInk && _wizardBuildings.Any(x => _locationChecker.IsLocationMissingSafe($"{x} Blueprint"));
 
             if (!hasReceivedAnyBuildings && !canPurchaseBlueprints)
             {
@@ -198,7 +198,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         private static void AddCheckItemToStock(Dictionary<ISalable, ItemStockInformation> shopItems, string buildingName, int price, Item[] materials, Hint[] hints)
         {
             var locationName = string.Format(BUILDING_BLUEPRINT_LOCATION_NAME, buildingName);
-            if (!_locationChecker.IsLocationMissing(locationName))
+            if (!_locationChecker.IsLocationMissingSafe(locationName))
             {
                 return;
             }

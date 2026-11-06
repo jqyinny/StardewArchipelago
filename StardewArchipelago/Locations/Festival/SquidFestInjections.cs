@@ -66,7 +66,7 @@ namespace StardewArchipelago.Locations.Festival
                     {
                         Game1.player.mailReceived.Add(rewardMail);
                         var apLocation = FestivalLocationNames.SQUIDFEST_REWARDS[Game1.dayOfMonth - 12, rewardIndex];
-                        if (_locationChecker.IsLocationMissing(apLocation))
+                        if (_locationChecker.IsLocationMissingSafe(apLocation))
                         {
                             _locationChecker.AddCheckedLocation(apLocation);
                         }

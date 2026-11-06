@@ -138,7 +138,7 @@ namespace StardewArchipelago
 
         private void FixStardrops()
         {
-            var numberStardropsDeserved = _archipelago.GetReceivedItemCount(APItem.STARDROP);
+            var numberStardropsDeserved = _archipelago.GetReceivedItemCountSafe(APItem.STARDROP);
 
             if (_archipelago.SlotData.FestivalLocations == FestivalLocations.Vanilla && Game1.player.mailReceived.Contains("CF_Fair"))
             {

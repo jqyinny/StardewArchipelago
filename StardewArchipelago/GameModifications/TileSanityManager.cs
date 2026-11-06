@@ -134,11 +134,11 @@ public class TileSanityManager
 
     public bool HasLocationLeft(string tileName)
     {
-        Debug.Assert(_archipelago.LocationExists(tileName));
+        Debug.Assert(_archipelago.LocationExistsSafe(tileName));
         if (_locationChecker.IsLocationChecked(tileName))
         {
             var luckyName = tileName + " (lucky)";
-            if (!_archipelago.LocationExists(luckyName) || _locationChecker.IsLocationChecked(luckyName))
+            if (!_archipelago.LocationExistsSafe(luckyName) || _locationChecker.IsLocationChecked(luckyName))
                 return false;
         }
         return true;

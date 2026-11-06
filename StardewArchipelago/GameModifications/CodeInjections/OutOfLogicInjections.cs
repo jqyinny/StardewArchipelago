@@ -126,7 +126,7 @@ namespace StardewArchipelago.GameModifications.CodeInjections
         {
             try
             {
-                if (__result == null || _archipelago.SlotData.Cropsanity == Cropsanity.Disabled || _archipelago.HasReceivedItem(__result.Name))
+                if (__result == null || _archipelago.SlotData.Cropsanity == Cropsanity.Disabled || _archipelago.HasReceivedItemSafe(__result.Name))
                 {
                     return;
                 }

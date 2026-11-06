@@ -197,7 +197,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 return;
             }
 
-            var currentStockSize = GetRandomItemStockSize(_archipelago.GetReceivedItemCount(AP_MERCHANT_STOCK));
+            var currentStockSize = GetRandomItemStockSize(_archipelago.GetReceivedItemCountSafe(AP_MERCHANT_STOCK));
             var day = Days.GetDayOfWeekName(Game1.dayOfMonth);
             var locationName = Game1.currentLocation is Forest ? "Cindersap Forest" : "the Beach Night Market";
             var text = _flairOverride.Any() ? _flairOverride.Values.First() : GetFlairForToday(playerName, locationName, day, currentStockSize);
@@ -244,7 +244,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
                 return false;
             }
 
-            var stockUpgrades = _archipelago.GetReceivedItemCount(AP_MERCHANT_STOCK);
+            var stockUpgrades = _archipelago.GetReceivedItemCountSafe(AP_MERCHANT_STOCK);
             var currentStockSize = GetRandomItemStockSize(stockUpgrades);
 
             var minimumStockSize = double.Parse(query[1]);
@@ -285,7 +285,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         public static IEnumerable<ItemQueryResult> CreateMetalDetectorItems(string key, string arguments, ItemQueryContext context, bool avoidrepeat, HashSet<string> avoiditemids, Action<string, string> logerror)
         {
             _flairOverride.Clear();
-            var metalDetectorUpgrades = _archipelago.GetReceivedItemCount(AP_METAL_DETECTOR);
+            var metalDetectorUpgrades = _archipelago.GetReceivedItemCountSafe(AP_METAL_DETECTOR);
             if (metalDetectorUpgrades < 1)
             {
                 yield break;
@@ -436,7 +436,17 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
         {
             var dayOfWeek = Days.GetDayOfWeekName(dayOfMonth);
             var requiredAPItemToSeeMerchantToday = string.Format(AP_MERCHANT_DAYS, dayOfWeek);
-            var hasReceivedToday = _archipelago.HasReceivedItem(requiredAPItemToSeeMerchantToday, false, out sendingPlayerName);
+            bool hasReceivedToday;
+            if (_archipelago.GetSession() != null)
+            {
+                hasReceivedToday = _archipelago.HasReceivedItem(requiredAPItemToSeeMerchantToday, false, out sendingPlayerName);
+            }
+            else
+            {
+                // Farmhand: no session, so no sender name to show - but whether the day is unlocked is known.
+                hasReceivedToday = _archipelago.HasReceivedItemSafe(requiredAPItemToSeeMerchantToday);
+                sendingPlayerName = string.Empty;
+            }
             return hasReceivedToday && TravelingCartConsequences.CanMeetToday();
         }
 
@@ -445,7 +455,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             foreach (var day in Days.DaysOfWeek)
             {
                 var requiredAPItemToSeeMerchantToday = string.Format(AP_MERCHANT_DAYS, day);
-                if (_archipelago.HasReceivedItem(requiredAPItemToSeeMerchantToday))
+                if (_archipelago.HasReceivedItemSafe(requiredAPItemToSeeMerchantToday))
                 {
                     return true;
                 }
@@ -462,7 +472,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla
             {
                 var apLocationName = string.Format(AP_MERCHANT_LOCATION, dayOfWeek, i);
 
-                if (_locationChecker.IsLocationMissing(apLocationName))
+                if (_locationChecker.IsLocationMissingSafe(apLocationName))
                 {
                     apItems.Add(apLocationName);
                 }

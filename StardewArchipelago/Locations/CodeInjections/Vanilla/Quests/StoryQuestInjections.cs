@@ -319,7 +319,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Quests
 
         private static void DrawForestMagicBasedOnApState(ClickableTextureComponent powerComponent)
         {
-            var hasForestMagic = _archipelago.HasReceivedItem(APItem.FOREST_MAGIC);
+            var hasForestMagic = _archipelago.HasReceivedItemSafe(APItem.FOREST_MAGIC);
             if (powerComponent.sourceRect.X != 16 || powerComponent.sourceRect.Y != 340)
             {
                 return;
@@ -330,7 +330,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Quests
 
         private static void DrawBearsKnowledgeBasedOnApState(ClickableTextureComponent powerComponent)
         {
-            var hasBearKnowledge = _archipelago.HasReceivedItem(APItem.BEARS_KNOWLEDGE);
+            var hasBearKnowledge = _archipelago.HasReceivedItemSafe(APItem.BEARS_KNOWLEDGE);
             if (powerComponent.sourceRect.X != 192 || powerComponent.sourceRect.Y != 336)
             {
                 return;
@@ -349,7 +349,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Quests
                 }
 
                 var hasSeenBearEvent = Game1.player.eventsSeen.Contains(EventIds.BEAR_KNOWLEDGE);
-                var hasReceivedBearKnowledge = _archipelago.HasReceivedItem(APItem.BEARS_KNOWLEDGE);
+                var hasReceivedBearKnowledge = _archipelago.HasReceivedItemSafe(APItem.BEARS_KNOWLEDGE);
                 if (hasSeenBearEvent == hasReceivedBearKnowledge)
                 {
                     return;

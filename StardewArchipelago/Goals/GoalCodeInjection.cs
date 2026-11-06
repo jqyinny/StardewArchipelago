@@ -811,7 +811,7 @@ namespace StardewArchipelago.Goals
             {
                 foreach (var (requiredItem, requiredCount) in harderRequiredItems)
                 {
-                    if (_archipelago.GetReceivedItemCount(requiredItem) < requiredCount)
+                    if (_archipelago.GetReceivedItemCountSafe(requiredItem) < requiredCount)
                     {
                         return true;
                     }

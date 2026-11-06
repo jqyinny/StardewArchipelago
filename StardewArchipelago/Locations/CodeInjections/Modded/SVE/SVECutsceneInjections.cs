@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -156,12 +157,12 @@ namespace StardewArchipelago.Locations.CodeInjections.Modded.SVE
                 foreach (var voidSpirit in voidSpirits)
                 {
                     var locationName = $"{MONSTER_ERADICATION_AP_PREFIX}{voidSpirit}";
-                    if (_locationChecker.IsLocationMissing(locationName))
+                    if (_locationChecker.IsLocationMissingSafe(locationName))
                     {
                         _locationChecker.AddCheckedLocation(locationName);
                     }
 
-                    if (_locationChecker.IsLocationMissing(DEINFEST_AP_LOCATION)) // Temp, as Void Spirits are on these maps
+                    if (_locationChecker.IsLocationMissingSafe(DEINFEST_AP_LOCATION)) // Temp, as Void Spirits are on these maps
                     {
                         _locationChecker.AddCheckedLocation(DEINFEST_AP_LOCATION);
                     }

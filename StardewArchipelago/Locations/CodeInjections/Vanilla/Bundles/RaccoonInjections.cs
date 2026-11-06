@@ -59,7 +59,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
                 }
 
-                if (!_locationChecker.IsLocationMissing(GIANT_STUMP))
+                if (!_locationChecker.IsLocationMissingSafe(GIANT_STUMP))
                 {
                     Game1.drawObjectDialogue("Eventually someone will move in...");
                     __result = true;
@@ -261,7 +261,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
         {
             try
             {
-                if (!_locationChecker.IsLocationMissing("Quest: The Giant Stump") || !Game1.player.hasQuest(QuestIds.GIANT_STUMP))
+                if (!_locationChecker.IsLocationMissingSafe("Quest: The Giant Stump") || !Game1.player.hasQuest(QuestIds.GIANT_STUMP))
                 {
                     return;
                 }
@@ -297,7 +297,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
 
         private static void MakeRaccoonWalkableThrough(Forest forest)
         {
-            if (!_locationChecker.IsLocationMissing("Quest: The Giant Stump"))
+            if (!_locationChecker.IsLocationMissingSafe("Quest: The Giant Stump"))
             {
                 return;
             }
@@ -316,7 +316,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Bundles
         private static void SetRaccoonBabies(Forest forest)
         {
             var maxRaccoons = GetMaxRaccoonsInSlot();
-            var receivedRaccoons = _archipelago.GetReceivedItemCount(APItem.PROGRESSIVE_RACCOON);
+            var receivedRaccoons = _archipelago.GetReceivedItemCountSafe(APItem.PROGRESSIVE_RACCOON);
 
             // private int numRaccoonBabies = -1;
             var numRaccoonBabiesField = _modHelper.Reflection.GetField<int>(forest, "numRaccoonBabies");

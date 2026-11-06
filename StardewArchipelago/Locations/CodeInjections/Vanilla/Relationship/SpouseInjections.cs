@@ -1,3 +1,4 @@
+using StardewArchipelago.Archipelago;
 ﻿using System;
 using KaitoKid.ArchipelagoUtilities.Net.Client;
 using StardewModdingAPI;
@@ -54,7 +55,7 @@ namespace StardewArchipelago.Locations.CodeInjections.Vanilla.Relationship
 
                 var friendshipData = who.friendshipData[npcName];
 
-                if (__instance.Sprite.CurrentAnimation != null || friendshipData.Points < 3125 || !_locationChecker.IsLocationMissing(SPOUSE_STARDROP))
+                if (__instance.Sprite.CurrentAnimation != null || friendshipData.Points < 3125 || !_locationChecker.IsLocationMissingSafe(SPOUSE_STARDROP))
                 {
                     return MethodPrefix.RUN_ORIGINAL_METHOD;
                 }
