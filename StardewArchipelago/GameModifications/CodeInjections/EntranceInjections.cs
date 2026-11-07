@@ -217,7 +217,10 @@ namespace StardewArchipelago.GameModifications.CodeInjections
             if (Game1.player.currentLocation is Farm farm && _state.HasFoundFarmhouseBed)
             {
                 var insideHouseSpot = homeOfFarmer.GetPlayerBedSpot();
-                Game1.warpFarmer(homeOfFarmer.Name, insideHouseSpot.X, insideHouseSpot.Y, false);
+                // NameOrUniqueName: a farmhand's home is a cabin whose Name is just "Cabin" (not a real location),
+                // so warping there by Name never resolved and left the farmhand on a black screen. For the host's
+                // FarmHouse both are "FarmHouse".
+                Game1.warpFarmer(homeOfFarmer.NameOrUniqueName, insideHouseSpot.X, insideHouseSpot.Y, false);
             }
             else
             {

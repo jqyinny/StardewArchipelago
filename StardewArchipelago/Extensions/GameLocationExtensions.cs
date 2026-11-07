@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using StardewArchipelago.GameModifications.EntranceRandomizer;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 using System;
@@ -575,7 +576,9 @@ namespace StardewArchipelago.Extensions
                         return false;
                     }
                     var insideSpot = homeOfFarmer.getEntryLocation();
-                    warpRequest = new WarpRequest("Farmhouse", insideSpot.X, insideSpot.Y, FacingDirection.Down);
+                    // A farmhand's home is their cabin (unique location name), not the host's farmhouse.
+                    var homeName = Context.IsMainPlayer ? "Farmhouse" : homeOfFarmer.NameOrUniqueName;
+                    warpRequest = new WarpRequest(homeName, insideSpot.X, insideSpot.Y, FacingDirection.Down);
                     return true;
                 case "UseReturnScepterExit":
                     if (homeOfFarmer == null)
