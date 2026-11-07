@@ -222,9 +222,16 @@ namespace StardewArchipelago.Archipelago
         // then kept current as the farmhand sends new checks (see CoopLocationChecker).
         private HashSet<string> _farmhandCheckedLocations;
 
+        // Fires on a farmhand whenever its checked-location set changes. Location checkers cache name-filter
+        // results (LocationNameMatcher) and the library only clears that cache on a real AddCheckedLocation,
+        // which a farmhand never does - so without this, e.g. the AP icon on a crafting recipe stayed on a
+        // farmhand's screen after the host completed that craftsanity check.
+        public event Action FarmhandCheckedLocationsChanged;
+
         public void SeedCheckedLocationsFromSnapshot(HashSet<string> checkedLocationNames)
         {
             _farmhandCheckedLocations = new HashSet<string>(checkedLocationNames);
+            FarmhandCheckedLocationsChanged?.Invoke();
         }
 
         // Scouting needs a live session, so a farmhand can't do it (shops would show only the generic AP
@@ -282,7 +289,10 @@ namespace StardewArchipelago.Archipelago
         public void RecordFarmhandCheckedLocation(string locationName)
         {
             _farmhandCheckedLocations ??= new HashSet<string>();
-            _farmhandCheckedLocations.Add(locationName);
+            if (_farmhandCheckedLocations.Add(locationName))
+            {
+                FarmhandCheckedLocationsChanged?.Invoke();
+            }
         }
 
         public HashSet<string> GetFarmhandCheckedLocationsSafe()

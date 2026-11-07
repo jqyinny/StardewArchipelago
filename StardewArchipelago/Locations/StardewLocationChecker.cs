@@ -21,6 +21,8 @@ namespace StardewArchipelago.Locations
         {
             _archipelago = archipelago;
             _locationNameMatcher = new LocationNameMatcher();
+            // Farmhand: its checked set changes without AddCheckedLocation ever running (see the event).
+            _archipelago.FarmhandCheckedLocationsChanged += _locationNameMatcher.ClearCache;
         }
 
         public override void SendAllLocationChecks()
