@@ -170,7 +170,10 @@ namespace StardewArchipelago.Locations.ShopStockModifiers
                 var experienceBookToInsert = item.DeepClone();
                 experienceBookToInsert.Condition = receivedCondition;
                 experienceBookToInsert.Condition = receivedCondition;
-                experienceBookToInsert.Id = experienceBook;
+                // Entry IDs must be unique within a shop (the game warns "multiple items with entry ID" otherwise,
+                // and uses the ID for stock tracking). Each RandomSkillBook group inserts the same five books
+                // under mutually exclusive conditions, so suffix the group number; the item itself is unchanged.
+                experienceBookToInsert.Id = $"{experienceBook}_Group{groupNumber}";
                 experienceBookToInsert.ItemId = experienceBook;
                 experienceBookToInsert.Price = price;
                 experienceBookToInsert.RandomItemId = null;
